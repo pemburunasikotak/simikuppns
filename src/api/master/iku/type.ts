@@ -81,6 +81,18 @@ export type TIKUFormulaTestRequest = {
     componentValues: Record<string, number>;
 };
 
+export type TIKUFormulaComponentItem = {
+    code: string;
+};
+
+export type TIKUFormulaComponentResponse = {
+    success: boolean;
+    data?: {
+        formulaId: string;
+        components: TIKUFormulaComponentItem[];
+    };
+};
+
 export type TIKUListResponse = TResponsePaginate<TIKUItem>;
 export type TIKUDetailResponse = TResponse<TIKUItem>;
 

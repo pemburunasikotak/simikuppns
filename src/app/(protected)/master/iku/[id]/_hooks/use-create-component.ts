@@ -17,11 +17,11 @@ type CreateComponentParams = {
 const useCreateComponent = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        // @ts-ignore
+        // @ts-expect-error: tanstack types are mismatching for mutationFn params
         mutationFn: ({ params, req }: CreateComponentParams) => createComponent(params, req),
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: [queryKeys.masterData.iku.list], // Will invalidate everything under iku
+                queryKey: [queryKeys.masterData.iku.list] // Will invalidate everything under iku
             });
             enqueueSnackbar("Berhasil Menambahkan Komponen", { variant: "success" });
         },

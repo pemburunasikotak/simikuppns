@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, Typography, IconButton, Grid, Paper } from "@mui/material";
-import { Add, DeleteOutlined } from "@mui/icons-material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, Typography, Grid, Paper } from "@mui/material";
 import useTestFormula from "../_hooks/use-test-formula";
 import useGetListFormulaComponent from "../_hooks/use-get-list-formula-component";
+import { TIKUFormulaComponentItem } from "@/api/master/iku/type";
 
 type ModalTestFormulaProps = {
     open: boolean;
     onClose: () => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     formula: any | null;
 };
 
@@ -15,12 +16,6 @@ type TestInput = {
     value: number;
 };
 
-type Component = {
-    code: string;
-    name: string;
-    type: string;
-    value: number;
-}
 
 const ModalTestFormula = ({ open, onClose, formula }: ModalTestFormulaProps) => {
     const [inputs, setInputs] = useState<TestInput[]>([]);
@@ -33,8 +28,8 @@ const ModalTestFormula = ({ open, onClose, formula }: ModalTestFormulaProps) => 
         if (open) {
             if (componentQuery.data?.data) {
                 // If the API returns an array of strings
-                const components: Component[] = componentQuery?.data?.data?.components || [];
-                setInputs(components?.map(key => ({ key: key?.code || '', value: 0 })));
+                const components: TIKUFormulaComponentItem[] = componentQuery?.data?.data?.components || [];
+                setInputs(components?.map(comp => ({ key: comp?.code || '', value: 0 })));
             } else {
                 setInputs([]);
             }

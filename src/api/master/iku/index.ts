@@ -11,6 +11,7 @@ import {
     TIKUComponentListResponse,
     TIKUFormulaCreateRequest,
     TIKUFormulaTestRequest,
+    TIKUFormulaComponentResponse,
 } from "./type";
 import { TDefaultResponse } from "@/commons/types/response";
 
@@ -36,7 +37,6 @@ export const getListIKU = async (
     params?: TGetIKUParams,
 ): Promise<TIKUListResponse> => {
     const res = await api.get(endpoints.list, { params });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const responseData = res.data;
     if (responseData.data && !responseData.result) {
         if (Array.isArray(responseData.data)) {
@@ -60,7 +60,6 @@ export const getDetailIKU = async (
 ): Promise<TIKUDetailResponse> => {
 
     const res = await api.get(`/api/ikus/${params?.id}`);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const responseData = res.data;
     if (responseData.data && !responseData.result) {
         if (Array.isArray(responseData.data)) {
@@ -102,7 +101,6 @@ export const getListComponent = async (
     params: TDetailParams,
 ): Promise<TIKUComponentListResponse> => {
     const res = await api.get(`/api/ikus/${params?.id}/components`);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const responseData = res.data;
     if (responseData.data && !responseData.result) {
         if (Array.isArray(responseData.data)) {
@@ -142,7 +140,6 @@ export const getListFormula = async (
     params: { ikuId: string },
 ): Promise<TIKUComponentListResponse> => {
     const res = await api.get(`/api/iku-formulas`, { params });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const responseData = res.data;
     if (responseData.data && !responseData.result) {
         if (Array.isArray(responseData.data)) {
@@ -186,7 +183,7 @@ export const testFormula = async (
 
 export const getFormulaComponents = async (
     id: string,
-): Promise<any> => {
+): Promise<TIKUFormulaComponentResponse> => {
     const res = await api.get(`/api/iku-formulas/${id}/components`);
     return res.data;
 };

@@ -9,6 +9,8 @@ import {
     TIKUCreateRequest,
     TIKUComponentCreateRequest,
     TIKUComponentListResponse,
+    TIKUFormulaCreateRequest,
+    TIKUFormulaTestRequest,
 } from "./type";
 import { TDefaultResponse } from "@/commons/types/response";
 
@@ -23,6 +25,11 @@ const endpoints = {
     listComponent: "/api/ikus/:id/components",
     createComponent: "/api/ikus/:id/components",
     deleteComponent: "/api/ikus/:id/components/:id",
+
+    //formula
+    listFormula: "/api/iku-formulas",
+    createFormula: "/api/iku-formulas",
+    deleteFormula: "/api/iku-formulas/:id",
 };
 
 export const getListIKU = async (
@@ -126,6 +133,60 @@ export const deleteComponent = async (
     ikuId: string,
     componentId: string,
 ): Promise<TDefaultResponse> => {
+    console.log('CEK ID', ikuId, componentId);
     const res = await api.delete(`/api/ikus/${ikuId}/components/${componentId}`);
+    return res.data;
+};
+
+export const getListFormula = async (
+    params: { ikuId: string },
+): Promise<TIKUComponentListResponse> => {
+    const res = await api.get(`/api/iku-formulas`, { params });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const responseData = res.data;
+    if (responseData.data && !responseData.result) {
+        if (Array.isArray(responseData.data)) {
+            responseData.result = {
+                data: responseData.data,
+                total: responseData.data.length,
+                currentPage: 1,
+                totalPage: 1,
+                hasPreviousPage: false,
+                hasNextPage: false
+            };
+        } else {
+            responseData.result = responseData.data;
+        }
+    }
+    return responseData;
+};
+
+
+export const deleteFormula = async (
+    id: string,
+): Promise<TDefaultResponse> => {
+    const res = await api.delete(`/api/iku-formulas/${id}`);
+    return res.data;
+};
+
+export const createFormula = async (
+    req: TIKUFormulaCreateRequest,
+): Promise<TDefaultResponse> => {
+    const res = await api.post(`/api/iku-formulas`, { ...req });
+    return res.data;
+};
+
+export const testFormula = async (
+    id: string,
+    req: TIKUFormulaTestRequest,
+): Promise<TDefaultResponse> => {
+    const res = await api.post(`/api/iku-formulas/${id}/test`, { ...req });
+    return res.data;
+};
+
+export const getFormulaComponents = async (
+    id: string,
+): Promise<any> => {
+    const res = await api.get(`/api/iku-formulas/${id}/components`);
     return res.data;
 };

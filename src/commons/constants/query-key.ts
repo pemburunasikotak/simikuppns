@@ -13,6 +13,13 @@ export const queryKeys = {
       list: "master-data/iku/list",
       detail: "master-data/iku/detail",
     },
+    component: {
+      list: "master-data/component/list",
+      detail: "master-data/component/detail",
+      delete: "master-data/component/delete",
+      edit: "master-data/component/edit",
+      create: "master-data/component/create",
+    },
     facilities: {
       list: "master-data/facilities/list",
       detail: "master-data/facilities/detail",

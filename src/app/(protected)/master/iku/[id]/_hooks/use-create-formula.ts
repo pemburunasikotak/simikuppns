@@ -2,22 +2,23 @@ import { queryKeys } from "@/commons/constants/query-key";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 import { TErrorResponse } from "@/commons/types/response";
-import { deleteComponent } from "@/api/master/iku";
+import { createFormula } from "@/api/master/iku";
+import { TIKUFormulaCreateRequest } from "@/api/master/iku/type";
 
-const useDeleteComponent = () => {
+const useCreateFormula = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (params: { ikuId: string, componentId: string }) => deleteComponent(params.ikuId, params.componentId),
+        mutationFn: (req: TIKUFormulaCreateRequest) => createFormula(req),
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: [queryKeys.masterData.iku.list],
             });
-            enqueueSnackbar("Berhasil Menghapus Komponen", { variant: "success" });
+            enqueueSnackbar("Berhasil Menambahkan Formula", { variant: "success" });
         },
         onError: (error: TErrorResponse) => {
-            enqueueSnackbar(error.response?.data.errors, { variant: "error" });
+            enqueueSnackbar(error.response?.data.message || "Gagal Menambahkan Formula", { variant: "error" });
         },
     });
 };
 
-export default useDeleteComponent;
+export default useCreateFormula;

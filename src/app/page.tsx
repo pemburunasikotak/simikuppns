@@ -104,7 +104,9 @@ export default function LandingPage() {
               },
             }}
           >
-            <CardActionArea onClick={() => navigate(paths.auth.login)} sx={{ p: 4, height: "100%" }}>
+            <CardActionArea
+              onClick={() => navigate(paths.auth.login)}
+              sx={{ p: 4, height: "100%" }}>
               <CardContent sx={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <Box
                   sx={{

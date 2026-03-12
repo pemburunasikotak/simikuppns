@@ -16,6 +16,7 @@ export const paths = {
       list: "/master/component",
       create: "/master/component/create",
       edit: "/master/component/:id/edit",
+      detail: "/master/component/:id",
     },
     formula: {
       list: "/master/formula",

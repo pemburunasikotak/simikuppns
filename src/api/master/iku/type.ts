@@ -49,6 +49,7 @@ export type TIKUComponentCreateRequest = {
     code: string;
     name: string;
     description: string;
+    componentId: string;
 }
 
 export type TIKUComponentUpdateRequest = {
@@ -56,6 +57,29 @@ export type TIKUComponentUpdateRequest = {
     name?: string;
     description?: string;
 }
+
+export type TIKUFormulaStepCreateRequest = {
+    sequence: number;
+    leftType: string;
+    leftValue: string;
+    operator: string;
+    rightType: string;
+    rightValue: string;
+    resultKey: string;
+};
+
+export type TIKUFormulaCreateRequest = {
+    ikuId: string;
+    name: string;
+    description: string;
+    finalResultKey: string;
+    isActive: boolean;
+    steps: TIKUFormulaStepCreateRequest[];
+};
+
+export type TIKUFormulaTestRequest = {
+    componentValues: Record<string, number>;
+};
 
 export type TIKUListResponse = TResponsePaginate<TIKUItem>;
 export type TIKUDetailResponse = TResponse<TIKUItem>;

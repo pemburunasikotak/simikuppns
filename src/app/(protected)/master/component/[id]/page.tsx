@@ -1,4 +1,4 @@
-import { generatePath, useParams } from "react-router";
+import { generatePath, useNavigate, useParams } from "react-router";
 import { GridColDef } from "@mui/x-data-grid";
 import { Typography, Box, Paper } from "@mui/material";
 import { Button, Grid } from "@mui/material";
@@ -15,31 +15,16 @@ import { Add, DeleteOutlined } from "@mui/icons-material";
 import ActionButtonTable from "@/app/_components/ui/action-button-table";
 import useModal from "@/app/_components/ui/modal";
 import useDeleteComponent from "./_hooks/use-delete-component";
-import ModalAddComponent from "./_components/modal-add-component";
-import ModalAddFormula from "./_components/modal-add-formula";
-import ModalTestFormula from "./_components/modal-test-formula";
-import { useState } from "react";
-import useGetListFormula from "./_hooks/use-get-list-formula";
-import useDeleteFormula from "./_hooks/use-delete-formula";
 
 const IKUDetailPage = () => {
     const params = useParams();
-
-    const idIku = params.id;
+    const navigate = useNavigate();
     const detailQuery = useGetDetailIKU({ id: params.id! });
     const componentQuery = useGetListComponent({ id: params.id! });
-    const formulaQuery = useGetListFormula({ ikuId: params.id! });
 
     const deleteComponent = useDeleteComponent();
-    const deleteFormula = useDeleteFormula();
 
     const modal = useModal();
-
-    const [openAddModal, setOpenAddModal] = useState(false);
-    const [openAddModalFormula, setOpenAddModalFormula] = useState(false);
-    const [openTestModalFormula, setOpenTestModalFormula] = useState(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [selectedTestFormula, setSelectedTestFormula] = useState<any>(null);
 
     const ikuInfo = detailQuery.data?.result;
 
@@ -52,42 +37,7 @@ const IKUDetailPage = () => {
         {
             field: "actions",
             headerName: "Action",
-            width: 100,
-            sortable: false,
-            filterable: false,
-            renderCell: (params) => (
-                <ActionButtonTable
-                    items={[
-                        {
-                            key: "delete",
-                            type: "delete",
-                            onClick: () => {
-                                modal.confirm({
-                                    icon: <DeleteOutlined sx={{ height: 40, width: 40 }} />,
-                                    description: "Apakah kamu akan menghapus data ini ?",
-                                    onOk: () => {
-                                        deleteComponent.mutate({ ikuId: idIku!, componentId: params.row.id });
-                                    },
-                                });
-                            },
-                        },
-                    ]}
-                />
-            ),
-        },
-    ];
-
-    const columnsFormula: GridColDef<TIKUComponentItem>[] = [
-        { field: "id", headerName: "ID", width: 150 },
-        { field: "ikuId", headerName: "IKU ID", minWidth: 200, flex: 0.5 },
-        { field: "name", headerName: "Nama", minWidth: 250, flex: 1 },
-        { field: "description", headerName: "Deskripsi", width: 150 },
-        { field: "finalResultKey", headerName: "Final Result Key", width: 150 },
-        { field: "isActive", headerName: "Aktif", width: 150 },
-        {
-            field: "actions",
-            headerName: "Action",
-            width: 100,
+            width: 150,
             sortable: false,
             filterable: false,
             renderCell: (params) => (
@@ -96,10 +46,14 @@ const IKUDetailPage = () => {
                         {
                             key: "detail",
                             type: "detail",
-                            onClick: () => {
-                                setSelectedTestFormula(params.row);
-                                setOpenTestModalFormula(true);
-                            }
+                            onClick: () =>
+                                navigate(generatePath(paths.master.iku.detail, { id: params.row.id })),
+                        },
+                        {
+                            key: "edit",
+                            type: "edit",
+                            onClick: () =>
+                                navigate(generatePath(paths.master.iku.edit, { id: params.row.id })),
                         },
                         {
                             key: "delete",
@@ -109,7 +63,7 @@ const IKUDetailPage = () => {
                                     icon: <DeleteOutlined sx={{ height: 40, width: 40 }} />,
                                     description: "Apakah kamu akan menghapus data ini ?",
                                     onOk: () => {
-                                        deleteFormula.mutate({ id: params.row.id });
+                                        deleteComponent.mutate({ id: params.row.id });
                                     },
                                 });
                             },
@@ -123,15 +77,15 @@ const IKUDetailPage = () => {
     return (
         <Page
             loading={detailQuery.isLoading}
-            title="Detail IKU"
+            title="Detail Component"
             breadcrumbs={[
                 {
                     label: "Master Data",
-                    path: paths.master.iku.list,
+                    path: paths.master.component.list,
                 },
                 {
-                    label: "IKU",
-                    path: paths.master.iku.list,
+                    label: "Component",
+                    path: paths.master.component.list,
                 },
                 {
                     label: "Detail",
@@ -143,17 +97,17 @@ const IKUDetailPage = () => {
                 <Grid size={{ xs: 12 }}>
                     <Paper sx={{ p: 3 }}>
                         <Typography variant="h6" gutterBottom>
-                            Informasi IKU
+                            Informasi Component
                         </Typography>
                         <Box mb={2}>
                             <Typography variant="subtitle2" color="textSecondary">
-                                Kode IKU
+                                Kode Component
                             </Typography>
                             <Typography variant="body1">{ikuInfo?.code || "-"}</Typography>
                         </Box>
                         <Box mb={2}>
                             <Typography variant="subtitle2" color="textSecondary">
-                                Nama IKU
+                                Nama Component
                             </Typography>
                             <Typography variant="body1">{ikuInfo?.name || "-"}</Typography>
                         </Box>
@@ -171,12 +125,7 @@ const IKUDetailPage = () => {
                         <Typography variant="h6" gutterBottom ml={1}>
                             Daftar Komponen
                         </Typography>
-                        <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<Add />}
-                            onClick={() => setOpenAddModal(true)}
-                        >
+                        <Button variant="outlined" size="small" startIcon={<Add />}>
                             Tambah Komponen
                         </Button>
                     </Box>
@@ -197,52 +146,6 @@ const IKUDetailPage = () => {
                     />
                 </Grid>
             </Grid>
-            <ModalAddComponent
-                open={openAddModal}
-                onClose={() => setOpenAddModal(false)}
-            />
-
-            <Grid size={{ xs: 12 }} mt={3}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-                    <Typography variant="h6" gutterBottom ml={1}>
-                        Daftar Formula
-                    </Typography>
-                    <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<Add />}
-                        onClick={() => setOpenAddModalFormula(true)}
-                    >
-                        Tambah Formula
-                    </Button>
-                </Box>
-                <DataTable
-                    loading={formulaQuery.isLoading}
-                    rows={formulaQuery?.data?.result?.data || []}
-                    columns={columnsFormula}
-                    checkboxSelection
-                    paginationInfo={createPaginationInfo({
-                        per_page: 10,
-                        total: formulaQuery.data?.result?.total || 0,
-                        page: formulaQuery.data?.result?.currentPage || 1,
-                    })}
-                    handleChange={() => { }}
-                    onRowSelectionModelChange={(ids) => {
-                        console.log('CEK ID', ids)
-                    }}
-                />
-            </Grid>
-            <ModalAddFormula
-                open={openAddModalFormula}
-                onClose={() => setOpenAddModalFormula(false)}
-                master={componentQuery.data?.result?.data || []}
-            />
-
-            <ModalTestFormula
-                open={openTestModalFormula}
-                onClose={() => setOpenTestModalFormula(false)}
-                formula={selectedTestFormula}
-            />
         </Page>
     );
 };

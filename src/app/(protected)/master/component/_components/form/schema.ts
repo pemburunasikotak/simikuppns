@@ -10,7 +10,14 @@ const BaseSchema = zod.object({
   description: zod
     .string({ error: "Deskripsi harus diisi" })
     .min(1, { message: "Deskripsi harus diisi" }),
+  dataType: zod
+    .string({ error: "Data Type harus diisi" })
+    .min(1, { message: "Data Type harus diisi" }),
+  sourceType: zod
+    .string({ error: "Source Type harus diisi" })
+    .min(1, { message: "Source Type harus diisi" }),
 });
 
-export const IKUSchema = BaseSchema;
-export type TIKUFormData = zod.infer<typeof IKUSchema>;
+export const ComponentSchema = BaseSchema;
+export type TComponentFormData = zod.infer<typeof ComponentSchema>;
+

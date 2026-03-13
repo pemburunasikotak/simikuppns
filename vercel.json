@@ -1,8 +1,12 @@
 {
-  "routes": [
+  "buildCommand": "pnpm run build",
+  "installCommand": "pnpm install",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
     {
-      "src": "/[^.]+",
-      "dest": "/"
+      "source": "/((?!api/.*).*)",
+      "destination": "/index.html"
     }
   ]
 }

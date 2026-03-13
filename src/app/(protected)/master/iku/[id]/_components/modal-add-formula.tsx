@@ -46,7 +46,7 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
 
     const handleAddStep = () => {
         setSteps([...steps, {
-            leftType: "component",
+            leftType: steps.length >= 1 ? "temp" : "component",
             leftValue: "",
             operator: "ADD",
             rightType: "component",
@@ -155,6 +155,7 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
                                         label="Left Type"
                                         size="small"
                                         fullWidth
+                                        disabled
                                         value={step.leftType}
                                         onChange={(e) => handleStepChange(index, "leftType", e.target.value)}
                                         placeholder="component / formula"
@@ -171,7 +172,7 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
                                         >
                                             {index === 0 ? (
                                                 master.map((item) => (
-                                                    <MenuItem key={item.id} value={item.id}>
+                                                    <MenuItem key={item.id} value={item.code}>
                                                         {item.code}
                                                     </MenuItem>
                                                 ))
@@ -240,7 +241,7 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
                                                 onChange={(e) => handleStepChange(index, "rightValue", e.target.value)}
                                             >
                                                 {master.map((item) => (
-                                                    <MenuItem key={item.id} value={item.id}>
+                                                    <MenuItem key={item.id} value={item.code}>
                                                         {item.code}
                                                     </MenuItem>
                                                 ))}

@@ -46,12 +46,12 @@ const Component: FC = (): ReactElement => {
       renderCell: (params) => (
         <ActionButtonTable
           items={[
-            {
-              key: "detail",
-              type: "detail",
-              onClick: () =>
-                navigate(generatePath(paths.master.component.detail, { id: params.row.id })),
-            },
+            // {
+            //   key: "detail",
+            //   type: "detail",
+            //   onClick: () =>
+            //     navigate(generatePath(paths.master.component.detail, { id: params.row.id })),
+            // },
             {
               key: "edit",
               type: "edit",

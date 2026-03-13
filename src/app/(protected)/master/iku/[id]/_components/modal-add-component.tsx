@@ -33,7 +33,7 @@ const ModalAddComponent = ({ open, onClose }: ModalAddComponentProps) => {
             const res = await getListComponent({ limit: 100, page: 1 });
             setOptions(res.result?.data || []);
         } catch (error) {
-            console.error("Failed to fetch components", error);
+            console.error("Failed to fetch ikp", error);
         } finally {
             setLoading(false);
         }
@@ -54,7 +54,7 @@ const ModalAddComponent = ({ open, onClose }: ModalAddComponentProps) => {
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-            <DialogTitle>Tambah Komponen</DialogTitle>
+            <DialogTitle>Tambah IKP</DialogTitle>
             <DialogContent>
                 <Box sx={{ pt: 1, minHeight: 150 }}>
                     <Autocomplete
@@ -68,12 +68,12 @@ const ModalAddComponent = ({ open, onClose }: ModalAddComponentProps) => {
                         renderInput={(params) => (
                             <TextField
                                 {...params}
-                                label="Pilih Komponen"
+                                label="Pilih Ikp"
                                 variant="outlined"
                                 autoFocus
                             />
                         )}
-                        noOptionsText="Tidak ada komponen ditemukan"
+                        noOptionsText="Tidak ada ikp ditemukan"
                         isOptionEqualToValue={(option, value) => option.id === value?.id}
                     />
                 </Box>

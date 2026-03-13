@@ -31,14 +31,14 @@ export const SIDEBAR_ITEMS: TSidebarItem[] = [
       },
       {
         key: "master-data-component",
-        label: "Component",
+        label: "IKP",
         path: paths.master.component.list,
       },
-      {
-        key: "master-data-formula",
-        label: "Formula",
-        path: paths.master.formula.list,
-      },
+      // {
+      //   key: "master-data-formula",
+      //   label: "Formula",
+      //   path: paths.master.formula.list,
+      // },
     ],
   },
 ];

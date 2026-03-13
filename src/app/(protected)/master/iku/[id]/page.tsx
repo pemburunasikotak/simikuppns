@@ -169,7 +169,7 @@ const IKUDetailPage = () => {
                 <Grid size={{ xs: 12 }}>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                         <Typography variant="h6" gutterBottom ml={1}>
-                            Daftar Komponen
+                            Daftar IKP
                         </Typography>
                         <Button
                             variant="outlined"
@@ -177,7 +177,7 @@ const IKUDetailPage = () => {
                             startIcon={<Add />}
                             onClick={() => setOpenAddModal(true)}
                         >
-                            Tambah Komponen
+                            Tambah IKP
                         </Button>
                     </Box>
                     <DataTable

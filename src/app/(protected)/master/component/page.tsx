@@ -85,14 +85,14 @@ const Component: FC = (): ReactElement => {
           path: null,
         },
         {
-          label: "Component",
+          label: "IKP",
           path: null,
         },
       ]}
       topPage={
         <Filter
           variants={["search"]}
-          labelSearch={"Cari Component..."}
+          labelSearch={"Cari IKP..."}
           defaultValue={{
             search_value: filters.search,
           }}
@@ -103,7 +103,7 @@ const Component: FC = (): ReactElement => {
               startIcon={<AddOutlined />}
               onClick={() => navigate(paths.master.component.create)}
             >
-              Tambah Component
+              Tambah IKP
             </Button>,
             ...(selectedIds.length
               ? [

@@ -35,7 +35,7 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues }: Props) => {
         <Grid size={{ xs: 12 }}>
           <FormTextField
             variant="filled"
-            label="Kode Component"
+            label="Kode IKP"
             control={form.control}
             name="code"
             required
@@ -45,11 +45,11 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues }: Props) => {
         <Grid size={{ xs: 12 }}>
           <FormTextField
             variant="filled"
-            label="Nama Component"
+            label="Nama IKP"
             control={form.control}
             name="name"
             required
-            placeholder="Ex: Component 1"
+            placeholder="Ex: IKP 1"
           />
         </Grid>
         <Grid size={{ xs: 12 }}>

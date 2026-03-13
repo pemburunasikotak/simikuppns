@@ -30,18 +30,18 @@ const CreatePage = () => {
 
   return (
     <Page
-      title="Data Component"
+      title="Data IKP"
       breadcrumbs={[
         {
           label: "Master Data",
           path: paths.master.component.list,
         },
         {
-          label: "Component",
+          label: "IKP",
           path: paths.master.component.list,
         },
         {
-          label: "Tambah Component",
+          label: "Tambah IKP",
           path: null,
         },
       ]}

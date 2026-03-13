@@ -6,7 +6,8 @@ import { TErrorResponse } from "@/commons/types/response";
 import { createComponent } from "@/api/master/iku";
 
 export type ComponentCreatePayload = {
-    id: string;
+    id?: string;
+    componentId?: string;
 };
 
 type CreateComponentParams = {

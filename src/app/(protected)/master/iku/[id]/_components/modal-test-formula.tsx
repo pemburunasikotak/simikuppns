@@ -13,7 +13,7 @@ type ModalTestFormulaProps = {
 
 type TestInput = {
     key: string;
-    value: number;
+    value: string;
 };
 
 
@@ -22,14 +22,12 @@ const ModalTestFormula = ({ open, onClose, formula }: ModalTestFormulaProps) => 
     const testFormulaMutation = useTestFormula();
     const componentQuery = useGetListFormulaComponent(formula?.id);
 
-    console.log("componentQuery", componentQuery?.data?.data?.components || []);
-
     useEffect(() => {
         if (open) {
             if (componentQuery.data?.data) {
                 // If the API returns an array of strings
                 const components: TIKUFormulaComponentItem[] = componentQuery?.data?.data?.components || [];
-                setInputs(components?.map(comp => ({ key: comp?.code || '', value: 0 })));
+                setInputs(components?.map(comp => ({ key: comp?.code || '', value: '' })));
             } else {
                 setInputs([]);
             }
@@ -43,11 +41,7 @@ const ModalTestFormula = ({ open, onClose, formula }: ModalTestFormulaProps) => 
 
     const handleInputChange = (index: number, field: keyof TestInput, val: string) => {
         const newInputs = [...inputs];
-        if (field === "value") {
-            newInputs[index][field] = Number(val) || 0;
-        } else {
-            newInputs[index][field] = val as string;
-        }
+        newInputs[index][field] = val;
         setInputs(newInputs);
     };
 
@@ -57,7 +51,7 @@ const ModalTestFormula = ({ open, onClose, formula }: ModalTestFormulaProps) => 
         const componentValues: Record<string, number> = {};
         inputs.forEach(input => {
             if (input.key.trim()) {
-                componentValues[input.key.trim()] = input.value;
+                componentValues[input.key.trim()] = Number(input.value) || 0;
             }
         });
 
@@ -99,7 +93,7 @@ const ModalTestFormula = ({ open, onClose, formula }: ModalTestFormulaProps) => 
                     {/* Form Testing */}
                     <Box>
                         <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <Typography variant="h6">Test Component Values (Payload)</Typography>
+                            <Typography variant="h6">Test Component Values</Typography>
                         </Box>
 
                         {componentQuery.isLoading && <Typography>Loading components...</Typography>}
@@ -127,6 +121,9 @@ const ModalTestFormula = ({ open, onClose, formula }: ModalTestFormulaProps) => 
                                 />
                             </Box>
                         ))}
+                        {testFormulaMutation.data?.data?.result != null && (
+                            <Typography variant="body2">Hasil: {testFormulaMutation.data?.data?.result}</Typography>
+                        )}
                     </Box>
 
                 </Box>

@@ -6,6 +6,9 @@ export type TResponse<T> = {
   message: string | null;
   status: boolean | null;
   result: T;
+  data?: {
+    result: Nullable<string>;
+  }
 };
 
 export type TPaginationInfo = {
@@ -27,6 +30,7 @@ export type TError = {
   status: boolean;
   errors: boolean;
   message: Nullable<string>;
+
 };
 
 export type TErrorResponse = AxiosError<TError>;

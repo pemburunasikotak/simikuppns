@@ -1,1 +1,1 @@
-export type TDetailParams = { id: string };
+export type TDetailParams = { id?: string, componentId?: string };

@@ -44,7 +44,7 @@ const ModalAddComponent = ({ open, onClose }: ModalAddComponentProps) => {
 
         createComponent.mutate({
             params: { id: params.id },
-            req: { id: selectedComponent.id }
+            req: { componentId: selectedComponent.id }
         }, {
             onSuccess: () => {
                 onClose();

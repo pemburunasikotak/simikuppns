@@ -1,5 +1,7 @@
 import {
+  CalendarMonthOutlined,
   DashboardOutlined,
+  ExtensionOutlined,
   SettingsOutlined,
 } from "@mui/icons-material";
 
@@ -40,5 +42,17 @@ export const SIDEBAR_ITEMS: TSidebarItem[] = [
       //   path: paths.master.formula.list,
       // },
     ],
+  },
+  {
+    key: "period",
+    label: "Periode",
+    path: paths.period.list,
+    icon: <CalendarMonthOutlined />,
+  },
+  {
+    key: "component",
+    label: "Komponen",
+    path: paths.component.list,
+    icon: <ExtensionOutlined />,
   },
 ];

@@ -23,6 +23,7 @@ export const paths = {
       create: "/master/formula/create",
       edit: "/master/formula/:id/edit",
     },
+
   },
   master_data: {
     access_admin: {
@@ -76,5 +77,17 @@ export const paths = {
     callback: "/auth/oauth-callback",
     forgotPassword: "/auth/forgot-password",
     resetPassword: "/auth/reset-password",
+  },
+  component: {
+    list: "/component",
+    create: "/component/create",
+    edit: "/component/:id/edit",
+    detail: "/component/:id",
+  },
+  period: {
+    list: "/period",
+    create: "/period/create",
+    edit: "/period/:id/edit",
+    detail: "/period/:id",
   },
 };

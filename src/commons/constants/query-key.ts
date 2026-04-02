@@ -20,6 +20,13 @@ export const queryKeys = {
       edit: "master-data/component/edit",
       create: "master-data/component/create",
     },
+    componentRealization: {
+      list: "master-data/component-realization/list",
+      detail: "master-data/component-realization/detail",
+      delete: "master-data/component-realization/delete",
+      edit: "master-data/component-realization/edit",
+      create: "master-data/component-realization/create",
+    },
     facilities: {
       list: "master-data/facilities/list",
       detail: "master-data/facilities/detail",
@@ -58,5 +65,12 @@ export const queryKeys = {
       list: "content/testimonial/list",
       detail: "content/testimonial/detail",
     },
+  },
+  period: {
+    list: "period/list",
+    detail: "period/detail",
+    delete: "period/delete",
+    edit: "period/edit",
+    create: "period/create",
   },
 } as const;

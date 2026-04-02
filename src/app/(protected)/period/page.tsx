@@ -16,6 +16,7 @@ import { paths } from "@/commons/constants/paths";
 import { TGetPeriodParams, TPeriodItem } from "@/api/period/type";
 import useGetListPeriod from "./_hooks/use-get-list-period";
 import useDeletePeriod from "./_hooks/use-delete-period";
+import { formatDateTimeWIB } from "@/utils/date";
 
 const PeriodPage: FC = (): ReactElement => {
   const navigate = useNavigate();
@@ -38,8 +39,15 @@ const PeriodPage: FC = (): ReactElement => {
     { field: "year", headerName: "Tahun", width: 100, type: "string" },
     { field: "periodType", headerName: "Tipe", width: 130 },
     { field: "periodValue", headerName: "Nilai", width: 100, type: "number" },
-    { field: "level", headerName: "Level", width: 90, type: "number" },
+    { field: "level", headerName: "Level", width: 90, type: "string" },
     { field: "parentId", headerName: "Parent ID", minWidth: 160, flex: 0.5 },
+    {
+      field: "createdAt",
+      headerName: "Dibuat",
+      minWidth: 180,
+      flex: 1,
+      valueFormatter: (value: string) => formatDateTimeWIB(value),
+    },
     {
       field: "actions",
       headerName: "Aksi",

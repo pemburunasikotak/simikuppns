@@ -69,6 +69,25 @@ const PeriodForm = ({ loading, handleSubmit, defaultValues }: Props) => {
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
+        <Grid size={{ xs: 12 }}>
+          <Controller
+            control={form.control}
+            name="periodName"
+            render={({ field, fieldState }) => (
+              <TextField
+                fullWidth
+                variant="filled"
+                label="Nama Periode"
+                placeholder="Ex: Semester 1 2024"
+                required
+                {...field}
+                value={field.value ?? ""}
+                error={fieldState.invalid}
+                helperText={fieldState.error?.message}
+              />
+            )}
+          />
+        </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <NumberField
             control={form.control}
@@ -94,10 +113,9 @@ const PeriodForm = ({ loading, handleSubmit, defaultValues }: Props) => {
             name="periodType"
             required
             options={[
+              { value: "year", label: "Tahunan" },
               { value: "semester", label: "Semester" },
-              { value: "quarterly", label: "Triwulan" },
-              { value: "monthly", label: "Bulanan" },
-              { value: "annual", label: "Tahunan" },
+              { value: "quarter", label: "Triwulan" },
             ]}
           />
         </Grid>
@@ -110,25 +128,7 @@ const PeriodForm = ({ loading, handleSubmit, defaultValues }: Props) => {
             required
           />
         </Grid>
-        <Grid size={{ xs: 12 }}>
-          <Controller
-            control={form.control}
-            name="periodName"
-            render={({ field, fieldState }) => (
-              <TextField
-                fullWidth
-                variant="filled"
-                label="Nama Periode"
-                placeholder="Ex: Semester 1 2024"
-                required
-                {...field}
-                value={field.value ?? ""}
-                error={fieldState.invalid}
-                helperText={fieldState.error?.message}
-              />
-            )}
-          />
-        </Grid>
+
         <Grid size={{ xs: 12 }}>
           <Controller
             control={form.control}

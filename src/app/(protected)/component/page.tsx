@@ -16,6 +16,7 @@ import { paths } from "@/commons/constants/paths";
 import { TGetComponentRealizationParams, TComponentRealizationItem } from "@/api/master/component-realization/type";
 import useGetListComponentRealization from "./_hooks/use-get-list-component-realization";
 import useDeleteComponentRealization from "./_hooks/use-delete-component-realization";
+import { formatDateTimeWIB } from "@/utils/date";
 
 const ComponentRealizationPage: FC = (): ReactElement => {
   const navigate = useNavigate();
@@ -37,7 +38,13 @@ const ComponentRealizationPage: FC = (): ReactElement => {
     { field: "idComponent", headerName: "ID Komponen", minWidth: 200, flex: 0.5 },
     { field: "idPeriod", headerName: "ID Periode", minWidth: 200, flex: 0.5 },
     { field: "value", headerName: "Nilai", width: 150, type: "number" },
-    { field: "createdAt", headerName: "Dibuat", minWidth: 180, flex: 1 },
+    {
+      field: "createdAt",
+      headerName: "Dibuat",
+      minWidth: 180,
+      flex: 1,
+      valueFormatter: (value: string) => formatDateTimeWIB(value),
+    },
     {
       field: "actions",
       headerName: "Aksi",

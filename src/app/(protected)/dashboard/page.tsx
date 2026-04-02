@@ -1,126 +1,92 @@
 import { FC, ReactElement } from "react";
 import { Page } from "@/app/_components/ui";
-// import { TFacilitiesFilter } from "@/api/examples/type";
-// import { useNavigate } from "react-router";
-// import { useFilter } from "@/app/_hooks/use-filter";
 import { Card, Grid, Typography } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { PieChart } from "@mui/x-charts/PieChart";
+import { GridColDef } from "@mui/x-data-grid";
+
+import DataTable from "@/app/_components/ui/data-table";
+import { createPaginationInfo } from "@/utils/data-table";
+import { formatDateTimeWIB } from "@/utils/date";
+import { useFilter } from "@/app/_hooks/use-filter";
+import { TGetIKUResultParams, TIKUResultItem } from "@/api/iku-result/type";
+import useGetListIKUResult from "./_hooks/use-get-list-iku-result";
 
 const Component: FC = (): ReactElement => {
-  // const { signout } = useSession();
-  // const navigate = useNavigate();
-  // const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  // console.log("selectedIds", selectedIds);
-  // const { filters } = useFilter<TFacilitiesFilter>();
-  // const query = useGetListTransaction({
-  //   sort_by: "created_at",
-  //   order: filters.order || "DESC",
-  //   limit: 10,
-  //   page: filters.page || 1,
-  // });
+  const { filters, setFilter } = useFilter<TGetIKUResultParams>();
 
-  // const handleLogout = () => {
-  //   signout();
-  // };
-
-  // const columns: GridColDef<TFacilities>[] = [
-  //   { field: "id", headerName: "ID Booking", width: 120 },
-  //   { field: "customerName", headerName: "Nama Lengkap", width: 200 },
-  //   { field: "customerWhatsapp", headerName: "No. Whatsapp", width: 200 },
-  //   { field: "package", headerName: "Paket", minWidth: 200, flex: 1 },
-  //   { field: "bookingDate", headerName: "Tanggal Acara", width: 200 },
-  //   { field: "totalPrice", headerName: "Total Transaksi", width: 200 },
-  //   {
-  //     field: "actions",
-  //     headerName: "Action",
-  //     width: 150,
-  //     sortable: false,
-  //     filterable: false,
-  //     renderCell: (params) => (
-  //       <ActionButtonTable
-  //         items={[
-  //           {
-  //             key: "edit",
-  //             type: "edit",
-  //             onClick: () =>
-  //               navigate(generatePath(paths.transaction.edit, { id: params.row.id })),
-  //           },
-  //           {
-  //             key: "delete",
-  //             type: "delete",
-  //             onClick: () => { },
-  //           },
-  //         ]}
-  //       />
-  //     ),
-  //   },
-  // ];
+  const ikuResultQuery = useGetListIKUResult({
+    order: "DESC",
+    limit: 10,
+    page: filters.page || 1,
+  });
 
   const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
   ];
 
   const series = [
     { label: "Grafik Batang", data: [4, 1, 2, 3, 5, 6, 2, 4, 3, 5, 1, 6], color: "#D1FADF" },
   ];
 
+  const currentPage = ikuResultQuery.data?.result?.currentPage || 1;
+
+  const columns: GridColDef<TIKUResultItem>[] = [
+    {
+      field: "_no",
+      headerName: "No",
+      width: 60,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => {
+        const index = (ikuResultQuery.data?.result?.data ?? []).findIndex(
+          (row) => row.idResult === params.row.idResult,
+        );
+        return (currentPage - 1) * 10 + index + 1;
+      },
+    },
+    {
+      field: "ikuName",
+      headerName: "Nama IKU",
+      minWidth: 200,
+      flex: 1,
+      valueGetter: (_value, row) => row.iku?.name ?? row.idIku,
+    },
+    {
+      field: "periodName",
+      headerName: "Periode",
+      minWidth: 160,
+      flex: 0.5,
+      valueGetter: (_value, row) => row.period?.periodName ?? row.idPeriod,
+    },
+    {
+      field: "calculatedValue",
+      headerName: "Nilai",
+      width: 120,
+    },
+    {
+      field: "formulaVersion",
+      headerName: "Versi Formula",
+      width: 130,
+    },
+    {
+      field: "calculatedAt",
+      headerName: "Dihitung Pada",
+      minWidth: 160,
+      flex: 0.5,
+      valueFormatter: (value: string) => formatDateTimeWIB(value),
+    },
+  ];
+
   return (
     <Page>
-      {/* <Grid container spacing={2} sx={{ marginBottom: 4 }}>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <SummaryCard
-            title="Grafik Batang"
-            value="Rp. 25.000.000"
-            icon={<MonetizationOn />}
-            iconBgColor="#27AE60"
-            trendValue="20%"
-            isUp={true}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <SummaryCard
-            title="Total Pengguna"
-            value="100.000"
-            icon={<ShoppingCart />}
-            iconBgColor="#EB5757"
-            trendValue="10%"
-            isUp={false}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <SummaryCard
-            title="Total Vendor"
-            value="1.000"
-            icon={<Inventory2 />}
-            iconBgColor="#F2C94C"
-            trendValue="20%"
-            isUp={true}
-          />
-        </Grid>
-      </Grid> */}
       <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-        <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: 'column' }}>
+        <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
           <Card style={{ padding: 10 }}>
             <Typography variant="h6" sx={{ marginBottom: 2 }}>Grafik Batang</Typography>
             <BarChart
-              xAxis={[
-                {
-                  data: months,
-                  scaleType: "band",
-                },
-              ]}
+              xAxis={[{ data: months, scaleType: "band" }]}
               series={series}
               height={300}
               barLabel="value"
@@ -128,7 +94,7 @@ const Component: FC = (): ReactElement => {
             />
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: 'column' }}>
+        <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
           <Card style={{ padding: 10 }}>
             <Typography variant="h6" sx={{ marginBottom: 2 }}>Chart PIE</Typography>
             <PieChart
@@ -151,6 +117,27 @@ const Component: FC = (): ReactElement => {
               ]}
               width={400}
               height={330}
+            />
+          </Card>
+        </Grid>
+
+        {/* Tabel IKU Result */}
+        <Grid size={{ xs: 12 }}>
+          <Card style={{ padding: 16 }}>
+            <Typography variant="h6" sx={{ marginBottom: 2 }}>
+              Hasil Kalkulasi IKU
+            </Typography>
+            <DataTable
+              loading={ikuResultQuery.isLoading}
+              rows={ikuResultQuery.data?.result?.data || []}
+              columns={columns}
+              getRowId={(row) => row.idResult}
+              paginationInfo={createPaginationInfo({
+                per_page: 10,
+                total: ikuResultQuery.data?.result?.total || 0,
+                page: ikuResultQuery.data?.result?.currentPage || 1,
+              })}
+              handleChange={setFilter}
             />
           </Card>
         </Grid>

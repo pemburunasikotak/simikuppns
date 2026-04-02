@@ -73,4 +73,8 @@ export const queryKeys = {
     edit: "period/edit",
     create: "period/create",
   },
+  ikuResult: {
+    list: "iku-result/list",
+    detail: "iku-result/detail",
+  },
 } as const;

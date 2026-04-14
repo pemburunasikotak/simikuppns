@@ -11,9 +11,12 @@ import { formatDateTimeWIB } from "@/utils/date";
 import { useFilter } from "@/app/_hooks/use-filter";
 import { TGetIKUResultParams, TIKUResultItem } from "@/api/iku-result/type";
 import useGetListIKUResult from "./_hooks/use-get-list-iku-result";
+import useGetDashboardIKU from "./_hooks/use-get-dashboard-iku";
 
 const Component: FC = (): ReactElement => {
   const { filters, setFilter } = useFilter<TGetIKUResultParams>();
+
+  const dashboardIKUQuery = useGetDashboardIKU({ year: 2026 });
 
   const ikuResultQuery = useGetListIKUResult({
     order: "DESC",
@@ -21,13 +24,22 @@ const Component: FC = (): ReactElement => {
     page: filters.page || 1,
   });
 
-  const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-  ];
+  const periods = ["Q1", "Q2", "Q3", "Q4", "Year"];
+
+  const firstIKU = dashboardIKUQuery.data?.result?.[0];
+  const chartData = firstIKU?.chartData || [];
 
   const series = [
-    { label: "Grafik Batang", data: [4, 1, 2, 3, 5, 6, 2, 4, 3, 5, 1, 6], color: "#D1FADF" },
+    {
+      label: "Target",
+      data: periods.map(p => chartData.find(d => d.period === p)?.target || 0),
+      color: "#D1FADF"
+    },
+    {
+      label: "Realisasi",
+      data: periods.map(p => chartData.find(d => d.period === p)?.realization || 0),
+      color: "#4D96FF"
+    },
   ];
 
   const currentPage = ikuResultQuery.data?.result?.currentPage || 1;
@@ -84,9 +96,12 @@ const Component: FC = (): ReactElement => {
       <Grid container spacing={2} sx={{ marginBottom: 2 }}>
         <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
           <Card style={{ padding: 10 }}>
-            <Typography variant="h6" sx={{ marginBottom: 2 }}>Grafik Batang</Typography>
+            <Typography variant="h6" sx={{ marginBottom: 2 }}>
+              Grafik Batang {firstIKU ? `- ${firstIKU.ikuName}` : ""}
+            </Typography>
             <BarChart
-              xAxis={[{ data: months, scaleType: "band" }]}
+              loading={dashboardIKUQuery.isLoading}
+              xAxis={[{ data: periods, scaleType: "band" }]}
               series={series}
               height={300}
               barLabel="value"

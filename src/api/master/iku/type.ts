@@ -98,3 +98,33 @@ export type TIKUDetailResponse = TResponse<TIKUItem>;
 
 // ─── Component List Response ───────────────────────────────────────────────────
 export type TIKUComponentListResponse = TResponsePaginate<TIKUComponentItem>;
+
+export type TIKUTargetItem = {
+    id: string;
+    ikuId: string;
+    year: number;
+    targetQ1: string;
+    targetQ2: string;
+    targetQ3: string;
+    targetQ4: string;
+    targetYear: string;
+    createdAt?: string;
+    updatedAt?: string;
+    iku?: TIKUItem;
+};
+
+export type TIKUTargetCreateRequest = {
+    ikuId: string;
+    year: number;
+    targetQ1: number;
+    targetQ2: number;
+    targetQ3: number;
+    targetQ4: number;
+    targetYear: number;
+};
+
+export type TIKUTargetListResponse = TResponse<TIKUTargetItem[]>;
+
+export type TIKUTargetUpdateRequest = Partial<TIKUTargetCreateRequest>;
+
+export type TIKUTargetDetailResponse = TResponse<TIKUTargetItem>;

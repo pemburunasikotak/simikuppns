@@ -21,6 +21,10 @@ import ModalTestFormula from "./_components/modal-test-formula";
 import { useState } from "react";
 import useGetListFormula from "./_hooks/use-get-list-formula";
 import useDeleteFormula from "./_hooks/use-delete-formula";
+import useGetListIKUTarget from "./_hooks/use-get-list-iku-target";
+import ModalAddTargetIKU from "./_components/modal-add-target-iku";
+import { TIKUTargetItem } from "@/api/master/iku/type";
+import useDeleteIKUTarget from "./_hooks/use-delete-iku-target";
 
 const IKUDetailPage = () => {
     const params = useParams();
@@ -29,15 +33,20 @@ const IKUDetailPage = () => {
     const detailQuery = useGetDetailIKU({ id: params.id! });
     const componentQuery = useGetListComponent({ id: params.id! });
     const formulaQuery = useGetListFormula({ ikuId: params.id! });
+    const targetQuery = useGetListIKUTarget({ ikuId: params.id! });
 
     const deleteComponent = useDeleteComponent();
     const deleteFormula = useDeleteFormula();
+    const deleteTarget = useDeleteIKUTarget();
 
     const modal = useModal();
 
     const [openAddModal, setOpenAddModal] = useState(false);
     const [openAddModalFormula, setOpenAddModalFormula] = useState(false);
     const [openTestModalFormula, setOpenTestModalFormula] = useState(false);
+    const [openAddModalTarget, setOpenAddModalTarget] = useState(false);
+    const [targetModalMode, setTargetModalMode] = useState<"add" | "edit" | "detail">("add");
+    const [selectedTarget, setSelectedTarget] = useState<TIKUTargetItem | null>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [selectedTestFormula, setSelectedTestFormula] = useState<any>(null);
 
@@ -120,6 +129,59 @@ const IKUDetailPage = () => {
         },
     ];
 
+    const columnsTarget: GridColDef<TIKUTargetItem>[] = [
+        { field: "year", headerName: "Tahun", width: 100 },
+        { field: "targetQ1", headerName: "Target Q1", width: 120 },
+        { field: "targetQ2", headerName: "Target Q2", width: 120 },
+        { field: "targetQ3", headerName: "Target Q3", width: 120 },
+        { field: "targetQ4", headerName: "Target Q4", width: 120 },
+        { field: "targetYear", headerName: "Target Tahunan", width: 150 },
+        {
+            field: "actions",
+            headerName: "Action",
+            width: 150,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) => (
+                <ActionButtonTable
+                    items={[
+                        {
+                            key: "detail",
+                            type: "detail",
+                            onClick: () => {
+                                setSelectedTarget(params.row);
+                                setTargetModalMode("detail");
+                                setOpenAddModalTarget(true);
+                            }
+                        },
+                        {
+                            key: "edit",
+                            type: "edit",
+                            onClick: () => {
+                                setSelectedTarget(params.row);
+                                setTargetModalMode("edit");
+                                setOpenAddModalTarget(true);
+                            }
+                        },
+                        {
+                            key: "delete",
+                            type: "delete",
+                            onClick: () => {
+                                modal.confirm({
+                                    icon: <DeleteOutlined sx={{ height: 40, width: 40 }} />,
+                                    description: "Apakah kamu akan menghapus data ini ?",
+                                    onOk: () => {
+                                        deleteTarget.mutate({ id: params.row.id });
+                                    },
+                                });
+                            },
+                        },
+                    ]}
+                />
+            ),
+        },
+    ];
+
     return (
         <Page
             loading={detailQuery.isLoading}
@@ -165,7 +227,6 @@ const IKUDetailPage = () => {
                         </Box>
                     </Paper>
                 </Grid>
-
                 <Grid size={{ xs: 12 }}>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                         <Typography variant="h6" gutterBottom ml={1}>
@@ -232,6 +293,47 @@ const IKUDetailPage = () => {
                     }}
                 />
             </Grid>
+
+            <Grid size={{ xs: 12 }} mt={3}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                    <Typography variant="h6" gutterBottom ml={1}>
+                        Target IKU
+                    </Typography>
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<Add />}
+                        onClick={() => {
+                            setTargetModalMode("add");
+                            setOpenAddModalTarget(true);
+                        }}
+                    >
+                        Tambah Target IKU
+                    </Button>
+                </Box>
+                <DataTable
+                    loading={targetQuery.isLoading}
+                    rows={targetQuery?.data?.result || []}
+                    columns={columnsTarget}
+                    checkboxSelection
+                    paginationInfo={createPaginationInfo({
+                        per_page: 10,
+                        total: targetQuery.data?.result?.length || 0,
+                        page: 1,
+                    })}
+                    handleChange={() => { }}
+                />
+            </Grid>
+
+            <ModalAddTargetIKU
+                open={openAddModalTarget}
+                onClose={() => {
+                    setOpenAddModalTarget(false);
+                    setSelectedTarget(null);
+                }}
+                target={selectedTarget}
+                mode={targetModalMode}
+            />
             <ModalAddFormula
                 open={openAddModalFormula}
                 onClose={() => setOpenAddModalFormula(false)}

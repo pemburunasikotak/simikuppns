@@ -12,6 +12,10 @@ import {
     TIKUFormulaCreateRequest,
     TIKUFormulaTestRequest,
     TIKUFormulaComponentResponse,
+    TIKUTargetListResponse,
+    TIKUTargetCreateRequest,
+    TIKUTargetUpdateRequest,
+    TIKUTargetDetailResponse,
 } from "./type";
 import { TDefaultResponse } from "@/commons/types/response";
 
@@ -31,6 +35,13 @@ const endpoints = {
     listFormula: "/api/iku-formulas",
     createFormula: "/api/iku-formulas",
     deleteFormula: "/api/iku-formulas/:id",
+
+    //target
+    listTarget: "/api/iku-targets",
+    createTarget: "/api/iku-targets",
+    detailTarget: "/api/iku-targets/:id",
+    editTarget: "/api/iku-targets/:id",
+    deleteTarget: "/api/iku-targets/:id",
 };
 
 export const getListIKU = async (
@@ -185,5 +196,45 @@ export const getFormulaComponents = async (
     id: string,
 ): Promise<TIKUFormulaComponentResponse> => {
     const res = await api.get(`/api/iku-formulas/${id}/components`);
+    return res.data;
+};
+
+export const getListIKUTarget = async (
+    params: { ikuId: string },
+): Promise<TIKUTargetListResponse> => {
+    const res = await api.get(endpoints.listTarget, { params });
+    const responseData = res.data;
+    if (responseData.data && !responseData.result) {
+        responseData.result = responseData.data;
+    }
+    return responseData;
+};
+
+export const createIKUTarget = async (
+    req: TIKUTargetCreateRequest,
+): Promise<TDefaultResponse> => {
+    const res = await api.post(endpoints.createTarget, { ...req });
+    return res.data;
+};
+
+export const deleteIKUTarget = async (
+    params: TDetailParams,
+): Promise<TDefaultResponse> => {
+    const res = await api.delete(`/api/iku-targets/${params.id}`);
+    return res.data;
+};
+
+export const getDetailIKUTarget = async (
+    params: TDetailParams,
+): Promise<TIKUTargetDetailResponse> => {
+    const res = await api.get(`/api/iku-targets/${params.id}`);
+    return res.data;
+};
+
+export const editIKUTarget = async (
+    params: TDetailParams,
+    req: TIKUTargetUpdateRequest,
+): Promise<TDefaultResponse> => {
+    const res = await api.patch(`/api/iku-targets/${params.id}`, { ...req });
     return res.data;
 };

@@ -37,3 +37,32 @@ export type TGetComponentParams = {
 
 export type TComponentListResponse = TResponsePaginate<TComponentItem>;
 export type TComponentDetailResponse = TResponse<TComponentItem>;
+
+// ─── Component Target ────────────────────────────────────────────────────────
+
+export type TComponentTargetItem = {
+    id: string;
+    componentId: string;
+    year: number;
+    targetQ1: string;
+    targetQ2: string;
+    targetQ3: string;
+    targetQ4: string;
+    targetYear: string;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type TComponentTargetCreateRequest = {
+    componentId: string;
+    year: number;
+    targetQ1: number;
+    targetQ2: number;
+    targetQ3: number;
+    targetQ4: number;
+    targetYear: number;
+};
+
+export type TComponentTargetUpdateRequest = Partial<TComponentTargetCreateRequest>;
+
+export type TComponentTargetListResponse = TResponse<TComponentTargetItem[]>;

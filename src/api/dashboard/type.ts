@@ -16,3 +16,20 @@ export type TTransactionItem = {
 
 export type TTransactionPaginateResponse = TResponsePaginate<TTransactionItem>;
 export type TTransactionDetailResponse = TResponse<TTransactionItem>;
+
+// ─── Dashboard IKU ───────────────────────────────────────────────────────────
+
+export type TDashboardIKUChartDataItem = {
+  period: string;
+  target: number | null;
+  realization: number | null;
+};
+
+export type TDashboardIKUItem = {
+  ikuId: string;
+  ikuCode: string;
+  ikuName: string;
+  chartData: TDashboardIKUChartDataItem[];
+};
+
+export type TDashboardIKUResponse = TResponse<TDashboardIKUItem[]>;

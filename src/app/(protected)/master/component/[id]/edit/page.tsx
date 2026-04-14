@@ -37,18 +37,18 @@ const EditIKUPage = () => {
   return (
     <Page
       loading={query.isLoading}
-      title="Data IKU"
+      title="Data IKP"
       breadcrumbs={[
         {
           label: "Master Data",
-          path: paths.master.iku.list,
+          path: paths.master.component.list,
         },
         {
-          label: "IKU",
-          path: paths.master.iku.list,
+          label: "IKP",
+          path: paths.master.component.list,
         },
         {
-          label: "Edit IKU",
+          label: "Edit IKP",
           path: null,
         },
       ]}

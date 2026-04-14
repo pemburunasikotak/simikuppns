@@ -12,6 +12,9 @@ export const queryKeys = {
     iku: {
       list: "master-data/iku/list",
       detail: "master-data/iku/detail",
+      target: {
+        list: "master-data/iku/target/list",
+      },
     },
     component: {
       list: "master-data/component/list",
@@ -19,6 +22,9 @@ export const queryKeys = {
       delete: "master-data/component/delete",
       edit: "master-data/component/edit",
       create: "master-data/component/create",
+      target: {
+        list: "master-data/component/target/list",
+      },
     },
     componentRealization: {
       list: "master-data/component-realization/list",
@@ -76,5 +82,8 @@ export const queryKeys = {
   ikuResult: {
     list: "iku-result/list",
     detail: "iku-result/detail",
+  },
+  dashboard: {
+    iku: "dashboard/iku",
   },
 } as const;

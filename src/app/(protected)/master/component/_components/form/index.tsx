@@ -1,12 +1,24 @@
-import { useEffect } from "react";
-import { Button, Grid, Stack } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Button, Grid, Stack, Divider, Typography, Box } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useParams } from "react-router";
+import { Add, DeleteOutlined } from "@mui/icons-material";
+import { GridColDef } from "@mui/x-data-grid";
 
 import FormTextField from "@/app/_components/ui/form-text-field";
 import FormDropdownField from "@/app/_components/ui/form-dropdown-field";
+import DataTable from "@/app/_components/ui/data-table";
+import ActionButtonTable from "@/app/_components/ui/action-button-table";
 
 import { ComponentSchema, TComponentFormData } from "./schema";
+import { createPaginationInfo } from "@/utils/data-table";
+import useModal from "@/app/_components/ui/modal";
+
+import useGetListComponentTarget from "../../[id]/_hooks/use-get-list-component-target";
+import useDeleteComponentTarget from "../../[id]/_hooks/use-delete-component-target";
+import ModalAddComponentTarget from "../modal-add-component-target";
+import { TComponentTargetItem } from "@/api/master/component/type";
 
 interface Props {
   loading?: boolean;
@@ -15,11 +27,73 @@ interface Props {
   defaultValues?: Partial<TComponentFormData>;
 }
 
-const ComponentForm = ({ loading, handleSubmit, defaultValues }: Props) => {
+const ComponentForm = ({ loading, handleSubmit, defaultValues, isEdit }: Props) => {
   const form = useForm<TComponentFormData>({
     resolver: zodResolver(ComponentSchema),
     mode: "onChange",
   });
+
+  const params = useParams();
+  const modal = useModal();
+  const targetQuery = useGetListComponentTarget({ componentId: params.id as string });
+  const deleteTarget = useDeleteComponentTarget();
+
+  const [openAddModalTarget, setOpenAddModalTarget] = useState(false);
+  const [targetModalMode, setTargetModalMode] = useState<"add" | "edit" | "detail">("add");
+  const [selectedTarget, setSelectedTarget] = useState<TComponentTargetItem | null>(null);
+
+  const columnsTarget: GridColDef<TComponentTargetItem>[] = [
+    { field: "year", headerName: "Tahun", width: 100 },
+    { field: "targetQ1", headerName: "Target Q1", width: 120 },
+    { field: "targetQ2", headerName: "Target Q2", width: 120 },
+    { field: "targetQ3", headerName: "Target Q3", width: 120 },
+    { field: "targetQ4", headerName: "Target Q4", width: 120 },
+    { field: "targetYear", headerName: "Target Tahunan", width: 150 },
+    {
+      field: "actions",
+      headerName: "Action",
+      width: 150,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <ActionButtonTable
+          items={[
+            {
+              key: "detail",
+              type: "detail",
+              onClick: () => {
+                setSelectedTarget(params.row);
+                setTargetModalMode("detail");
+                setOpenAddModalTarget(true);
+              }
+            },
+            {
+              key: "edit",
+              type: "edit",
+              onClick: () => {
+                setSelectedTarget(params.row);
+                setTargetModalMode("edit");
+                setOpenAddModalTarget(true);
+              }
+            },
+            {
+              key: "delete",
+              type: "delete",
+              onClick: () => {
+                modal.confirm({
+                  icon: <DeleteOutlined sx={{ height: 40, width: 40 }} />,
+                  description: "Apakah kamu akan menghapus data ini ?",
+                  onOk: () => {
+                    deleteTarget.mutate({ id: params.row.id });
+                  },
+                });
+              },
+            },
+          ]}
+        />
+      ),
+    },
+  ];
 
   const onSubmit = (data: TComponentFormData) => {
     handleSubmit(data);
@@ -107,6 +181,50 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues }: Props) => {
           Simpan
         </Button>
       </Stack>
+
+      {isEdit && (
+        <>
+          <Divider sx={{ my: 4 }} />
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+            <Typography variant="h6">
+              Target IKP
+            </Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<Add />}
+              onClick={() => {
+                setTargetModalMode("add");
+                setOpenAddModalTarget(true);
+              }}
+            >
+              Tambah Target IKP
+            </Button>
+          </Box>
+          <DataTable
+            loading={targetQuery.isLoading}
+            rows={targetQuery?.data?.result || []}
+            columns={columnsTarget}
+            checkboxSelection
+            paginationInfo={createPaginationInfo({
+              per_page: 10,
+              total: targetQuery.data?.result?.length || 0,
+              page: 1,
+            })}
+            handleChange={() => { }}
+          />
+
+          <ModalAddComponentTarget
+            open={openAddModalTarget}
+            onClose={() => {
+              setOpenAddModalTarget(false);
+              setSelectedTarget(null);
+            }}
+            target={selectedTarget}
+            mode={targetModalMode}
+          />
+        </>
+      )}
     </form>
   );
 };

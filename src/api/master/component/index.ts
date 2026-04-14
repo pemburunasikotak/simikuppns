@@ -5,6 +5,9 @@ import {
     TComponentListResponse,
     TGetComponentParams,
     TComponentCreateRequest,
+    TComponentTargetListResponse,
+    TComponentTargetCreateRequest,
+    TComponentTargetUpdateRequest,
 } from "./type";
 import { TDefaultResponse } from "@/commons/types/response";
 
@@ -14,6 +17,12 @@ const endpoints = {
     create: "/api/components",
     edit: "/api/components/:id",
     delete: "/api/components/:id",
+
+    //target
+    listTarget: "/api/component-targets",
+    createTarget: "/api/component-targets",
+    editTarget: "/api/component-targets/:id",
+    deleteTarget: "/api/component-targets/:id",
 };
 
 export const getListComponent = async (
@@ -77,6 +86,39 @@ export const editComponent = async (
     req: TComponentCreateRequest,
 ): Promise<TDefaultResponse> => {
     const res = await api.patch(`/api/components/${params?.id}`, { ...req });
+    return res.data;
+};
+
+export const getListComponentTarget = async (
+    params: { componentId: string },
+): Promise<TComponentTargetListResponse> => {
+    const res = await api.get(endpoints.listTarget, { params });
+    const responseData = res.data;
+    if (responseData.data && !responseData.result) {
+        responseData.result = responseData.data;
+    }
+    return responseData;
+};
+
+export const createComponentTarget = async (
+    req: TComponentTargetCreateRequest,
+): Promise<TDefaultResponse> => {
+    const res = await api.post(endpoints.createTarget, { ...req });
+    return res.data;
+};
+
+export const editComponentTarget = async (
+    params: TDetailParams,
+    req: TComponentTargetUpdateRequest,
+): Promise<TDefaultResponse> => {
+    const res = await api.patch(`/api/component-targets/${params.id}`, { ...req });
+    return res.data;
+};
+
+export const deleteComponentTarget = async (
+    params: TDetailParams,
+): Promise<TDefaultResponse> => {
+    const res = await api.delete(`/api/component-targets/${params?.id}`);
     return res.data;
 };
 

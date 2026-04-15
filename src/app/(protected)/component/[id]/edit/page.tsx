@@ -25,7 +25,8 @@ const EditComponentRealizationPage = () => {
         params: { id: params.id! },
         req: {
           idComponent: data.idComponent,
-          idPeriod: data.idPeriod,
+          year: data.year,
+          month: data.month,
           value: data.value,
         },
       },
@@ -63,10 +64,11 @@ const EditComponentRealizationPage = () => {
         defaultValues={
           realization
             ? {
-                idComponent: realization.idComponent,
-                idPeriod: realization.idPeriod,
-                value: realization.value,
-              }
+              idComponent: realization.idComponent,
+              year: Number(realization.year),
+              month: Number(realization.month),
+              value: realization.value,
+            }
             : {}
         }
       />

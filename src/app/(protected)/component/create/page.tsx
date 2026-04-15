@@ -18,7 +18,8 @@ const CreateComponentRealizationPage = () => {
   const handleSubmit = (data: TComponentRealizationFormData) => {
     const payload: TComponentRealizationCreateRequest = {
       idComponent: data.idComponent,
-      idPeriod: data.idPeriod,
+      year: data.year,
+      month: data.month,
       value: data.value,
     };
 

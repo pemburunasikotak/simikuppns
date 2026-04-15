@@ -9,7 +9,7 @@ import FormDropdownField from "@/app/_components/ui/form-dropdown-field";
 import { ComponentRealizationSchema, TComponentRealizationFormData } from "./schema";
 import { useQuery } from "@/app/_hooks/request/use-query";
 import { getListComponent } from "@/api/master/component";
-import { getListPeriod } from "@/api/period";
+// import { getListPeriod } from "@/api/period";
 import { queryKeys } from "@/commons/constants/query-key";
 
 interface Props {
@@ -32,20 +32,41 @@ const ComponentRealizationForm = ({ loading, handleSubmit, defaultValues }: Prop
   });
 
   // Fetch periods for dropdown
-  const periodQuery = useQuery({
-    queryKey: [queryKeys.period.list, { limit: 999 }],
-    queryFn: () => getListPeriod({ limit: 999, order: "ASC" }),
-  });
+  // const periodQuery = useQuery({
+  //   queryKey: [queryKeys.period.list, { limit: 999 }],
+  //   queryFn: () => getListPeriod({ limit: 999, order: "ASC" }),
+  // });
 
   const componentOptions = (componentQuery.data?.result?.data ?? []).map((c) => ({
     value: c.id,
     label: `${c.code} - ${c.name}`,
   }));
 
-  const periodOptions = (periodQuery.data?.result?.data ?? []).map((p) => ({
-    value: p.idPeriod,
-    label: p.periodName,
+  // const periodOptions = (periodQuery.data?.result?.data ?? []).map((p) => ({
+  //   value: p.idPeriod,
+  //   label: p.periodName,
+  // }));
+
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 6 }, (_, i) => ({
+    value: currentYear - 3 + i,
+    label: (currentYear - 3 + i).toString(),
   }));
+
+  const monthOptions = [
+    { value: 1, label: "Januari" },
+    { value: 2, label: "Februari" },
+    { value: 3, label: "Maret" },
+    { value: 4, label: "April" },
+    { value: 5, label: "Mei" },
+    { value: 6, label: "Juni" },
+    { value: 7, label: "Juli" },
+    { value: 8, label: "Agustus" },
+    { value: 9, label: "September" },
+    { value: 10, label: "Oktober" },
+    { value: 11, label: "November" },
+    { value: 12, label: "Desember" },
+  ];
 
   const onSubmit = (data: TComponentRealizationFormData) => {
     handleSubmit(data);
@@ -68,7 +89,27 @@ const ComponentRealizationForm = ({ loading, handleSubmit, defaultValues }: Prop
             options={componentOptions}
           />
         </Grid>
-        <Grid size={{ xs: 12 }}>
+        <Grid size={{ xs: 6 }}>
+          <FormDropdownField
+            label="Tahun"
+            control={form.control}
+            name="year"
+            required
+            placeholder="Pilih Tahun..."
+            options={yearOptions}
+          />
+        </Grid>
+        <Grid size={{ xs: 6 }}>
+          <FormDropdownField
+            label="Bulan"
+            control={form.control}
+            name="month"
+            required
+            placeholder="Pilih Bulan..."
+            options={monthOptions}
+          />
+        </Grid>
+        {/* <Grid size={{ xs: 12 }}>
           <FormDropdownField
             label="Periode"
             control={form.control}
@@ -77,7 +118,8 @@ const ComponentRealizationForm = ({ loading, handleSubmit, defaultValues }: Prop
             placeholder="Pilih Periode..."
             options={periodOptions}
           />
-        </Grid>
+        </Grid> */}
+
         <Grid size={{ xs: 12 }}>
           <Controller
             control={form.control}

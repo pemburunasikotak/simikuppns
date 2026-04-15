@@ -1,5 +1,4 @@
 import {
-  CalendarMonthOutlined,
   DashboardOutlined,
   ExtensionOutlined,
   SettingsOutlined,
@@ -43,12 +42,12 @@ export const SIDEBAR_ITEMS: TSidebarItem[] = [
       // },
     ],
   },
-  {
-    key: "period",
-    label: "Periode",
-    path: paths.period.list,
-    icon: <CalendarMonthOutlined />,
-  },
+  // {
+  //   key: "period",
+  //   label: "Periode",
+  //   path: paths.period.list,
+  //   icon: <CalendarMonthOutlined />,
+  // },
   {
     key: "component",
     label: "Komponen",

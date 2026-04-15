@@ -4,7 +4,7 @@ import { Controller, FieldValues, UseControllerProps } from "react-hook-form";
 import HelperText from "../helper-text";
 
 type DropdownOption = {
-  value: string;
+  value: string | number;
   label: string;
 };
 

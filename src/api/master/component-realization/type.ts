@@ -7,6 +7,8 @@ export type TComponentRealizationItem = {
     idRealization: number;
     idComponent: string;
     idPeriod: string;
+    year: number;
+    month: number;
     value: number;
     createdAt?: string | null;
     updatedAt?: string | null;
@@ -16,13 +18,18 @@ export type TComponentRealizationItem = {
 
 export type TComponentRealizationCreateRequest = {
     idComponent: string;
-    idPeriod: string;
+    // idPeriod: string;
     value: number;
+    year?: number;
+    month?: number;
+
 };
 
 export type TComponentRealizationUpdateRequest = {
     idComponent?: string;
     idPeriod?: string;
+    year?: number;
+    month?: number;
     value?: number;
 };
 

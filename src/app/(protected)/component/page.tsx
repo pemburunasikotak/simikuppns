@@ -36,7 +36,20 @@ const ComponentRealizationPage: FC = (): ReactElement => {
   const columns: GridColDef<TComponentRealizationItem>[] = [
     { field: "idRealization", headerName: "ID Realisasi", width: 120 },
     { field: "idComponent", headerName: "ID Komponen", minWidth: 200, flex: 0.5 },
-    { field: "idPeriod", headerName: "ID Periode", minWidth: 200, flex: 0.5 },
+    { field: "year", headerName: "Tahun", minWidth: 200, flex: 0.5 },
+    {
+      field: "month",
+      headerName: "Bulan",
+      minWidth: 200,
+      flex: 0.5,
+      valueFormatter: (value: number) => {
+        const bulan = [
+          "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+          "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+        ];
+        return bulan[value - 1] ?? value;
+      },
+    },
     { field: "value", headerName: "Nilai", width: 150, type: "number" },
     {
       field: "createdAt",

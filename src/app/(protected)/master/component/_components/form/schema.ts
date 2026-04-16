@@ -10,12 +10,12 @@ const BaseSchema = zod.object({
   description: zod
     .string({ error: "Deskripsi harus diisi" })
     .min(1, { message: "Deskripsi harus diisi" }),
-  dataType: zod
-    .string({ error: "Data Type harus diisi" })
-    .min(1, { message: "Data Type harus diisi" }),
-  sourceType: zod
-    .string({ error: "Source Type harus diisi" })
-    .min(1, { message: "Source Type harus diisi" }),
+  periodType: zod
+    .string({ error: "Type Priode harus diisi" })
+    .min(1, { message: "Type Priode harus diisi" }),
+  // sourceType: zod
+  //   .string({ error: "Source Type harus diisi" })
+  //   .min(1, { message: "Source Type harus diisi" }),
 });
 
 export const ComponentSchema = BaseSchema;

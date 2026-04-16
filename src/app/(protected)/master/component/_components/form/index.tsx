@@ -138,20 +138,19 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues, isEdit }: Props) 
             rows={4}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
+        <Grid size={{ xs: 12, sm: 12 }}>
           <FormDropdownField
-            label="Data Type"
+            label="Type Priode"
             control={form.control}
-            name="dataType"
+            name="periodType"
             required
             options={[
-              { value: "number", label: "Number" },
-              { value: "percentage", label: "Percentage" },
-              { value: "integer", label: "Integer" },
+              { value: "monthly", label: "Bulanan" },
+              { value: "yearly", label: "Tahunan" },
             ]}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
+        {/* <Grid size={{ xs: 12, sm: 6 }}>
           <FormDropdownField
             label="Source Type"
             control={form.control}
@@ -163,7 +162,7 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues, isEdit }: Props) 
               { value: "manual", label: "Manual" },
             ]}
           />
-        </Grid>
+        </Grid> */}
       </Grid>
       <Stack
         direction="row"

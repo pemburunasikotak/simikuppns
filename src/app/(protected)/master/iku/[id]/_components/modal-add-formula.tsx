@@ -151,15 +151,29 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
 
                             <Grid container spacing={2}>
                                 <Grid size={{ xs: 12, sm: 4, md: 2 }}>
-                                    <TextField
+                                    {/* <TextField
                                         label="Left Type"
                                         size="small"
                                         fullWidth
-                                        disabled
+                                        // disabled
                                         value={step.leftType}
                                         onChange={(e) => handleStepChange(index, "leftType", e.target.value)}
                                         placeholder="component / formula"
-                                    />
+                                    /> */}
+                                    <FormControl fullWidth size="small">
+                                        <InputLabel id={`left-type-label-${index}`}>Left Type</InputLabel>
+                                        <Select
+                                            labelId={`left-type-label-${index}`}
+                                            value={step.leftType}
+                                            label="Left Type"
+                                            onChange={(e) => handleStepChange(index, "leftType", e.target.value)}
+                                            size="small"
+                                            fullWidth
+                                        >
+                                            <MenuItem value="component">Component</MenuItem>
+                                            <MenuItem value="temp">Temp</MenuItem>
+                                        </Select>
+                                    </FormControl>
                                 </Grid>
                                 <Grid size={{ xs: 12, sm: 4, md: 2 }}>
                                     <FormControl fullWidth size="small">
@@ -170,7 +184,7 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
                                             label="Left Value"
                                             onChange={(e) => handleStepChange(index, "leftValue", e.target.value)}
                                         >
-                                            {index === 0 ? (
+                                            {step.leftType === 'component' ? (
                                                 master.map((item) => (
                                                     <MenuItem key={item.id} value={item.code}>
                                                         {item.code}
@@ -179,12 +193,20 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
                                             ) : (
                                                 steps.slice(0, index).map((prevStep, pIdx) => (
                                                     prevStep.resultKey ? (
-                                                        <MenuItem key={pIdx} value={prevStep.resultKey}>
+                                                        <MenuItem key={`step-${pIdx}`} value={prevStep.resultKey}>
                                                             {prevStep.resultKey}
                                                         </MenuItem>
                                                     ) : null
                                                 ))
                                             )}
+                                            {/* }
+                                            {steps.slice(0, index).map((prevStep, pIdx) => (
+                                                prevStep.resultKey ? (
+                                                    <MenuItem key={`step-${pIdx}`} value={prevStep.resultKey}>
+                                                        {prevStep.resultKey}
+                                                    </MenuItem>
+                                                ) : null
+                                            ))} */}
                                         </Select>
                                     </FormControl>
                                 </Grid>

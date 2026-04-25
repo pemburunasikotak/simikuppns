@@ -38,13 +38,8 @@ const ModalAddFormula = ({ open, onClose, master, formulas }: ModalAddFormulaPro
         rightValue: "",
         resultKey: ""
     };
-
     const [steps, setSteps] = useState<StepForm[]>([initialStep]);
-
-    console.log("MASUK SINI", formulas)
-
     const createFormula = useCreateFormula();
-
     const handleReset = () => {
         setName("");
         setDescription("");
@@ -92,7 +87,7 @@ const ModalAddFormula = ({ open, onClose, master, formulas }: ModalAddFormulaPro
                 ));
             case 'formula_ref':
                 return formulas.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
+                    <MenuItem key={item.id} value={item.finalResultKey}>
                         {item.name}
                     </MenuItem>
                 ));

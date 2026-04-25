@@ -43,6 +43,7 @@ export type TIKUComponentItem = {
     createdAt?: string | null;
     updatedAt?: string | null;
     deletedAt?: string | null;
+    finalResultKey?: string
 };
 
 export type TIKUComponentCreateRequest = {

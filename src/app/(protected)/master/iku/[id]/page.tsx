@@ -338,6 +338,7 @@ const IKUDetailPage = () => {
                 open={openAddModalFormula}
                 onClose={() => setOpenAddModalFormula(false)}
                 master={componentQuery.data?.result?.data || []}
+                formulas={formulaQuery?.data?.result?.data || []}
             />
 
             <ModalTestFormula

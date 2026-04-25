@@ -5,11 +5,13 @@ import useCreateFormula from "../_hooks/use-create-formula";
 import { Add, DeleteOutlined } from "@mui/icons-material";
 import { TComponentItem } from "@/api/master/component/type";
 import { enqueueSnackbar } from "notistack";
+import { TIKUComponentItem } from "@/api/master/iku/type";
 
 type ModalAddFormulaProps = {
     open: boolean;
     onClose: () => void;
     master: TComponentItem[];
+    formulas: TIKUComponentItem[];
 };
 
 type StepForm = {
@@ -21,13 +23,25 @@ type StepForm = {
     resultKey: string;
 };
 
-const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
+const ModalAddFormula = ({ open, onClose, master, formulas }: ModalAddFormulaProps) => {
     const params = useParams();
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [finalResultKey, setFinalResultKey] = useState("");
     const [isActive, setIsActive] = useState(true);
-    const [steps, setSteps] = useState<StepForm[]>([]);
+    const [isFinal, setIsFinal] = useState(false);
+    const initialStep: StepForm = {
+        leftType: "component",
+        leftValue: "",
+        operator: "ADD",
+        rightType: "component",
+        rightValue: "",
+        resultKey: ""
+    };
+
+    const [steps, setSteps] = useState<StepForm[]>([initialStep]);
+
+    console.log("MASUK SINI", formulas)
 
     const createFormula = useCreateFormula();
 
@@ -36,7 +50,8 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
         setDescription("");
         setFinalResultKey("");
         setIsActive(true);
-        setSteps([]);
+        setIsFinal(false);
+        setSteps([initialStep]);
     };
 
     const handleClose = () => {
@@ -67,6 +82,32 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
         setSteps(newSteps);
     };
 
+    const renderLeftValueOptions = (type: string, index: number) => {
+        switch (type) {
+            case 'component':
+                return master.map((item) => (
+                    <MenuItem key={item.id} value={item.code}>
+                        {item.code}
+                    </MenuItem>
+                ));
+            case 'formula_ref':
+                return formulas.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                        {item.name}
+                    </MenuItem>
+                ));
+            case 'temp':
+            default:
+                return steps.slice(0, index).map((prevStep, pIdx) => (
+                    prevStep.resultKey ? (
+                        <MenuItem key={`step-${pIdx}`} value={prevStep.resultKey}>
+                            {prevStep.resultKey}
+                        </MenuItem>
+                    ) : null
+                ));
+        }
+    };
+
     const handleSubmit = () => {
         if (!params.id) return;
 
@@ -82,6 +123,7 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
             description,
             finalResultKey,
             isActive,
+            isFinal,
             steps: steps.map((step, index) => ({
                 ...step,
                 sequence: index + 1
@@ -122,16 +164,28 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
                         value={finalResultKey}
                         onChange={(e) => setFinalResultKey(e.target.value)}
                     />
-                    <FormControlLabel
-                        control={
-                            <Switch
-                                checked={isActive}
-                                onChange={(e) => setIsActive(e.target.checked)}
-                                color="primary"
-                            />
-                        }
-                        label="Aktif"
-                    />
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={isActive}
+                                    onChange={(e) => setIsActive(e.target.checked)}
+                                    color="primary"
+                                />
+                            }
+                            label="Aktif"
+                        />
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={isFinal}
+                                    onChange={(e) => setIsFinal(e.target.checked)}
+                                    color="primary"
+                                />
+                            }
+                            label="Final"
+                        />
+                    </Box>
 
                     <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <Typography variant="h6">Steps Kalkulasi</Typography>
@@ -144,22 +198,15 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
                         <Box key={index} sx={{ p: 2, border: "1px dashed grey", borderRadius: 1, position: "relative" }}>
                             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                                 <Typography variant="subtitle2">Step {index + 1}</Typography>
-                                <IconButton size="small" color="error" onClick={() => handleRemoveStep(index)}>
-                                    <DeleteOutlined fontSize="small" />
-                                </IconButton>
+                                {steps.length > 1 && (
+                                    <IconButton size="small" color="error" onClick={() => handleRemoveStep(index)}>
+                                        <DeleteOutlined fontSize="small" />
+                                    </IconButton>
+                                )}
                             </Box>
 
                             <Grid container spacing={2}>
                                 <Grid size={{ xs: 12, sm: 4, md: 2 }}>
-                                    {/* <TextField
-                                        label="Left Type"
-                                        size="small"
-                                        fullWidth
-                                        // disabled
-                                        value={step.leftType}
-                                        onChange={(e) => handleStepChange(index, "leftType", e.target.value)}
-                                        placeholder="component / formula"
-                                    /> */}
                                     <FormControl fullWidth size="small">
                                         <InputLabel id={`left-type-label-${index}`}>Left Type</InputLabel>
                                         <Select
@@ -172,6 +219,7 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
                                         >
                                             <MenuItem value="component">Component</MenuItem>
                                             <MenuItem value="temp">Temp</MenuItem>
+                                            <MenuItem value="formula_ref">Formula</MenuItem>
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -184,29 +232,7 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
                                             label="Left Value"
                                             onChange={(e) => handleStepChange(index, "leftValue", e.target.value)}
                                         >
-                                            {step.leftType === 'component' ? (
-                                                master.map((item) => (
-                                                    <MenuItem key={item.id} value={item.code}>
-                                                        {item.code}
-                                                    </MenuItem>
-                                                ))
-                                            ) : (
-                                                steps.slice(0, index).map((prevStep, pIdx) => (
-                                                    prevStep.resultKey ? (
-                                                        <MenuItem key={`step-${pIdx}`} value={prevStep.resultKey}>
-                                                            {prevStep.resultKey}
-                                                        </MenuItem>
-                                                    ) : null
-                                                ))
-                                            )}
-                                            {/* }
-                                            {steps.slice(0, index).map((prevStep, pIdx) => (
-                                                prevStep.resultKey ? (
-                                                    <MenuItem key={`step-${pIdx}`} value={prevStep.resultKey}>
-                                                        {prevStep.resultKey}
-                                                    </MenuItem>
-                                                ) : null
-                                            ))} */}
+                                            {renderLeftValueOptions(step.leftType, index)}
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -235,7 +261,6 @@ const ModalAddFormula = ({ open, onClose, master }: ModalAddFormulaProps) => {
                                             label="Right Type"
                                             onChange={(e) => {
                                                 handleStepChange(index, "rightType", e.target.value);
-                                                // Reset right value when type changes
                                                 handleStepChange(index, "rightValue", "");
                                             }}
                                         >

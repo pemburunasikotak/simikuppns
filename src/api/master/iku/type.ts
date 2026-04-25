@@ -74,6 +74,7 @@ export type TIKUFormulaCreateRequest = {
     description: string;
     finalResultKey: string;
     isActive: boolean;
+    isFinal?: boolean;
     steps: TIKUFormulaStepCreateRequest[];
 };
 

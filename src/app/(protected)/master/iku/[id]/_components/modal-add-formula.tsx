@@ -77,7 +77,7 @@ const ModalAddFormula = ({ open, onClose, master, formulas }: ModalAddFormulaPro
         setSteps(newSteps);
     };
 
-    const renderLeftValueOptions = (type: string, index: number) => {
+    const renderValueOptions = (type: string, index: number) => {
         switch (type) {
             case 'component':
                 return master.map((item) => (
@@ -227,7 +227,7 @@ const ModalAddFormula = ({ open, onClose, master, formulas }: ModalAddFormulaPro
                                             label="Left Value"
                                             onChange={(e) => handleStepChange(index, "leftValue", e.target.value)}
                                         >
-                                            {renderLeftValueOptions(step.leftType, index)}
+                                            {renderValueOptions(step.leftType, index)}
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -261,6 +261,7 @@ const ModalAddFormula = ({ open, onClose, master, formulas }: ModalAddFormulaPro
                                         >
                                             <MenuItem value="component">Component</MenuItem>
                                             <MenuItem value="constant">Constant</MenuItem>
+                                            <MenuItem value="formula_ref">Formula</MenuItem>
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -282,11 +283,7 @@ const ModalAddFormula = ({ open, onClose, master, formulas }: ModalAddFormulaPro
                                                 label="Right Value"
                                                 onChange={(e) => handleStepChange(index, "rightValue", e.target.value)}
                                             >
-                                                {master.map((item) => (
-                                                    <MenuItem key={item.id} value={item.code}>
-                                                        {item.code}
-                                                    </MenuItem>
-                                                ))}
+                                                {renderValueOptions(step.rightType, index)}
                                             </Select>
                                         </FormControl>
                                     )}

@@ -83,6 +83,7 @@ export const paths = {
     create: "/component/create",
     edit: "/component/:id/edit",
     detail: "/component/:id",
+    view: "/component/view/:type/:id",
   },
   period: {
     list: "/period",

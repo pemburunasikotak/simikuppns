@@ -39,7 +39,7 @@ export const getListComponentRealization = async (
 export const getDetailComponentRealization = async (
     params?: TDetailParams,
 ): Promise<TComponentRealizationDetailResponse> => {
-    const res = await api.get(`/api/component-realizations/${params?.id}`);
+    const res = await api.get(`/api/realizations/component/${params?.id}/detail`);
     const responseData = res.data;
     if (responseData.data && !responseData.result) {
         responseData.result = responseData.data;

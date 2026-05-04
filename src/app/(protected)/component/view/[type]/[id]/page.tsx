@@ -20,11 +20,10 @@ import {
   TableRow,
   alpha,
   Skeleton,
-  Button,
   SxProps,
   Theme,
 } from "@mui/material";
-import { useSnackbar } from "notistack";
+// import { useSnackbar } from "notistack";
 import {
   ArrowBackOutlined,
   AnalyticsOutlined,
@@ -32,18 +31,39 @@ import {
   CalendarTodayOutlined,
   InfoOutlined,
   TrendingUpOutlined,
-  AddOutlined,
 } from "@mui/icons-material";
 
 import { Page } from "@/app/_components/ui";
-import { TMetricTag, TMetricYearData, TMetricRealization } from "@/api/master/metrics/type";
+import { TMetricTag, TMetricYearData } from "@/api/master/metrics/type";
 import useGetMetricDetail from "../../../_hooks/use-get-metric-detail";
+import useUpdateComponentRealization from "../../../_hooks/use-update-component-realization";
+import RealizationDialog from "./_components/RealizationDialog";
+import { useState } from "react";
 
 const MetricDetailPage: FC = (): ReactElement => {
   const { type, id } = useParams<{ type: string; id: string }>();
   const navigate = useNavigate();
   const { data, isLoading } = useGetMetricDetail(type || "", id || "");
-  const { enqueueSnackbar } = useSnackbar();
+  const updateMutation = useUpdateComponentRealization();
+
+  const [selectedYearData, setSelectedYearData] = useState<TMetricYearData | null>(null);
+  const [selectedRealizationId, setSelectedRealizationId] = useState<string | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleRowClick = (yearData: TMetricYearData) => {
+    setSelectedYearData(yearData);
+    setSelectedRealizationId(null);
+    setSelectedMonth(null);
+    setIsDialogOpen(true);
+  };
+
+  const handleRowClickMonth = (id: string | null, yearData: TMetricYearData, month: number) => {
+    setSelectedRealizationId(id);
+    setSelectedYearData(yearData);
+    setSelectedMonth(month);
+    setIsDialogOpen(true);
+  };
 
   if (isLoading) {
     return (
@@ -189,71 +209,109 @@ const MetricDetailPage: FC = (): ReactElement => {
                   Data Realisasi & Target
                 </Typography>
               </Stack>
-              <Button
-                variant="contained"
-                size="small"
-                startIcon={<AddOutlined />}
-                onClick={() => enqueueSnackbar("Fitur Tambah Realisasi akan segera hadir!", { variant: "info" })}
-                sx={{
-                  borderRadius: "8px",
-                  textTransform: "none",
-                  fontWeight: 700,
-                  boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)",
-                  px: 2,
-                }}
-              >
-                Tambah Realisasi
-              </Button>
             </Box>
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "#f8fafc" }}>
                   <TableCell sx={{ fontWeight: 700, color: "#64748b" }}>TAHUN</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: "#64748b" }}>TARGET TAHUNAN</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: "#64748b" }}>TARGET TRIWULAN (Q1-Q4)</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: "#64748b" }}>TOTAL REALISASI</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: "#64748b" }}>CAPAIAN (%)</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: "#64748b" }}>
+                    {metric?.periodType?.toLowerCase() === "bulanan" || metric?.periodType?.toLowerCase() === "monthly" ? "REALISASI BULANAN" : "REALISASI TAHUNAN"}
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {yearsData.length > 0 ? (
                   yearsData.map((yearData: TMetricYearData) => {
-                    const totalRealization = yearData.realizations?.reduce((acc: number, curr: TMetricRealization) => acc + (Number(curr.value) || 0), 0) || 0;
-                    const targetYear = Number(yearData.target?.targetYear) || 0;
-                    const achievement = targetYear > 0 ? (totalRealization / targetYear) * 100 : 0;
+                    // const totalRealization = yearData.realizations?.reduce((acc: number, curr: TMetricRealization) => acc + (Number(curr.value) || 0), 0) || 0;
+                    // const targetYear = Number(yearData.target?.targetYear) || 0;
+                    // const achievement = targetYear > 0 ? (totalRealization / targetYear) * 100 : 0;
+                    const isMonthly = metric?.periodType?.toLowerCase() === "bulanan" || metric?.periodType?.toLowerCase() === "monthly";
 
                     return (
-                      <TableRow key={yearData.year} sx={{ "&:hover": { backgroundColor: "#fdfdfd" } }}>
+                      <TableRow
+                        key={yearData.year}
+
+                        sx={{
+                          "&:hover": { backgroundColor: "#f8fafc", cursor: "pointer" },
+                          transition: "background-color 0.2s"
+                        }}
+                      >
                         <TableCell sx={{ fontWeight: 700, fontSize: "1.1rem", color: "#1e293b" }}>
                           {yearData.year}
                         </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{targetYear || "-"}</Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Stack direction="row" spacing={1}>
-                            <QuarterBadge label="Q1" value={yearData.target?.targetQ1} />
-                            <QuarterBadge label="Q2" value={yearData.target?.targetQ2} />
-                            <QuarterBadge label="Q3" value={yearData.target?.targetQ3} />
-                            <QuarterBadge label="Q4" value={yearData.target?.targetQ4} />
-                          </Stack>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 700, color: "#6366f1" }}>
-                            {totalRealization}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={`${achievement.toFixed(1)}%`}
-                            size="small"
-                            sx={{
-                              fontWeight: 700,
-                              backgroundColor: achievement >= 100 ? alpha("#22c55e", 0.1) : alpha("#6366f1", 0.1),
-                              color: achievement >= 100 ? "#22c55e" : "#6366f1",
-                              borderRadius: "6px",
-                            }}
-                          />
+
+                        <TableCell onClick={() => !isMonthly && handleRowClick(yearData)}>
+                          {isMonthly ? (
+                            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", py: 1 }}>
+                              {Array.from({ length: 12 }, (_, i) => {
+                                const monthNum = i + 1;
+                                const realization = yearData.realizations.find(r => r.month === monthNum);
+                                const id = realization?.id || null;
+                                const val = realization ? Number(realization.value) : 0;
+                                return (
+                                  <Box
+                                    key={monthNum}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRowClickMonth(id, yearData, monthNum);
+                                    }}
+                                    sx={{
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      width: 48,
+                                      height: 48,
+                                      borderRadius: "10px",
+                                      backgroundColor: val > 0 ? alpha("#6366f1", 0.1) : "#f8fafc",
+                                      border: "1px solid",
+                                      borderColor: val > 0 ? alpha("#6366f1", 0.3) : "#e2e8f0",
+                                      cursor: "pointer",
+                                      transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                      "&:hover": {
+                                        transform: "translateY(-2px)",
+                                        boxShadow: "0 4px 12px rgba(99, 102, 241, 0.15)",
+                                        borderColor: "#6366f1",
+                                        backgroundColor: alpha("#6366f1", 0.15),
+                                      },
+                                      "&:active": {
+                                        transform: "translateY(0)",
+                                      }
+                                    }}
+                                  >
+                                    <Typography
+                                      variant="caption"
+                                      sx={{
+                                        fontSize: "0.7rem",
+                                        color: val > 0 ? "#6366f1" : "#94a3b8",
+                                        fontWeight: 700,
+                                        lineHeight: 1
+                                      }}
+                                    >
+                                      {monthNum}
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        fontSize: "0.9rem",
+                                        fontWeight: 800,
+                                        color: val > 0 ? "#1e1b4b" : "#cbd5e1",
+                                        mt: 0.2
+                                      }}
+                                    >
+                                      {val}
+                                    </Typography>
+                                  </Box>
+                                );
+                              })}
+                            </Stack>
+                          ) : (
+                            <Stack>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                {yearData.realizations.map(item => item.value).join(', ') || "-"}
+                              </Typography>
+                            </Stack>
+                          )}
                         </TableCell>
                       </TableRow>
                     );
@@ -270,27 +328,37 @@ const MetricDetailPage: FC = (): ReactElement => {
           </TableContainer>
         </Grid>
       </Grid>
+
+      <RealizationDialog
+        open={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        yearData={selectedYearData}
+        idComponent={selectedRealizationId || id || ""}
+        updateRealization={updateMutation}
+        metricType={metric?.periodType || ""}
+        selectedMonth={selectedMonth}
+      />
     </Page>
   );
 };
 
-const QuarterBadge = ({ label, value }: { label: string; value: string | number | null | undefined }) => (
-  <Box
-    sx={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      minWidth: "45px",
-      p: 0.5,
-      borderRadius: "6px",
-      backgroundColor: "#fff",
-      border: "1px solid #f1f5f9",
-    }}
-  >
-    <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 700, fontSize: "0.6rem" }}>{label}</Typography>
-    <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "0.75rem" }}>{value || 0}</Typography>
-  </Box>
-);
+// const QuarterBadge = ({ label, value }: { label: string; value: string | number | null | undefined }) => (
+//   <Box
+//     sx={{
+//       display: "flex",
+//       flexDirection: "column",
+//       alignItems: "center",
+//       minWidth: "45px",
+//       p: 0.5,
+//       borderRadius: "6px",
+//       backgroundColor: "#fff",
+//       border: "1px solid #f1f5f9",
+//     }}
+//   >
+//     <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 700, fontSize: "0.6rem" }}>{label}</Typography>
+//     <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "0.75rem" }}>{value || 0}</Typography>
+//   </Box>
+// );
 
 const Divider = ({ sx, opacity }: { sx?: SxProps<Theme>; opacity?: number }) => (
   <Box sx={{ height: "1px", backgroundColor: "rgba(0,0,0,0.1)", opacity, ...sx }} />

@@ -64,10 +64,10 @@ const EditComponentRealizationPage = () => {
         defaultValues={
           realization
             ? {
-              idComponent: realization.idComponent,
-              year: Number(realization.year),
-              month: Number(realization.month),
-              value: realization.value,
+              idComponent: realization.realization.idComponent,
+              year: Number(realization.realization.year),
+              month: Number(realization.realization.month),
+              value: Number(realization.realization.value),
             }
             : {}
         }

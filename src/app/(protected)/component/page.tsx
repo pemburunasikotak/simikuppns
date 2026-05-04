@@ -26,11 +26,14 @@ import {
   Skeleton,
   CircularProgress,
 } from "@mui/material";
-import { EditOutlined, VisibilityOutlined, TagOutlined, AnalyticsOutlined } from "@mui/icons-material";
+import { EditOutlined, VisibilityOutlined, TagOutlined, AnalyticsOutlined, FilterListOutlined } from "@mui/icons-material";
+import { Menu, MenuItem } from "@mui/material";
+import { useState } from "react";
 
 const ComponentRealizationPage: FC = (): ReactElement => {
   const navigate = useNavigate();
   const { filters } = useFilter<TGetMetricsParams & { search_value?: string }>();
+  const { setFilter } = useFilter<TGetMetricsParams & { search_value?: string }>();
 
   const { ref, inView } = useInView();
 
@@ -49,6 +52,24 @@ const ComponentRealizationPage: FC = (): ReactElement => {
   const metrics = useMemo(() => {
     return data?.pages.flatMap((page) => page?.result?.data || []) || [];
   }, [data]);
+
+  const uniqueTags = useMemo(() => {
+    const tags = new Set<string>();
+    metrics.forEach((item) => {
+      item.tags?.forEach((tag) => {
+        if (tag.name) tags.add(tag.name);
+      });
+    });
+    return Array.from(tags).sort();
+  }, [metrics]);
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleTagClick = (tag: string) => {
+    setFilter({ tag });
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -322,6 +343,44 @@ const ComponentRealizationPage: FC = (): ReactElement => {
             },
           ]}
           actions={[
+            <Box key="filter-tag">
+              <Button
+                variant="outlined"
+                startIcon={<FilterListOutlined />}
+                onClick={(e) => setAnchorEl(e.currentTarget)}
+                sx={{
+                  borderRadius: "12px",
+                  textTransform: "none",
+                  px: 3,
+                  borderColor: "rgba(0,0,0,0.1)",
+                  color: "#64748b",
+                }}
+              >
+                {filters.tag || "Semua Tag"}
+              </Button>
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={() => setAnchorEl(null)}
+                PaperProps={{
+                  sx: {
+                    borderRadius: "12px",
+                    mt: 1,
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                    minWidth: "160px",
+                  },
+                }}
+              >
+                <MenuItem onClick={() => handleTagClick("")} selected={!filters.tag}>
+                  Semua Tag
+                </MenuItem>
+                {uniqueTags.map((tag) => (
+                  <MenuItem key={tag} onClick={() => handleTagClick(tag)} selected={filters.tag === tag}>
+                    {tag}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>,
             <Button
               key="add"
               variant="contained"

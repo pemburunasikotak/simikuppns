@@ -39,3 +39,28 @@ export const getMetricDetail = async (
   }
   return responseData;
 };
+import { TResponse } from "@/commons/types/response";
+
+export const updateComponentRealization = async (payload: {
+  idComponent: string;
+  month: number;
+  year: number;
+  value: number;
+  documentIds: string[];
+}): Promise<TResponse<unknown>> => {
+  const res = await api.post("/api/component-realizations", payload);
+  return res.data;
+};
+
+export const uploadDocuments = async (files: File[]): Promise<TResponse<{ id: string }[]>> => {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append("files", file);
+  });
+  const res = await api.post("/api/documents/upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return res.data;
+};

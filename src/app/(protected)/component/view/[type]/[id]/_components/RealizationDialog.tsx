@@ -187,14 +187,13 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
     setIsSubmitting(true);
     try {
       let finalDocumentIds: string[] = [];
-
-      // 1. Filter files that need uploading
       const filesToUpload = fileItems.filter(item => !!item.file).map(item => item.file!);
       const existingIds = fileItems.filter(item => !!item.id).map(item => item.id!);
-
-      // 2. Upload all files in one request
       if (filesToUpload.length > 0) {
+        console.log("Uploading files...", filesToUpload);
         const res = await uploadDocuments(filesToUpload);
+        console.log("Upload response:", res);
+        
         if (res.status && res.result) {
           const uploadedIds = res.result.map((doc: { id: string }) => doc.id);
           finalDocumentIds = [...existingIds, ...uploadedIds];
@@ -205,7 +204,8 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
         finalDocumentIds = existingIds;
       }
 
-      // 3. Submit realization data
+      console.log("Saving realization with documentIds:", finalDocumentIds);
+
       if (isYearly) {
         await updateRealization.mutateAsync({
           idComponent,
@@ -215,7 +215,12 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
           documentIds: finalDocumentIds,
         });
       } else {
-        const savePromises = Object.entries(monthlyValues).map(([month, value]) =>
+        // Only update the selected month if provided, otherwise update all months in monthlyValues
+        const monthsToUpdate = Object.entries(monthlyValues).filter(([month]) => 
+          selectedMonth === null || selectedMonth === undefined || Number(month) === selectedMonth
+        );
+
+        const savePromises = monthsToUpdate.map(([month, value]) =>
           updateRealization.mutateAsync({
             idComponent,
             month: Number(month),
@@ -353,7 +358,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
                     >
                       {item.name.match(/\.(jpg|jpeg|png|gif)$/i) || item.previewUrl.startsWith('blob:') ? (
                         <img
-                          src={item.previewUrl.startsWith('blob:') ? item.previewUrl : `https://sim.ntech.web.id${item.previewUrl}`}
+                          src={item.previewUrl}
                           alt={item.name}
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />

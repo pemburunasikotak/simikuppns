@@ -49,7 +49,14 @@ export const updateComponentRealization = async (payload: {
   documentIds: string[];
 }): Promise<TResponse<unknown>> => {
   const res = await api.post("/api/component-realizations", payload);
-  return res.data;
+  const responseData = res.data;
+  if (responseData.success !== undefined && responseData.status === undefined) {
+    responseData.status = responseData.success;
+  }
+  if (responseData.data && !responseData.result) {
+    responseData.result = responseData.data;
+  }
+  return responseData;
 };
 
 export const uploadDocuments = async (files: File[]): Promise<TResponse<{ id: string }[]>> => {
@@ -62,5 +69,12 @@ export const uploadDocuments = async (files: File[]): Promise<TResponse<{ id: st
       "Content-Type": "multipart/form-data",
     },
   });
-  return res.data;
+  const responseData = res.data;
+  if (responseData.success !== undefined && responseData.status === undefined) {
+    responseData.status = responseData.success;
+  }
+  if (responseData.data && !responseData.result) {
+    responseData.result = responseData.data;
+  }
+  return responseData;
 };

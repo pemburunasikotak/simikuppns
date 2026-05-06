@@ -88,6 +88,8 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
     month: selectedMonth ?? undefined
   });
 
+  console.log('MASUK DISINI', detailData?.result.realization.idComponent)
+
   const [monthlyValues, setMonthlyValues] = useState<Record<number, number>>({});
   const [fileItems, setFileItems] = useState<TFileItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -193,7 +195,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
         console.log("Uploading files...", filesToUpload);
         const res = await uploadDocuments(filesToUpload);
         console.log("Upload response:", res);
-        
+
         if (res.status && res.result) {
           const uploadedIds = res.result.map((doc: { id: string }) => doc.id);
           finalDocumentIds = [...existingIds, ...uploadedIds];
@@ -206,9 +208,11 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
 
       console.log("Saving realization with documentIds:", finalDocumentIds);
 
+      const newIdComponent = detailData?.result?.realization?.idComponent || idComponent
+
       if (isYearly) {
         await updateRealization.mutateAsync({
-          idComponent,
+          idComponent: newIdComponent,
           month: 0,
           year: yearData?.year || 0,
           value: monthlyValues[0] || 0,
@@ -216,13 +220,13 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
         });
       } else {
         // Only update the selected month if provided, otherwise update all months in monthlyValues
-        const monthsToUpdate = Object.entries(monthlyValues).filter(([month]) => 
+        const monthsToUpdate = Object.entries(monthlyValues).filter(([month]) =>
           selectedMonth === null || selectedMonth === undefined || Number(month) === selectedMonth
         );
 
         const savePromises = monthsToUpdate.map(([month, value]) =>
           updateRealization.mutateAsync({
-            idComponent,
+            idComponent: newIdComponent,
             month: Number(month),
             year: yearData?.year || 0,
             value: value,

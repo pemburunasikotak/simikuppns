@@ -88,14 +88,10 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
     month: selectedMonth ?? undefined
   });
 
-  console.log('MASUK DISINI', detailData?.result.realization.idComponent)
-
   const [monthlyValues, setMonthlyValues] = useState<Record<number, number>>({});
   const [fileItems, setFileItems] = useState<TFileItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
-
-  console.log("BULAN monthlyValues", monthlyValues)
 
   useEffect(() => {
     if (yearData && open) {

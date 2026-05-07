@@ -53,7 +53,7 @@ const MetricDetailPage: FC = (): ReactElement => {
 
   const handleRowClick = (yearData: TMetricYearData) => {
     setSelectedYearData(yearData);
-    setSelectedRealizationId(null);
+    setSelectedRealizationId(yearData.realizations?.[0]?.id);
     setSelectedMonth(null);
     setIsDialogOpen(true);
   };
@@ -341,24 +341,6 @@ const MetricDetailPage: FC = (): ReactElement => {
     </Page>
   );
 };
-
-// const QuarterBadge = ({ label, value }: { label: string; value: string | number | null | undefined }) => (
-//   <Box
-//     sx={{
-//       display: "flex",
-//       flexDirection: "column",
-//       alignItems: "center",
-//       minWidth: "45px",
-//       p: 0.5,
-//       borderRadius: "6px",
-//       backgroundColor: "#fff",
-//       border: "1px solid #f1f5f9",
-//     }}
-//   >
-//     <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 700, fontSize: "0.6rem" }}>{label}</Typography>
-//     <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "0.75rem" }}>{value || 0}</Typography>
-//   </Box>
-// );
 
 const Divider = ({ sx, opacity }: { sx?: SxProps<Theme>; opacity?: number }) => (
   <Box sx={{ height: "1px", backgroundColor: "rgba(0,0,0,0.1)", opacity, ...sx }} />

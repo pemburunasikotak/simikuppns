@@ -19,6 +19,7 @@ import {
     TIKUFormulaItem,
 } from "./type";
 import { TDefaultResponse, TResponse } from "@/commons/types/response";
+import { TFilterParams } from "@/commons/types/filter";
 
 const endpoints = {
     list: "/api/ikus",
@@ -119,7 +120,7 @@ export const editIKU = async (
 };
 
 export const getListComponent = async (
-    params: TDetailParams,
+    params: TFilterParams<TGetIKUParams>,
 ): Promise<TIKUComponentListResponse> => {
     const res = await api.get(`/api/ikus/${params?.id}/components`);
     const responseData = res.data;

@@ -33,6 +33,7 @@ export type TGetIKUParams = {
     order?: string;
     search?: string;
     search_value?: string;
+    id?: string;
 };
 
 export type TIKUComponentItem = {

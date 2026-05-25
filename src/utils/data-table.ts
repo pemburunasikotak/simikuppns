@@ -7,7 +7,7 @@ export const createPaginationInfo = (
     page?: number;
   },
 ): DataTableProps["paginationInfo"] => {
-  const perPage = params?.per_page || 10;
+  const perPage = params?.per_page || 50;
   const total = params?.total || 0;
   const page = params?.page || 1;
   const totalPages = Math.ceil(total / perPage) || 1;

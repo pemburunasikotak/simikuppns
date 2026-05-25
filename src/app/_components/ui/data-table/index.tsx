@@ -72,7 +72,7 @@ const DataTable = ({
           <Typography>Rows Per Page :</Typography>
           <Select
             value={paginationInfo.limit}
-            onChange={(e) => handleChange({ per_page: e.target.value })}
+            onChange={(e) => handleChange({ per_page: e.target.value as number, page: 1 })}
             autoWidth
           >
             <MenuItem value={1}>1</MenuItem>

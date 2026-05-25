@@ -7,11 +7,16 @@ export const useFilter = <T = Record<string, unknown>>() => {
 
   const currentParams = useMemo(() => {
     const entries = Array.from(searchParams.entries());
-    return Object.fromEntries(entries);
+    const params = Object.fromEntries(entries);
+    return {
+      ...params,
+      page: params.page ? Number(params.page) : 1,
+      per_page: params.per_page ? Number(params.per_page) : 50,
+    };
   }, [searchParams]);
 
   const setFilter = (newParams: Partial<T>) => {
-    const updatedParams = {
+    const updatedParams: Record<string, unknown> = {
       ...currentParams,
       ...newParams,
     };

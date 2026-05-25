@@ -22,6 +22,7 @@ import {
   DescriptionOutlined,
   DeleteOutline,
   AddOutlined,
+  VisibilityOutlined,
 } from "@mui/icons-material";
 import { TMetricYearData } from "@/api/master/metrics/type";
 import { uploadDocuments } from "@/api/master/metrics";
@@ -90,8 +91,16 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
 
   const [monthlyValues, setMonthlyValues] = useState<Record<number, number>>({});
   const [fileItems, setFileItems] = useState<TFileItem[]>([]);
+  const [selectedFileForDetail, setSelectedFileForDetail] = useState<TFileItem | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
+
+  const isImageFile = (item: TFileItem) => {
+    if (item.file) {
+      return item.file.type.startsWith("image/");
+    }
+    return /\.(jpg|jpeg|png|gif|webp)$/i.test(item.name);
+  };
 
   useEffect(() => {
     if (yearData && open) {
@@ -243,15 +252,16 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-      PaperProps={{
-        sx: { borderRadius: "20px", boxShadow: "0 20px 50px rgba(0,0,0,0.12)" },
-      }}
-    >
+    <>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: "20px", boxShadow: "0 20px 50px rgba(0,0,0,0.12)" },
+        }}
+      >
       <DialogTitle sx={{ m: 0, p: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Box>
           <Typography variant="h6" sx={{ fontWeight: 800, color: "#1e293b" }}>
@@ -345,6 +355,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
                   {fileItems.map((item, index) => (
                     <Box
                       key={index}
+                      onClick={() => setSelectedFileForDetail(item)}
                       sx={{
                         width: 120,
                         height: 120,
@@ -354,9 +365,19 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
                         border: "1px solid #e2e8f0",
                         backgroundColor: "#fff",
                         boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease-in-out",
+                        "&:hover": {
+                          borderColor: "#6366f1",
+                          transform: "translateY(-2px)",
+                          boxShadow: "0 8px 16px rgba(99, 102, 241, 0.1)",
+                          "& .hover-overlay": {
+                            opacity: 1,
+                          },
+                        },
                       }}
                     >
-                      {item.name.match(/\.(jpg|jpeg|png|gif)$/i) || item.previewUrl.startsWith('blob:') ? (
+                      {isImageFile(item) ? (
                         <img
                           src={item.previewUrl}
                           alt={item.name}
@@ -371,13 +392,37 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
                         </Box>
                       )}
 
+                      <Box
+                        className="hover-overlay"
+                        sx={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: "100%",
+                          backgroundColor: "rgba(99, 102, 241, 0.35)",
+                          backdropFilter: "blur(2px)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          opacity: 0,
+                          transition: "opacity 0.2s ease-in-out",
+                        }}
+                      >
+                        <VisibilityOutlined sx={{ color: "#fff", fontSize: 24 }} />
+                      </Box>
+
                       <IconButton
                         size="small"
-                        onClick={() => handleRemoveFile(index)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveFile(index);
+                        }}
                         sx={{
                           position: "absolute",
                           top: 4,
                           right: 4,
+                          zIndex: 10,
                           backgroundColor: "rgba(255,255,255,0.8)",
                           "&:hover": { backgroundColor: "#fff" },
                         }}
@@ -467,7 +512,109 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
         </Button>
       </DialogActions>
     </Dialog>
-  );
+
+    {/* Detail Document Dialog */}
+    <Dialog
+      open={!!selectedFileForDetail}
+      onClose={() => setSelectedFileForDetail(null)}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: { borderRadius: "16px", boxShadow: "0 12px 40px rgba(0,0,0,0.15)" },
+      }}
+    >
+      <DialogTitle sx={{ m: 0, p: 2.5, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Typography variant="h6" sx={{ fontWeight: 800, color: "#1e293b", overflow: "hidden", pr: 2 }}>
+          Detail Dokumen
+        </Typography>
+        <IconButton onClick={() => setSelectedFileForDetail(null)} sx={{ color: "#94a3b8" }}>
+          <CloseOutlined />
+        </IconButton>
+      </DialogTitle>
+      <Divider />
+      <DialogContent sx={{ p: 3, display: "flex", justifyContent: "center", alignItems: "center", minHeight: 300, backgroundColor: "#f8fafc" }}>
+        {selectedFileForDetail && (
+          <Box sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+            {isImageFile(selectedFileForDetail) ? (
+              <Box
+                component="img"
+                src={selectedFileForDetail.previewUrl}
+                alt={selectedFileForDetail.name}
+                sx={{
+                  maxWidth: "100%",
+                  maxHeight: "65vh",
+                  objectFit: "contain",
+                  borderRadius: "8px",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+                  border: "1px solid #e2e8f0",
+                }}
+              />
+            ) : selectedFileForDetail.name.toLowerCase().endsWith(".pdf") || (selectedFileForDetail.file && selectedFileForDetail.file.type === "application/pdf") ? (
+              <Box sx={{ width: "100%", height: "65vh", borderRadius: "8px", overflow: "hidden", border: "1px solid #e2e8f0", boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}>
+                <iframe
+                  src={selectedFileForDetail.previewUrl}
+                  title={selectedFileForDetail.name}
+                  width="100%"
+                  height="100%"
+                  style={{ border: "none" }}
+                />
+              </Box>
+            ) : (
+              <Stack spacing={3} alignItems="center" sx={{ py: 4 }}>
+                <DescriptionOutlined sx={{ fontSize: 80, color: "#6366f1" }} />
+                <Box sx={{ textAlign: "center" }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#1e293b", mb: 0.5 }}>
+                    {selectedFileForDetail.name}
+                  </Typography>
+                  {selectedFileForDetail.file && (
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      Ukuran: {(selectedFileForDetail.file.size / (1024 * 1024)).toFixed(2)} MB
+                    </Typography>
+                  )}
+                </Box>
+              </Stack>
+            )}
+          </Box>
+        )}
+      </DialogContent>
+      <Divider />
+      <DialogActions sx={{ p: 2.5, backgroundColor: "#fff", gap: 1.5 }}>
+        <Button
+          onClick={() => setSelectedFileForDetail(null)}
+          variant="outlined"
+          sx={{
+            borderRadius: "10px",
+            textTransform: "none",
+            fontWeight: 700,
+            borderColor: "#cbd5e1",
+            color: "#64748b",
+            "&:hover": { borderColor: "#94a3b8", backgroundColor: "#f8fafc" },
+          }}
+        >
+          Tutup
+        </Button>
+        {selectedFileForDetail && (
+          <Button
+            variant="contained"
+            onClick={() => window.open(selectedFileForDetail.previewUrl, "_blank")}
+            sx={{
+              borderRadius: "10px",
+              textTransform: "none",
+              fontWeight: 700,
+              background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
+              boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)",
+              "&:hover": {
+                boxShadow: "0 6px 16px rgba(99, 102, 241, 0.3)",
+              },
+            }}
+          >
+            Buka di Tab Baru
+          </Button>
+        )}
+      </DialogActions>
+    </Dialog>
+  </>
+);
 };
 
 export default RealizationDialog;

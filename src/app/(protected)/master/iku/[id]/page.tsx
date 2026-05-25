@@ -9,7 +9,7 @@ import { paths } from "@/commons/constants/paths";
 
 import useGetDetailIKU from "./_hooks/use-get-detail-iku";
 import useGetListComponent from "./_hooks/use-get-list-component";
-import { TIKUComponentItem } from "@/api/master/iku/type";
+import { TGetIKUParams, TIKUComponentItem } from "@/api/master/iku/type";
 import { createPaginationInfo } from "@/utils/data-table";
 import { Add, DeleteOutlined } from "@mui/icons-material";
 import ActionButtonTable from "@/app/_components/ui/action-button-table";
@@ -25,6 +25,7 @@ import useGetListIKUTarget from "./_hooks/use-get-list-iku-target";
 import ModalAddTargetIKU from "./_components/modal-add-target-iku";
 import { TIKUTargetItem } from "@/api/master/iku/type";
 import useDeleteIKUTarget from "./_hooks/use-delete-iku-target";
+import { useFilter } from "@/app/_hooks/use-filter";
 
 const IKUDetailPage = () => {
     const params = useParams();
@@ -32,13 +33,22 @@ const IKUDetailPage = () => {
 
     const idIku = params.id;
     const detailQuery = useGetDetailIKU({ id: params.id! });
-    const componentQuery = useGetListComponent({ id: params.id! });
+    const { filters, setFilter } = useFilter<TGetIKUParams>();
+
+    const componentQuery = useGetListComponent({
+        id: params.id!,
+        limit: filters.per_page ? Number(filters.per_page) : 10,
+        page: filters.page ? Number(filters.page) : 1,
+    });
     const formulaQuery = useGetListFormula({ ikuId: params.id! });
     const targetQuery = useGetListIKUTarget({ ikuId: params.id! });
 
     const deleteComponent = useDeleteComponent();
     const deleteFormula = useDeleteFormula();
     const deleteTarget = useDeleteIKUTarget();
+
+    // const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
 
     const modal = useModal();
 
@@ -256,16 +266,16 @@ const IKUDetailPage = () => {
                         loading={componentQuery.isLoading}
                         rows={componentQuery?.data?.result?.data || []}
                         columns={columns}
-                        checkboxSelection
+                        // checkboxSelection
                         paginationInfo={createPaginationInfo({
-                            per_page: 10,
+                            per_page: filters.per_page ? Number(filters.per_page) : 10,
                             total: componentQuery.data?.result?.total || 0,
                             page: componentQuery.data?.result?.currentPage || 1,
                         })}
-                        handleChange={() => { }}
-                        onRowSelectionModelChange={(ids) => {
-                            console.log('CEK ID', ids)
-                        }}
+                        handleChange={setFilter}
+                    // onRowSelectionModelChange={(ids) => {
+                    //     setSelectedIds(ids);
+                    // }}
                     />
                 </Grid>
             </Grid>
@@ -295,16 +305,16 @@ const IKUDetailPage = () => {
                     loading={formulaQuery.isLoading}
                     rows={formulaQuery?.data?.result?.data || []}
                     columns={columnsFormula}
-                    checkboxSelection
+                    // checkboxSelection
                     paginationInfo={createPaginationInfo({
-                        per_page: 10,
+                        per_page: filters.per_page ? Number(filters.per_page) : 2,
                         total: formulaQuery.data?.result?.total || 0,
                         page: formulaQuery.data?.result?.currentPage || 1,
                     })}
-                    handleChange={() => { }}
-                    onRowSelectionModelChange={(ids) => {
-                        console.log('CEK ID', ids)
-                    }}
+                    handleChange={setFilter}
+                // onRowSelectionModelChange={(ids) => {
+                //     setSelectedIds(ids);
+                // }}
                 />
             </Grid>
 
@@ -329,13 +339,16 @@ const IKUDetailPage = () => {
                     loading={targetQuery.isLoading}
                     rows={targetQuery?.data?.result || []}
                     columns={columnsTarget}
-                    checkboxSelection
+                    // checkboxSelection
                     paginationInfo={createPaginationInfo({
-                        per_page: 10,
+                        per_page: filters.per_page ? Number(filters.per_page) : 10,
                         total: targetQuery.data?.result?.length || 0,
                         page: 1,
                     })}
-                    handleChange={() => { }}
+                    handleChange={setFilter}
+                // onRowSelectionModelChange={(ids) => {
+                //     setSelectedIds(ids);
+                // }}
                 />
             </Grid>
 

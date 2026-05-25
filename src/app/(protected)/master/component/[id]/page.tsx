@@ -9,18 +9,27 @@ import { paths } from "@/commons/constants/paths";
 
 import useGetDetailIKU from "./_hooks/use-get-detail-iku";
 import useGetListComponent from "./_hooks/use-get-list-component";
-import { TIKUComponentItem } from "@/api/master/iku/type";
+import { TGetIKUParams, TIKUComponentItem } from "@/api/master/iku/type";
 import { createPaginationInfo } from "@/utils/data-table";
 import { Add, DeleteOutlined } from "@mui/icons-material";
 import ActionButtonTable from "@/app/_components/ui/action-button-table";
 import useModal from "@/app/_components/ui/modal";
 import useDeleteComponent from "./_hooks/use-delete-component";
+import { useFilter } from "@/app/_hooks/use-filter";
+// import { useState } from "react";
 
 const IKUDetailPage = () => {
     const params = useParams();
     const navigate = useNavigate();
+    const { filters, setFilter } = useFilter<TGetIKUParams>();
     const detailQuery = useGetDetailIKU({ id: params.id! });
-    const componentQuery = useGetListComponent({ id: params.id! });
+    // const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const componentQuery = useGetListComponent({
+        id: params.id!,
+        // order: filters.order || "DESC",
+        limit: filters.per_page ? Number(filters.per_page) : 10,
+        page: filters.page ? Number(filters.page) : 1,
+    });
 
     const deleteComponent = useDeleteComponent();
 
@@ -128,21 +137,22 @@ const IKUDetailPage = () => {
                         <Button variant="outlined" size="small" startIcon={<Add />}>
                             Tambah IKP
                         </Button>
+
                     </Box>
                     <DataTable
                         loading={componentQuery.isLoading}
                         rows={componentQuery?.data?.result?.data || []}
                         columns={columns}
-                        checkboxSelection
+                        // checkboxSelection
                         paginationInfo={createPaginationInfo({
-                            per_page: 10,
+                            per_page: filters.per_page ? Number(filters.per_page) : 2,
                             total: componentQuery.data?.result?.total || 0,
                             page: componentQuery.data?.result?.currentPage || 1,
                         })}
-                        handleChange={() => { }}
-                        onRowSelectionModelChange={(ids) => {
-                            console.log('CEK ID', ids)
-                        }}
+                        handleChange={setFilter}
+                    // onRowSelectionModelChange={(ids) => {
+                    //     setSelectedIds(ids);
+                    // }}
                     />
                 </Grid>
             </Grid>

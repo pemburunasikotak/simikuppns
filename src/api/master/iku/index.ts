@@ -205,9 +205,10 @@ export const getListIKUTarget = async (
     const res = await api.get(endpoints.listTarget, { params });
     const responseData = res.data;
     if (responseData.data && !responseData.result) {
-        responseData.result = responseData.data;
+        responseData.result = responseData.data.data;
     }
     return responseData;
+    // return res.data
 };
 
 export const createIKUTarget = async (
@@ -235,6 +236,6 @@ export const editIKUTarget = async (
     params: TDetailParams,
     req: TIKUTargetUpdateRequest,
 ): Promise<TDefaultResponse> => {
-    const res = await api.patch(`/api/iku-targets/${params.id}`, { ...req });
+    const res = await api.put(`/api/iku-targets/${params.id}`, { ...req });
     return res.data;
 };

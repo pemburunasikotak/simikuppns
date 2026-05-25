@@ -24,8 +24,14 @@ const Component: FC = (): ReactElement => {
   const query = useGetListTransaction({
     sort_by: "createdAt",
     order: filters.order || "DESC",
-    limit: 10,
-    page: filters.page || 1,
+    limit: filters.per_page ? Number(filters.per_page) : 10,
+    page: filters.page ? Number(filters.page) : 1,
+  });
+
+  const searchQuery = filters.search || filters.search_value || "";
+  const filteredRows = (query.data?.result?.data || []).filter((row) => {
+    if (!searchQuery) return true;
+    return row.customerName?.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   const columns: GridColDef<TTransacion>[] = [
@@ -101,7 +107,7 @@ const Component: FC = (): ReactElement => {
         <Filter
           labelSearch={"Transaksi"}
           defaultValue={{
-            search_value: filters.search_value,
+            search_value: filters.search || filters.search_value,
             start_date: filters.start_date,
             end_date: filters.end_date,
           }}
@@ -121,13 +127,13 @@ const Component: FC = (): ReactElement => {
       <DataTable
         getRowId={(row: TTransacion) => row.id}
         loading={query.isLoading}
-        rows={query.data?.result.data}
+        rows={filteredRows}
         columns={columns}
         checkboxSelection
         paginationInfo={createPaginationInfo({
-          per_page: 5,
-          total: 10,
-          page: 1,
+          per_page: filters.per_page ? Number(filters.per_page) : 10,
+          total: query.data?.result?.total || 0,
+          page: query.data?.result?.currentPage || 1,
         })}
         handleChange={setFilter}
       />

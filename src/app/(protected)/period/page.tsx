@@ -25,9 +25,15 @@ const PeriodPage: FC = (): ReactElement => {
 
   const query = useGetListPeriod({
     order: filters.order || "DESC",
-    limit: 10,
-    page: filters.page || 1,
+    limit: filters.per_page ? Number(filters.per_page) : 10,
+    page: filters.page ? Number(filters.page) : 1,
     search: filters.search,
+  });
+
+  const searchQuery = filters.search || filters.search_value || "";
+  const filteredRows = (query.data?.result?.data || []).filter((row) => {
+    if (!searchQuery) return true;
+    return row.periodName?.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   const modal = useModal();
@@ -97,7 +103,7 @@ const PeriodPage: FC = (): ReactElement => {
           variants={["search"]}
           labelSearch={"Cari Periode..."}
           defaultValue={{
-            search_value: filters.search,
+            search_value: filters.search || filters.search_value,
           }}
           actions={[
             <Button
@@ -121,12 +127,12 @@ const PeriodPage: FC = (): ReactElement => {
     >
       <DataTable
         loading={query.isLoading}
-        rows={query.data?.result?.data || []}
+        rows={filteredRows}
         columns={columns}
         getRowId={(row) => row.idPeriod}
         checkboxSelection
         paginationInfo={createPaginationInfo({
-          per_page: 10,
+          per_page: filters.per_page ? Number(filters.per_page) : 10,
           total: query.data?.result?.total || 0,
           page: query.data?.result?.currentPage || 1,
         })}

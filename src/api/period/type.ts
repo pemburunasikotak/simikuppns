@@ -36,9 +36,11 @@ export type TPeriodUpdateRequest = {
 export type TGetPeriodParams = {
     page?: number;
     limit?: number;
+    per_page?: number;
     sort?: string;
     order?: string;
     search?: string;
+    search_value?: string;
     year?: number;
     periodType?: string;
 };

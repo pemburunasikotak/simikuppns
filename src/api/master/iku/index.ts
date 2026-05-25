@@ -16,8 +16,9 @@ import {
     TIKUTargetCreateRequest,
     TIKUTargetUpdateRequest,
     TIKUTargetDetailResponse,
+    TIKUFormulaItem,
 } from "./type";
-import { TDefaultResponse } from "@/commons/types/response";
+import { TDefaultResponse, TResponse } from "@/commons/types/response";
 
 const endpoints = {
     list: "/api/ikus",
@@ -60,7 +61,16 @@ export const getListIKU = async (
                 hasNextPage: false
             };
         } else {
-            responseData.result = responseData.data;
+            const data = responseData.data.data || [];
+            const pagination = responseData.data.pagination || {};
+            responseData.result = {
+                data: data,
+                total: pagination.total || 0,
+                currentPage: pagination.page || 1,
+                totalPage: pagination.totalPages || 1,
+                hasPreviousPage: (pagination.page || 1) > 1,
+                hasNextPage: (pagination.page || 1) < (pagination.totalPages || 1)
+            };
         }
     }
     return responseData;
@@ -124,7 +134,16 @@ export const getListComponent = async (
                 hasNextPage: false
             };
         } else {
-            responseData.result = responseData.data;
+            const data = responseData.data.data || [];
+            const pagination = responseData.data.pagination || {};
+            responseData.result = {
+                data: data,
+                total: pagination.total || 0,
+                currentPage: pagination.page || 1,
+                totalPage: pagination.totalPages || 1,
+                hasPreviousPage: (pagination.page || 1) > 1,
+                hasNextPage: (pagination.page || 1) < (pagination.totalPages || 1)
+            };
         }
     }
     return responseData;
@@ -163,12 +182,31 @@ export const getListFormula = async (
                 hasNextPage: false
             };
         } else {
-            responseData.result = responseData.data;
+            const data = responseData.data.data || [];
+            const pagination = responseData.data.pagination || {};
+            responseData.result = {
+                data: data,
+                total: pagination.total || 0,
+                currentPage: pagination.page || 1,
+                totalPage: pagination.totalPages || 1,
+                hasPreviousPage: (pagination.page || 1) > 1,
+                hasNextPage: (pagination.page || 1) < (pagination.totalPages || 1)
+            };
         }
     }
     return responseData;
 };
 
+export const getDetailFormula = async (
+    id: string,
+): Promise<TResponse<TIKUFormulaItem>> => {
+    const res = await api.get(`/api/iku-formulas/${id}`);
+    const responseData = res.data;
+    if (responseData.data && !responseData.result) {
+        responseData.result = responseData.data;
+    }
+    return responseData;
+};
 
 export const deleteFormula = async (
     id: string,
@@ -181,6 +219,14 @@ export const createFormula = async (
     req: TIKUFormulaCreateRequest,
 ): Promise<TDefaultResponse> => {
     const res = await api.post(`/api/iku-formulas`, { ...req });
+    return res.data;
+};
+
+export const editFormula = async (
+    id: string,
+    req: TIKUFormulaCreateRequest,
+): Promise<TDefaultResponse> => {
+    const res = await api.put(`/api/iku-formulas/${id}`, { ...req });
     return res.data;
 };
 

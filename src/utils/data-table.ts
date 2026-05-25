@@ -1,12 +1,21 @@
 import { DataTableProps } from "@/app/_components/ui/data-table";
 
 export const createPaginationInfo = (
-  params?: Record<string, number>,
+  params?: {
+    per_page?: number;
+    total?: number;
+    page?: number;
+  },
 ): DataTableProps["paginationInfo"] => {
+  const perPage = params?.per_page || 10;
+  const total = params?.total || 0;
+  const page = params?.page || 1;
+  const totalPages = Math.ceil(total / perPage) || 1;
+
   return {
-    limit: params?.per_page || 10,
-    total: params?.total,
-    page_size: 10,
-    page: params?.page ? params.page - 1 : 0,
+    limit: perPage,
+    total: total,
+    page_size: totalPages,
+    page: page,
   };
 };

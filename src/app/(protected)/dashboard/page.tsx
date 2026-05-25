@@ -21,8 +21,8 @@ const Component: FC = (): ReactElement => {
 
   const ikuResultQuery = useGetListIKUResult({
     order: "DESC",
-    limit: 10,
-    page: filters.page || 1,
+    limit: filters.per_page ? Number(filters.per_page) : 10,
+    page: filters.page ? Number(filters.page) : 1,
   });
 
   const periods = ["Q1", "Q2", "Q3", "Q4", "Year"];
@@ -139,7 +139,7 @@ const Component: FC = (): ReactElement => {
               columns={columns}
               getRowId={(row) => row.idResult}
               paginationInfo={createPaginationInfo({
-                per_page: 10,
+                per_page: filters.per_page ? Number(filters.per_page) : 10,
                 total: ikuResultQuery.data?.result?.total || 0,
                 page: ikuResultQuery.data?.result?.currentPage || 1,
               })}

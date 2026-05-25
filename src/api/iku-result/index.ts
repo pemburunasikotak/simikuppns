@@ -17,7 +17,16 @@ export const getListIKUResult = async (
                 hasNextPage: false,
             };
         } else {
-            responseData.result = responseData.data;
+            const data = responseData.data.data || [];
+            const pagination = responseData.data.pagination || {};
+            responseData.result = {
+                data: data,
+                total: pagination.total || 0,
+                currentPage: pagination.page || 1,
+                totalPage: pagination.totalPages || 1,
+                hasPreviousPage: (pagination.page || 1) > 1,
+                hasNextPage: (pagination.page || 1) < (pagination.totalPages || 1)
+            };
         }
     }
     return responseData;

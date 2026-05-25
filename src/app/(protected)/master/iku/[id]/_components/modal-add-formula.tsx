@@ -1,17 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, FormControlLabel, Switch, Typography, IconButton, Grid, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { useParams } from "react-router";
 import useCreateFormula from "../_hooks/use-create-formula";
+import useEditFormula from "../_hooks/use-edit-formula";
+import useGetDetailFormula from "../_hooks/use-get-detail-formula";
 import { Add, DeleteOutlined } from "@mui/icons-material";
 import { TComponentItem } from "@/api/master/component/type";
 import { enqueueSnackbar } from "notistack";
-import { TIKUComponentItem } from "@/api/master/iku/type";
+import { TIKUComponentItem, TIKUFormulaStepCreateRequest } from "@/api/master/iku/type";
 
 type ModalAddFormulaProps = {
     open: boolean;
     onClose: () => void;
     master: TComponentItem[];
     formulas: TIKUComponentItem[];
+    formulaId?: string | null;
 };
 
 type StepForm = {
@@ -23,31 +26,64 @@ type StepForm = {
     resultKey: string;
 };
 
-const ModalAddFormula = ({ open, onClose, master, formulas }: ModalAddFormulaProps) => {
+const initialStep: StepForm = {
+    leftType: "component",
+    leftValue: "",
+    operator: "ADD",
+    rightType: "component",
+    rightValue: "",
+    resultKey: ""
+};
+
+const ModalAddFormula = ({ open, onClose, master, formulas, formulaId }: ModalAddFormulaProps) => {
     const params = useParams();
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [finalResultKey, setFinalResultKey] = useState("");
     const [isActive, setIsActive] = useState(true);
     const [isFinal, setIsFinal] = useState(false);
-    const initialStep: StepForm = {
-        leftType: "component",
-        leftValue: "",
-        operator: "ADD",
-        rightType: "component",
-        rightValue: "",
-        resultKey: ""
-    };
     const [steps, setSteps] = useState<StepForm[]>([initialStep]);
     const createFormula = useCreateFormula();
-    const handleReset = () => {
+    const editFormulaMutation = useEditFormula();
+    const detailQuery = useGetDetailFormula(formulaId || undefined);
+    const detailData = detailQuery.data?.result;
+
+    const handleReset = useCallback(() => {
         setName("");
         setDescription("");
         setFinalResultKey("");
         setIsActive(true);
         setIsFinal(false);
         setSteps([initialStep]);
-    };
+    }, []);
+
+    useEffect(() => {
+        if (open) {
+            if (formulaId) {
+                if (detailData) {
+                    setName(detailData.name || "");
+                    setDescription(detailData.description || "");
+                    setFinalResultKey(detailData.finalResultKey || "");
+                    setIsActive(detailData.isActive !== false);
+                    setIsFinal(detailData.isFinal === true);
+                    if (detailData.steps && detailData.steps.length > 0) {
+                        setSteps(detailData.steps.map((s: TIKUFormulaStepCreateRequest) => ({
+                            leftType: s.leftType || "component",
+                            leftValue: s.leftValue || "",
+                            operator: s.operator || "ADD",
+                            rightType: s.rightType || "component",
+                            rightValue: s.rightValue || "",
+                            resultKey: s.resultKey || ""
+                        })));
+                    } else {
+                        setSteps([initialStep]);
+                    }
+                }
+            } else {
+                handleReset();
+            }
+        }
+    }, [open, formulaId, detailData, handleReset]);
 
     const handleClose = () => {
         handleReset();
@@ -112,7 +148,7 @@ const ModalAddFormula = ({ open, onClose, master, formulas }: ModalAddFormulaPro
             enqueueSnackbar("Final result key tidak sesuai dengan result key terakhir", { variant: "error" });
             return;
         }
-        createFormula.mutate({
+        const payload = {
             ikuId: params.id,
             name,
             description,
@@ -123,18 +159,36 @@ const ModalAddFormula = ({ open, onClose, master, formulas }: ModalAddFormulaPro
                 ...step,
                 sequence: index + 1
             }))
-        }, {
-            onSuccess: () => {
-                handleClose();
-            }
-        });
+        };
+
+        if (formulaId) {
+            editFormulaMutation.mutate({
+                id: formulaId,
+                req: payload
+            }, {
+                onSuccess: () => {
+                    handleClose();
+                }
+            });
+        } else {
+            createFormula.mutate(payload, {
+                onSuccess: () => {
+                    handleClose();
+                }
+            });
+        }
     };
 
     return (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="lg">
-            <DialogTitle>Tambah Formula</DialogTitle>
+            <DialogTitle>{formulaId ? "Edit Formula" : "Tambah Formula"}</DialogTitle>
             <DialogContent>
-                <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {detailQuery.isLoading ? (
+                    <Box sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
+                        <Typography>Memuat detail formula...</Typography>
+                    </Box>
+                ) : (
+                    <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <TextField
                         label="Nama"
                         variant="outlined"
@@ -302,6 +356,7 @@ const ModalAddFormula = ({ open, onClose, master, formulas }: ModalAddFormulaPro
                     ))}
 
                 </Box>
+                )}
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose} color="inherit">
@@ -311,9 +366,9 @@ const ModalAddFormula = ({ open, onClose, master, formulas }: ModalAddFormulaPro
                     onClick={handleSubmit}
                     variant="contained"
                     color="primary"
-                    disabled={createFormula.isPending || !name || !finalResultKey}
+                    disabled={createFormula.isPending || editFormulaMutation.isPending || !name || !finalResultKey}
                 >
-                    {createFormula.isPending ? "Menyimpan..." : "Simpan"}
+                    {createFormula.isPending || editFormulaMutation.isPending ? "Menyimpan..." : "Simpan"}
                 </Button>
             </DialogActions>
         </Dialog>

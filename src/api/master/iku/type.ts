@@ -28,9 +28,11 @@ export type TIKUUpdateRequest = {
 export type TGetIKUParams = {
     page?: number;
     limit?: number;
+    per_page?: number;
     sort?: string;
     order?: string;
     search?: string;
+    search_value?: string;
 };
 
 export type TIKUComponentItem = {
@@ -77,6 +79,19 @@ export type TIKUFormulaCreateRequest = {
     isActive: boolean;
     isFinal?: boolean;
     steps: TIKUFormulaStepCreateRequest[];
+};
+
+export type TIKUFormulaItem = {
+    id: string;
+    ikuId: string;
+    name: string;
+    description: string;
+    finalResultKey: string;
+    isActive: boolean;
+    isFinal?: boolean;
+    steps?: TIKUFormulaStepCreateRequest[];
+    createdAt?: string;
+    updatedAt?: string;
 };
 
 export type TIKUFormulaTestRequest = {

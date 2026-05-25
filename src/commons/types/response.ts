@@ -8,6 +8,10 @@ export type TResponse<T> = {
   result: T;
   data?: {
     result: Nullable<string>;
+    per_page: number;
+    page: number;
+    total: number;
+    limit: number;
   }
 };
 

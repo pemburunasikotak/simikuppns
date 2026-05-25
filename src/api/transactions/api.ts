@@ -20,9 +20,32 @@ const endpoints = {
 export const getListTransaction = async (
   params?: TTransactionFilter,
 ): Promise<TListTransactionResponse> => {
-  const res = await api.get(endpoints.list, { params});
-
-  return res.data;
+  const res = await api.get(endpoints.list, { params });
+  const responseData = res.data;
+  if (responseData.data && !responseData.result) {
+    if (Array.isArray(responseData.data)) {
+      responseData.result = {
+        data: responseData.data,
+        total: responseData.data.length,
+        currentPage: 1,
+        totalPage: 1,
+        hasPreviousPage: false,
+        hasNextPage: false
+      };
+    } else {
+      const data = responseData.data.data || [];
+      const pagination = responseData.data.pagination || {};
+      responseData.result = {
+        data: data,
+        total: pagination.total || 0,
+        currentPage: pagination.page || 1,
+        totalPage: pagination.totalPages || 1,
+        hasPreviousPage: (pagination.page || 1) > 1,
+        hasNextPage: (pagination.page || 1) < (pagination.totalPages || 1)
+      };
+    }
+  }
+  return responseData;
 };
 
 export const getDetailTransaction = async (

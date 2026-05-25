@@ -23,9 +23,11 @@ export type TIKUResultItem = {
 export type TGetIKUResultParams = {
     page?: number;
     limit?: number;
+    per_page?: number;
     sort?: string;
     order?: string;
     search?: string;
+    search_value?: string;
     idIku?: string;
     idPeriod?: string;
 };

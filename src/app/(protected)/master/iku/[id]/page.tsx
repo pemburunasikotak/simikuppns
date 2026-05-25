@@ -28,6 +28,7 @@ import useDeleteIKUTarget from "./_hooks/use-delete-iku-target";
 
 const IKUDetailPage = () => {
     const params = useParams();
+    // const navigate = useNavigate();
 
     const idIku = params.id;
     const detailQuery = useGetDetailIKU({ id: params.id! });
@@ -49,6 +50,8 @@ const IKUDetailPage = () => {
     const [selectedTarget, setSelectedTarget] = useState<TIKUTargetItem | null>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [selectedTestFormula, setSelectedTestFormula] = useState<any>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [selectedFormula, setSelectedFormula] = useState<any>(null);
 
     const ikuInfo = detailQuery.data?.result;
 
@@ -96,7 +99,7 @@ const IKUDetailPage = () => {
         {
             field: "actions",
             headerName: "Action",
-            width: 100,
+            width: 200,
             sortable: false,
             filterable: false,
             renderCell: (params) => (
@@ -108,6 +111,14 @@ const IKUDetailPage = () => {
                             onClick: () => {
                                 setSelectedTestFormula(params.row);
                                 setOpenTestModalFormula(true);
+                            }
+                        },
+                        {
+                            key: "edit",
+                            type: "edit",
+                            onClick: () => {
+                                setSelectedFormula(params.row);
+                                setOpenAddModalFormula(true);
                             }
                         },
                         {
@@ -272,7 +283,10 @@ const IKUDetailPage = () => {
                         variant="outlined"
                         size="small"
                         startIcon={<Add />}
-                        onClick={() => setOpenAddModalFormula(true)}
+                        onClick={() => {
+                            setSelectedFormula(null);
+                            setOpenAddModalFormula(true);
+                        }}
                     >
                         Tambah Formula
                     </Button>
@@ -336,9 +350,13 @@ const IKUDetailPage = () => {
             />
             <ModalAddFormula
                 open={openAddModalFormula}
-                onClose={() => setOpenAddModalFormula(false)}
+                onClose={() => {
+                    setOpenAddModalFormula(false);
+                    setSelectedFormula(null);
+                }}
                 master={componentQuery.data?.result?.data || []}
                 formulas={formulaQuery?.data?.result?.data || []}
+                formulaId={selectedFormula?.id}
             />
 
             <ModalTestFormula

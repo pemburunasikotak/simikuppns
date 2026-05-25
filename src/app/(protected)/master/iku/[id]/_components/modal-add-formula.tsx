@@ -15,6 +15,7 @@ type ModalAddFormulaProps = {
     master: TComponentItem[];
     formulas: TIKUComponentItem[];
     formulaId?: string | null;
+    idIku?: string | null;
 };
 
 type StepForm = {
@@ -35,7 +36,9 @@ const initialStep: StepForm = {
     resultKey: ""
 };
 
-const ModalAddFormula = ({ open, onClose, master, formulas, formulaId }: ModalAddFormulaProps) => {
+const ModalAddFormula = ({ open, onClose, master, formulas, formulaId, idIku }: ModalAddFormulaProps) => {
+
+    console.log('CEK ID', idIku)
     const params = useParams();
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
@@ -149,7 +152,7 @@ const ModalAddFormula = ({ open, onClose, master, formulas, formulaId }: ModalAd
             return;
         }
         const payload = {
-            ikuId: params.id,
+            ikuId: formulaId ? undefined : params.id,
             name,
             description,
             finalResultKey,
@@ -163,6 +166,7 @@ const ModalAddFormula = ({ open, onClose, master, formulas, formulaId }: ModalAd
 
         if (formulaId) {
             editFormulaMutation.mutate({
+                // id: String(idIku),
                 id: formulaId,
                 req: payload
             }, {
@@ -189,173 +193,173 @@ const ModalAddFormula = ({ open, onClose, master, formulas, formulaId }: ModalAd
                     </Box>
                 ) : (
                     <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <TextField
-                        label="Nama"
-                        variant="outlined"
-                        fullWidth
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        autoFocus
-                    />
-                    <TextField
-                        label="Deskripsi"
-                        variant="outlined"
-                        fullWidth
-                        multiline
-                        rows={3}
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                    />
-                    <TextField
-                        label="Final Result Key"
-                        variant="outlined"
-                        fullWidth
-                        value={finalResultKey}
-                        onChange={(e) => setFinalResultKey(e.target.value)}
-                    />
-                    <Box sx={{ display: 'flex', gap: 2 }}>
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={isActive}
-                                    onChange={(e) => setIsActive(e.target.checked)}
-                                    color="primary"
-                                />
-                            }
-                            label="Aktif"
+                        <TextField
+                            label="Nama"
+                            variant="outlined"
+                            fullWidth
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            autoFocus
                         />
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={isFinal}
-                                    onChange={(e) => setIsFinal(e.target.checked)}
-                                    color="primary"
-                                />
-                            }
-                            label="Final"
+                        <TextField
+                            label="Deskripsi"
+                            variant="outlined"
+                            fullWidth
+                            multiline
+                            rows={3}
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
                         />
-                    </Box>
+                        <TextField
+                            label="Final Result Key"
+                            variant="outlined"
+                            fullWidth
+                            value={finalResultKey}
+                            onChange={(e) => setFinalResultKey(e.target.value)}
+                        />
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={isActive}
+                                        onChange={(e) => setIsActive(e.target.checked)}
+                                        color="primary"
+                                    />
+                                }
+                                label="Aktif"
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={isFinal}
+                                        onChange={(e) => setIsFinal(e.target.checked)}
+                                        color="primary"
+                                    />
+                                }
+                                label="Final"
+                            />
+                        </Box>
 
-                    <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <Typography variant="h6">Steps Kalkulasi</Typography>
-                        <Button variant="outlined" size="small" startIcon={<Add />} onClick={handleAddStep}>
-                            Tambah Step
-                        </Button>
-                    </Box>
+                        <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <Typography variant="h6">Steps Kalkulasi</Typography>
+                            <Button variant="outlined" size="small" startIcon={<Add />} onClick={handleAddStep}>
+                                Tambah Step
+                            </Button>
+                        </Box>
 
-                    {steps.map((step, index) => (
-                        <Box key={index} sx={{ p: 2, border: "1px dashed grey", borderRadius: 1, position: "relative" }}>
-                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-                                <Typography variant="subtitle2">Step {index + 1}</Typography>
-                                {steps.length > 1 && (
-                                    <IconButton size="small" color="error" onClick={() => handleRemoveStep(index)}>
-                                        <DeleteOutlined fontSize="small" />
-                                    </IconButton>
-                                )}
-                            </Box>
+                        {steps.map((step, index) => (
+                            <Box key={index} sx={{ p: 2, border: "1px dashed grey", borderRadius: 1, position: "relative" }}>
+                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                                    <Typography variant="subtitle2">Step {index + 1}</Typography>
+                                    {steps.length > 1 && (
+                                        <IconButton size="small" color="error" onClick={() => handleRemoveStep(index)}>
+                                            <DeleteOutlined fontSize="small" />
+                                        </IconButton>
+                                    )}
+                                </Box>
 
-                            <Grid container spacing={2}>
-                                <Grid size={{ xs: 12, sm: 4, md: 2 }}>
-                                    <FormControl fullWidth size="small">
-                                        <InputLabel id={`left-type-label-${index}`}>Left Type</InputLabel>
-                                        <Select
-                                            labelId={`left-type-label-${index}`}
-                                            value={step.leftType}
-                                            label="Left Type"
-                                            onChange={(e) => handleStepChange(index, "leftType", e.target.value)}
-                                            size="small"
-                                            fullWidth
-                                        >
-                                            <MenuItem value="component">Component</MenuItem>
-                                            <MenuItem value="temp">Temp</MenuItem>
-                                            <MenuItem value="formula_ref">Formula</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid size={{ xs: 12, sm: 4, md: 2 }}>
-                                    <FormControl fullWidth size="small">
-                                        <InputLabel id={`left-value-label-${index}`}>Left Value</InputLabel>
-                                        <Select
-                                            labelId={`left-value-label-${index}`}
-                                            value={step.leftValue}
-                                            label="Left Value"
-                                            onChange={(e) => handleStepChange(index, "leftValue", e.target.value)}
-                                        >
-                                            {renderValueOptions(step.leftType, index)}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid size={{ xs: 12, sm: 4, md: 2 }}>
-                                    <FormControl fullWidth size="small">
-                                        <InputLabel id={`operator-label-${index}`}>Operator</InputLabel>
-                                        <Select
-                                            labelId={`operator-label-${index}`}
-                                            value={step.operator}
-                                            label="Operator"
-                                            onChange={(e) => handleStepChange(index, "operator", e.target.value)}
-                                        >
-                                            <MenuItem value="ADD">ADD (+)</MenuItem>
-                                            <MenuItem value="SUB">SUB (-)</MenuItem>
-                                            <MenuItem value="MUL">MUL (*)</MenuItem>
-                                            <MenuItem value="DIV">DIV (/)</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid size={{ xs: 12, sm: 4, md: 2 }}>
-                                    <FormControl fullWidth size="small">
-                                        <InputLabel id={`right-type-label-${index}`}>Right Type</InputLabel>
-                                        <Select
-                                            labelId={`right-type-label-${index}`}
-                                            value={step.rightType || "component"}
-                                            label="Right Type"
-                                            onChange={(e) => {
-                                                handleStepChange(index, "rightType", e.target.value);
-                                                handleStepChange(index, "rightValue", "");
-                                            }}
-                                        >
-                                            <MenuItem value="component">Component</MenuItem>
-                                            <MenuItem value="constant">Constant</MenuItem>
-                                            <MenuItem value="formula_ref">Formula</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid size={{ xs: 12, sm: 4, md: 2 }}>
-                                    {step.rightType === "constant" ? (
-                                        <TextField
-                                            label="Right Value"
-                                            size="small"
-                                            fullWidth
-                                            value={step.rightValue}
-                                            onChange={(e) => handleStepChange(index, "rightValue", e.target.value)}
-                                        />
-                                    ) : (
+                                <Grid container spacing={2}>
+                                    <Grid size={{ xs: 12, sm: 4, md: 2 }}>
                                         <FormControl fullWidth size="small">
-                                            <InputLabel id={`right-value-label-${index}`}>Right Value</InputLabel>
+                                            <InputLabel id={`left-type-label-${index}`}>Left Type</InputLabel>
                                             <Select
-                                                labelId={`right-value-label-${index}`}
-                                                value={step.rightValue}
-                                                label="Right Value"
-                                                onChange={(e) => handleStepChange(index, "rightValue", e.target.value)}
+                                                labelId={`left-type-label-${index}`}
+                                                value={step.leftType}
+                                                label="Left Type"
+                                                onChange={(e) => handleStepChange(index, "leftType", e.target.value)}
+                                                size="small"
+                                                fullWidth
                                             >
-                                                {renderValueOptions(step.rightType, index)}
+                                                <MenuItem value="component">Component</MenuItem>
+                                                <MenuItem value="temp">Temp</MenuItem>
+                                                <MenuItem value="formula_ref">Formula</MenuItem>
                                             </Select>
                                         </FormControl>
-                                    )}
+                                    </Grid>
+                                    <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+                                        <FormControl fullWidth size="small">
+                                            <InputLabel id={`left-value-label-${index}`}>Left Value</InputLabel>
+                                            <Select
+                                                labelId={`left-value-label-${index}`}
+                                                value={step.leftValue}
+                                                label="Left Value"
+                                                onChange={(e) => handleStepChange(index, "leftValue", e.target.value)}
+                                            >
+                                                {renderValueOptions(step.leftType, index)}
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+                                        <FormControl fullWidth size="small">
+                                            <InputLabel id={`operator-label-${index}`}>Operator</InputLabel>
+                                            <Select
+                                                labelId={`operator-label-${index}`}
+                                                value={step.operator}
+                                                label="Operator"
+                                                onChange={(e) => handleStepChange(index, "operator", e.target.value)}
+                                            >
+                                                <MenuItem value="ADD">ADD (+)</MenuItem>
+                                                <MenuItem value="SUB">SUB (-)</MenuItem>
+                                                <MenuItem value="MUL">MUL (*)</MenuItem>
+                                                <MenuItem value="DIV">DIV (/)</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+                                        <FormControl fullWidth size="small">
+                                            <InputLabel id={`right-type-label-${index}`}>Right Type</InputLabel>
+                                            <Select
+                                                labelId={`right-type-label-${index}`}
+                                                value={step.rightType || "component"}
+                                                label="Right Type"
+                                                onChange={(e) => {
+                                                    handleStepChange(index, "rightType", e.target.value);
+                                                    handleStepChange(index, "rightValue", "");
+                                                }}
+                                            >
+                                                <MenuItem value="component">Component</MenuItem>
+                                                <MenuItem value="constant">Constant</MenuItem>
+                                                <MenuItem value="formula_ref">Formula</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+                                        {step.rightType === "constant" ? (
+                                            <TextField
+                                                label="Right Value"
+                                                size="small"
+                                                fullWidth
+                                                value={step.rightValue}
+                                                onChange={(e) => handleStepChange(index, "rightValue", e.target.value)}
+                                            />
+                                        ) : (
+                                            <FormControl fullWidth size="small">
+                                                <InputLabel id={`right-value-label-${index}`}>Right Value</InputLabel>
+                                                <Select
+                                                    labelId={`right-value-label-${index}`}
+                                                    value={step.rightValue}
+                                                    label="Right Value"
+                                                    onChange={(e) => handleStepChange(index, "rightValue", e.target.value)}
+                                                >
+                                                    {renderValueOptions(step.rightType, index)}
+                                                </Select>
+                                            </FormControl>
+                                        )}
+                                    </Grid>
+                                    <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+                                        <TextField
+                                            label="Result Key"
+                                            size="small"
+                                            fullWidth
+                                            value={step.resultKey}
+                                            onChange={(e) => handleStepChange(index, "resultKey", e.target.value)}
+                                        />
+                                    </Grid>
                                 </Grid>
-                                <Grid size={{ xs: 12, sm: 4, md: 2 }}>
-                                    <TextField
-                                        label="Result Key"
-                                        size="small"
-                                        fullWidth
-                                        value={step.resultKey}
-                                        onChange={(e) => handleStepChange(index, "resultKey", e.target.value)}
-                                    />
-                                </Grid>
-                            </Grid>
-                        </Box>
-                    ))}
+                            </Box>
+                        ))}
 
-                </Box>
+                    </Box>
                 )}
             </DialogContent>
             <DialogActions>

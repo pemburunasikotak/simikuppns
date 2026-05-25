@@ -72,7 +72,7 @@ export type TIKUFormulaStepCreateRequest = {
 };
 
 export type TIKUFormulaCreateRequest = {
-    ikuId: string;
+    ikuId?: string;
     name: string;
     description: string;
     finalResultKey: string;

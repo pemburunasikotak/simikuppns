@@ -357,6 +357,8 @@ const IKUDetailPage = () => {
                 master={componentQuery.data?.result?.data || []}
                 formulas={formulaQuery?.data?.result?.data || []}
                 formulaId={selectedFormula?.id}
+                idIku={selectedFormula?.ikuId}
+
             />
 
             <ModalTestFormula

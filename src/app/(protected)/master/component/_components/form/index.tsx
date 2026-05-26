@@ -146,6 +146,7 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues, isEdit }: Props) 
             required
             options={[
               { value: "monthly", label: "Bulanan" },
+              { value: "quarterly", label: "Triwulan" },
               { value: "yearly", label: "Tahunan" },
             ]}
           />
@@ -206,10 +207,11 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues, isEdit }: Props) 
             columns={columnsTarget}
             checkboxSelection
             paginationInfo={createPaginationInfo({
-              per_page: 10,
+              // per_page: 10,
               total: targetQuery.data?.result?.length || 0,
               page: 1,
             })}
+            hidePagination={true}
             handleChange={() => { }}
           />
 

@@ -104,7 +104,7 @@ export const getListComponentTarget = async (
     const res = await api.get(endpoints.listTarget, { params });
     const responseData = res.data;
     if (responseData.data && !responseData.result) {
-        responseData.result = responseData.data;
+        responseData.result = responseData.data.data;
     }
     return responseData;
 };

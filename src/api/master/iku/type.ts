@@ -133,12 +133,12 @@ export type TIKUTargetItem = {
 
 export type TIKUTargetCreateRequest = {
     ikuId: string;
-    year: number;
-    targetQ1: number;
-    targetQ2: number;
-    targetQ3: number;
-    targetQ4: number;
-    targetYear: number;
+    year: number | string;
+    targetQ1: number | string;
+    targetQ2: number | string;
+    targetQ3: number | string;
+    targetQ4: number | string;
+    targetYear: number | string;
 };
 
 export type TIKUTargetListResponse = TResponse<TIKUTargetItem[]>;

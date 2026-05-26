@@ -14,36 +14,36 @@ type ModalAddTargetIKUProps = {
 
 const ModalAddTargetIKU = ({ open, onClose, target, mode = "add" }: ModalAddTargetIKUProps) => {
     const params = useParams();
-    const [year, setYear] = useState<number>(new Date().getFullYear());
-    const [targetQ1, setTargetQ1] = useState<number>(0);
-    const [targetQ2, setTargetQ2] = useState<number>(0);
-    const [targetQ3, setTargetQ3] = useState<number>(0);
-    const [targetQ4, setTargetQ4] = useState<number>(0);
-    const [targetYear, setTargetYear] = useState<number>(new Date().getFullYear());
+    const [year, setYear] = useState<string>(String(new Date().getFullYear()));
+    const [targetQ1, setTargetQ1] = useState<string>("");
+    const [targetQ2, setTargetQ2] = useState<string>("0");
+    const [targetQ3, setTargetQ3] = useState<string>("0");
+    const [targetQ4, setTargetQ4] = useState<string>("0");
+    const [targetYear, setTargetYear] = useState<string>(String(new Date().getFullYear()));
 
     const createTarget = useCreateIKUTarget();
     const editTarget = useEditIKUTarget();
 
     useEffect(() => {
         if (target) {
-            setYear(target.year);
-            setTargetQ1(Number(target.targetQ1));
-            setTargetQ2(Number(target.targetQ2));
-            setTargetQ3(Number(target.targetQ3));
-            setTargetQ4(Number(target.targetQ4));
-            setTargetYear(Number(target.targetYear));
+            setYear(String(target.year));
+            setTargetQ1(String(target.targetQ1));
+            setTargetQ2(String(target.targetQ2));
+            setTargetQ3(String(target.targetQ3));
+            setTargetQ4(String(target.targetQ4));
+            setTargetYear(String(target.targetYear));
         } else {
             handleReset();
         }
     }, [target, open]);
 
     const handleReset = () => {
-        setYear(new Date().getFullYear());
-        setTargetQ1(0);
-        setTargetQ2(0);
-        setTargetQ3(0);
-        setTargetQ4(0);
-        setTargetYear(new Date().getFullYear());
+        setYear(String(new Date().getFullYear()));
+        setTargetQ1("0");
+        setTargetQ2("0");
+        setTargetQ3("0");
+        setTargetQ4("0");
+        setTargetYear(String(new Date().getFullYear()));
     };
 
     const handleClose = () => {
@@ -56,12 +56,12 @@ const ModalAddTargetIKU = ({ open, onClose, target, mode = "add" }: ModalAddTarg
 
         const payload = {
             ikuId: params.id,
-            year,
-            targetQ1,
-            targetQ2,
-            targetQ3,
-            targetQ4,
-            targetYear,
+            year: Number(year),
+            targetQ1: Number(targetQ1),
+            targetQ2: +targetQ2,
+            targetQ3: +targetQ3,
+            targetQ4: +targetQ4,
+            targetYear: +targetYear,
         };
 
         if (mode === "edit" && target) {
@@ -93,7 +93,7 @@ const ModalAddTargetIKU = ({ open, onClose, target, mode = "add" }: ModalAddTarg
                         variant="outlined"
                         fullWidth
                         value={year}
-                        onChange={(e) => setYear(Number(e.target.value))}
+                        onChange={(e) => setYear(String(e.target.value))}
                         disabled={isDetail}
                         autoFocus={!isDetail && mode === "add"}
                     />
@@ -104,7 +104,7 @@ const ModalAddTargetIKU = ({ open, onClose, target, mode = "add" }: ModalAddTarg
                                 variant="outlined"
                                 fullWidth
                                 value={targetQ1}
-                                onChange={(e) => setTargetQ1(Number(e.target.value))}
+                                onChange={(e) => setTargetQ1(String(e.target.value))}
                                 disabled={isDetail}
                             />
                         </Grid>
@@ -114,7 +114,7 @@ const ModalAddTargetIKU = ({ open, onClose, target, mode = "add" }: ModalAddTarg
                                 variant="outlined"
                                 fullWidth
                                 value={targetQ2}
-                                onChange={(e) => setTargetQ2(Number(e.target.value))}
+                                onChange={(e) => setTargetQ2(String(e.target.value))}
                                 disabled={isDetail}
                             />
                         </Grid>
@@ -124,7 +124,7 @@ const ModalAddTargetIKU = ({ open, onClose, target, mode = "add" }: ModalAddTarg
                                 variant="outlined"
                                 fullWidth
                                 value={targetQ3}
-                                onChange={(e) => setTargetQ3(Number(e.target.value))}
+                                onChange={(e) => setTargetQ3(String(e.target.value))}
                                 disabled={isDetail}
                             />
                         </Grid>
@@ -134,7 +134,7 @@ const ModalAddTargetIKU = ({ open, onClose, target, mode = "add" }: ModalAddTarg
                                 variant="outlined"
                                 fullWidth
                                 value={targetQ4}
-                                onChange={(e) => setTargetQ4(Number(e.target.value))}
+                                onChange={(e) => setTargetQ4(String(e.target.value))}
                                 disabled={isDetail}
                             />
                         </Grid>
@@ -144,7 +144,7 @@ const ModalAddTargetIKU = ({ open, onClose, target, mode = "add" }: ModalAddTarg
                         variant="outlined"
                         fullWidth
                         value={targetYear}
-                        onChange={(e) => setTargetYear(Number(e.target.value))}
+                        onChange={(e) => setTargetYear(String(e.target.value))}
                         disabled={isDetail}
                     />
                 </Box>

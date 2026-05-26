@@ -126,7 +126,7 @@ const ModalAddFormula = ({ open, onClose, master, formulas, formulaId, idIku }: 
                 ));
             case 'formula_ref':
                 return formulas.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
+                    <MenuItem key={item.id} value={item.finalResultKey}>
                         {item.name}
                     </MenuItem>
                 ));

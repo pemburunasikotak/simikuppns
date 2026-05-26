@@ -94,7 +94,7 @@ export const editComponent = async (
     params: TDetailParams,
     req: TComponentCreateRequest,
 ): Promise<TDefaultResponse> => {
-    const res = await api.patch(`/api/components/${params?.id}`, { ...req });
+    const res = await api.put(`/api/components/${params?.id}`, { ...req });
     return res.data;
 };
 
@@ -120,7 +120,7 @@ export const editComponentTarget = async (
     params: TDetailParams,
     req: TComponentTargetUpdateRequest,
 ): Promise<TDefaultResponse> => {
-    const res = await api.patch(`/api/component-targets/${params.id}`, { ...req });
+    const res = await api.put(`/api/component-targets/${params.id}`, { ...req });
     return res.data;
 };
 

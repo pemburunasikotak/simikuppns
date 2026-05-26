@@ -12,23 +12,25 @@ export interface DataTableProps
     | "rowCount"
     | "onRowSelectionModelChange"
   > {
-  handleChange: (pagination: Pick<TFilterParams, "page" | "per_page">) => void;
+  handleChange?: (pagination: Pick<TFilterParams, "page" | "per_page">) => void;
   onRowSelectionModelChange?: (ids: string[]) => void;
-  paginationInfo: {
+  paginationInfo?: {
     total?: number;
     page_size: number;
     page: number;
     limit?: number;
   };
+  hidePagination?: boolean;
 }
 
 const DataTable = ({
   onRowSelectionModelChange,
   handleChange,
   paginationInfo,
+  hidePagination = false,
   ...others
 }: DataTableProps) => {
-  console.log('CEK CEK', paginationInfo)
+
   return (
     <Box sx={{ width: "100%" }}>
       <DataGrid
@@ -54,44 +56,46 @@ const DataTable = ({
           },
         }}
       />
-      <Stack
-        direction="row"
-        sx={{
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginTop: "24px",
-        }}
-      >
+      {!hidePagination && paginationInfo && handleChange && (
         <Stack
           direction="row"
-          spacing={2}
           sx={{
             alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: "24px",
           }}
         >
-          <Typography>Rows Per Page :</Typography>
-          <Select
-            value={paginationInfo.limit}
-            onChange={(e) => handleChange({ per_page: e.target.value as number, page: 1 })}
-            autoWidth
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
+              alignItems: "center",
+            }}
           >
-            <MenuItem value={1}>1</MenuItem>
-            <MenuItem value={5}>5</MenuItem>
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={50}>50</MenuItem>
-            <MenuItem value={100}>100</MenuItem>
-          </Select>
+            <Typography>Rows Per Page :</Typography>
+            <Select
+              value={paginationInfo.limit}
+              onChange={(e) => handleChange({ per_page: e.target.value as number, page: 1 })}
+              autoWidth
+            >
+              <MenuItem value={1}>1</MenuItem>
+              <MenuItem value={5}>5</MenuItem>
+              <MenuItem value={10}>10</MenuItem>
+              <MenuItem value={50}>50</MenuItem>
+              <MenuItem value={100}>100</MenuItem>
+            </Select>
+          </Stack>
+          <MuiPagination
+            count={paginationInfo.page_size}
+            page={paginationInfo.page}
+            defaultPage={1}
+            siblingCount={0}
+            size="large"
+            shape="rounded"
+            onChange={(_e, value) => handleChange({ page: value })}
+          />
         </Stack>
-        <MuiPagination
-          count={paginationInfo.page_size}
-          page={paginationInfo.page}
-          defaultPage={1}
-          siblingCount={0}
-          size="large"
-          shape="rounded"
-          onChange={(_e, value) => handleChange({ page: value })}
-        />
-      </Stack>
+      )}
     </Box>
   );
 };

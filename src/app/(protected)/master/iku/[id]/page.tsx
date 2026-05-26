@@ -222,7 +222,7 @@ const IKUDetailPage = () => {
                 },
             ]}
         >
-            <Grid container spacing={3}>
+            <Grid container spacing={3} sx={{ mt: 5 }}>
                 <Grid size={{ xs: 12 }}>
                     <Paper sx={{ p: 3 }}>
                         <Typography variant="h6" gutterBottom>
@@ -273,6 +273,7 @@ const IKUDetailPage = () => {
                             page: componentQuery.data?.result?.currentPage || 1,
                         })}
                         handleChange={setFilter}
+                        hidePagination={true}
                     // onRowSelectionModelChange={(ids) => {
                     //     setSelectedIds(ids);
                     // }}
@@ -284,7 +285,7 @@ const IKUDetailPage = () => {
                 onClose={() => setOpenAddModal(false)}
             />
 
-            <Grid size={{ xs: 12 }} mt={3}>
+            <Grid size={{ xs: 12 }} mt={5}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                     <Typography variant="h6" gutterBottom ml={1}>
                         Daftar Formula
@@ -311,6 +312,7 @@ const IKUDetailPage = () => {
                         total: formulaQuery.data?.result?.total || 0,
                         page: formulaQuery.data?.result?.currentPage || 1,
                     })}
+                    hidePagination={true}
                     handleChange={setFilter}
                 // onRowSelectionModelChange={(ids) => {
                 //     setSelectedIds(ids);
@@ -318,7 +320,7 @@ const IKUDetailPage = () => {
                 />
             </Grid>
 
-            <Grid size={{ xs: 12 }} mt={3}>
+            <Grid size={{ xs: 12 }} mt={5}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                     <Typography variant="h6" gutterBottom ml={1}>
                         Target IKU
@@ -346,6 +348,7 @@ const IKUDetailPage = () => {
                         page: 1,
                     })}
                     handleChange={setFilter}
+                    hidePagination={true}
                 // onRowSelectionModelChange={(ids) => {
                 //     setSelectedIds(ids);
                 // }}

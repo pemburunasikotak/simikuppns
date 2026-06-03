@@ -80,6 +80,9 @@ export const paths = {
   },
   component: {
     list: "/component",
+    ikp: "/component/ikp",
+    iku: "/component/iku",
+    realisasi: "/component/realisasi",
     create: "/component/create",
     edit: "/component/:id/edit",
     detail: "/component/:id",
@@ -90,5 +93,11 @@ export const paths = {
     create: "/period/create",
     edit: "/period/:id/edit",
     detail: "/period/:id",
+  },
+  user: {
+    list: "/user",
+    create: "/user/create",
+    edit: "/user/:id/edit",
+    detail: "/user/:id",
   },
 };

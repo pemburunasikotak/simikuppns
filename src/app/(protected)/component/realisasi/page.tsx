@@ -9,7 +9,7 @@ import { useFilter } from "@/app/_hooks/use-filter";
 
 import { paths } from "@/commons/constants/paths";
 import { TGetMetricsParams, TMetricItem } from "@/api/master/metrics/type";
-import useGetInfiniteMetrics from "./_hooks/use-get-infinite-metrics";
+import useGetInfiniteMetrics from "../_hooks/use-get-infinite-metrics";
 import { useInView } from "react-intersection-observer";
 import { useEffect, useMemo } from "react";
 import {

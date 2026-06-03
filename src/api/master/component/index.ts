@@ -8,6 +8,8 @@ import {
     TComponentTargetListResponse,
     TComponentTargetCreateRequest,
     TComponentTargetUpdateRequest,
+    TComponentStructureResponse,
+    TComponentRealizationResponse,
 } from "./type";
 import { TDefaultResponse } from "@/commons/types/response";
 
@@ -128,6 +130,22 @@ export const deleteComponentTarget = async (
     params: TDetailParams,
 ): Promise<TDefaultResponse> => {
     const res = await api.delete(`/api/component-targets/${params?.id}`);
+    return res.data;
+};
+
+export const getComponentStructure = async (
+    id: string,
+    params: { year: number },
+): Promise<TComponentStructureResponse> => {
+    const res = await api.get(`/api/components/${id}/structure`, { params });
+    return res.data;
+};
+
+export const getComponentRealization = async (
+    id: string,
+    params: { year: number },
+): Promise<TComponentRealizationResponse> => {
+    const res = await api.get(`/api/components/${id}/realization`, { params });
     return res.data;
 };
 

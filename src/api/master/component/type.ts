@@ -66,3 +66,35 @@ export type TComponentTargetCreateRequest = {
 export type TComponentTargetUpdateRequest = Partial<TComponentTargetCreateRequest>;
 
 export type TComponentTargetListResponse = TResponse<TComponentTargetItem[]>;
+
+// ─── Component Structure & Realization ────────────────────────────────────────
+
+export type TComponentStructureItem = TComponentItem & {
+    parentId: string | null;
+    periodType: string;
+    hasBreakdown: boolean;
+    filterByLevel: boolean;
+    tags: Array<{ id: string; name: string; color?: string }>;
+    ikus: Array<{ id: string; code: string; name: string }>;
+    realization: unknown;
+    children: TComponentStructureItem[];
+};
+
+export type TComponentStructureResponse = TResponse<TComponentStructureItem>;
+
+export type TProdiRealizationItem = {
+    prodiId: string;
+    prodiName: string;
+    target: number;
+    realization: number;
+};
+
+export type TComponentRealizationResponse = TResponse<{
+    id: string;
+    componentId: string;
+    year: number;
+    totalTarget: number;
+    totalRealization: number;
+    achievementPercentage: number;
+    prodis: TProdiRealizationItem[];
+}>;

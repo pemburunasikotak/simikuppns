@@ -1,3 +1,4 @@
+import { authApi } from "@/libs/axios/api";
 import { TResponse } from "@/commons/types/response";
 import {
   TPermissionCreateRequest,
@@ -7,69 +8,48 @@ import {
   TPermissionUpdateRequest,
 } from "./type";
 
-export const getPermissions = (params: TGetPermissionsParams): Promise<TPermissionListResponse> => {
-  console.log(params);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: {
-      data: [],
-      currentPage: 1,
-      total: 10,
-      totalPage: 4,
-      hasPreviousPage: false,
-      hasNextPage: true,
-    },
+export const getPermissions = async (params: TGetPermissionsParams): Promise<TPermissionListResponse> => {
+  const { data } = await authApi({
+    url: "/api/permissions",
+    method: "GET",
+    params,
   });
+  return data;
 };
 
-export const getPermission = (id: string): Promise<TPermissionDetailResponse> => {
-  console.log(id);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: {
-      name: "View Role",
-      key: "view-role",
-      id: "145efcff-8ae5-4a6c-9900-05a855000622",
-      created_at: null,
-      updated_at: null,
-      deleted_at: null,
-    },
+export const getPermission = async (id: string): Promise<TPermissionDetailResponse> => {
+  const { data } = await authApi({
+    url: `/api/permissions/${id}`,
+    method: "GET",
   });
+  return data;
 };
 
-export const createPermission = (data: TPermissionCreateRequest): Promise<TResponse<null>> => {
-  console.log(data);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: null,
+export const createPermission = async (data: TPermissionCreateRequest): Promise<TResponse<null>> => {
+  const { data: res } = await authApi({
+    url: "/api/permissions",
+    method: "POST",
+    data,
   });
+  return res;
 };
 
-export const updatePermission = (
+export const updatePermission = async (
   id: string,
   data: TPermissionUpdateRequest,
 ): Promise<TResponse<null>> => {
-  console.log(id, data);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: null,
+  const { data: res } = await authApi({
+    url: `/api/permissions/${id}`,
+    method: "PUT",
+    data,
   });
+  return res;
 };
 
-export const deletePermission = (id: string): Promise<TResponse<null>> => {
-  console.log(id);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: null,
+export const deletePermission = async (id: string): Promise<TResponse<null>> => {
+  const { data: res } = await authApi({
+    url: `/api/permissions/${id}`,
+    method: "DELETE",
   });
+  return res;
 };

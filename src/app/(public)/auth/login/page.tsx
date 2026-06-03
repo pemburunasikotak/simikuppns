@@ -38,7 +38,8 @@ const Component: React.FC = () => {
   const handleLogin = (data: TLoginFormData) => {
     setSearchParams({ error: "" });
     session.signin({
-      email: data.email,
+      // email: data.email,
+      nip: data.nip,
       password: data.password,
     });
   };
@@ -136,13 +137,22 @@ const Component: React.FC = () => {
               </Box>
             ) : null}
             <form onSubmit={handleSubmit(handleLogin)}>
-              <TextField
+              {/* <TextField
                 label="email"
                 variant="outlined"
                 fullWidth
                 {...register("email")}
                 error={!!errors.email}
                 helperText={errors.email?.message}
+                style={{ marginBottom: "1rem" }}
+              /> */}
+              <TextField
+                label="nip"
+                variant="outlined"
+                fullWidth
+                {...register("nip")}
+                error={!!errors.nip}
+                helperText={errors.nip?.message}
                 style={{ marginBottom: "1rem" }}
               />
               <TextField

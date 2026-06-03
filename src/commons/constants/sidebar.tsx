@@ -2,6 +2,7 @@ import {
   DashboardOutlined,
   ExtensionOutlined,
   SettingsOutlined,
+  PeopleOutlined,
 } from "@mui/icons-material";
 
 import { paths } from "./paths";
@@ -51,7 +52,29 @@ export const SIDEBAR_ITEMS: TSidebarItem[] = [
   {
     key: "component",
     label: "Komponen",
-    path: paths.component.list,
     icon: <ExtensionOutlined />,
+    children: [
+      {
+        key: "component-iku",
+        label: "IKU",
+        path: paths.component.iku,
+      },
+      {
+        key: "component-ikp",
+        label: "IKP",
+        path: paths.component.ikp,
+      },
+      {
+        key: "component-realization",
+        label: "Input Realisasi",
+        path: paths.component.realisasi,
+      },
+    ],
+  },
+  {
+    key: "user",
+    label: "User",
+    path: paths.user.list,
+    icon: <PeopleOutlined />,
   },
 ];

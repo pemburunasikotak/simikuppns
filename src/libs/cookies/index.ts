@@ -1,13 +1,14 @@
 import Cookies from "js-cookie";
 
 export const SessionToken = {
-  set: (val: { access_token: string }) => Cookies.set("token", JSON.stringify(val)),
+  set: (val: { access_token: string; refresh_token?: string }) => Cookies.set("simiku_token", JSON.stringify(val)),
   get: ():
     | {
       access_token: string;
+      refresh_token?: string;
     }
     | undefined => {
-    const token = Cookies.get("token");
+    const token = Cookies.get("simiku_token");
     if (!token) return undefined;
     try {
       return JSON.parse(token);
@@ -15,5 +16,5 @@ export const SessionToken = {
       return undefined;
     }
   },
-  remove: () => Cookies.remove("token"),
+  remove: () => Cookies.remove("simiku_token"),
 };

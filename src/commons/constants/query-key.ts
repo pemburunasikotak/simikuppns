@@ -86,4 +86,11 @@ export const queryKeys = {
   dashboard: {
     iku: "dashboard/iku",
   },
+  user: {
+    list: "user/list",
+    detail: "user/detail",
+    delete: "user/delete",
+    edit: "user/edit",
+    create: "user/create",
+  },
 } as const;

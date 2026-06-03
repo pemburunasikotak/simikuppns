@@ -1,3 +1,4 @@
+import { authApi } from "@/libs/axios/api";
 import { TResponse } from "@/commons/types/response";
 import {
   TRoleCreateRequest,
@@ -7,76 +8,54 @@ import {
   TRoleUpdateRequest,
 } from "./type";
 
-export const getRoles = (params: TRoleGetRequest): Promise<TRoleListResponse> => {
-  console.log(params);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: {
-      data: [],
-      currentPage: 1,
-      total: 10,
-      totalPage: 4,
-      hasPreviousPage: false,
-      hasNextPage: true,
-    },
+export const getRoles = async (params: TRoleGetRequest): Promise<TRoleListResponse> => {
+  const { data } = await authApi({
+    url: "/api/roles",
+    method: "GET",
+    params,
   });
+  return data;
 };
 
-export const getRole = (id: string): Promise<TRoleDetailResponse> => {
-  console.log(id);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: {
-      permissions: [
-        {
-          name: "View Role",
-          key: "view-role",
-          id: "145efcff-8ae5-4a6c-9900-05a855000622",
-          created_at: null,
-          updated_at: null,
-          deleted_at: null,
-        },
-      ],
-      name: "Super Admin",
-      key: "super-admin",
-      id: "410b4d3f-9ea1-4871-81ff-b091cf6c15fb",
-      created_at: null,
-      updated_at: null,
-      deleted_at: null,
-    },
+export const getRole = async (id: string): Promise<TRoleDetailResponse> => {
+  const { data } = await authApi({
+    url: `/api/roles/${id}`,
+    method: "GET",
   });
+  return data;
 };
 
-export const createRole = (data: TRoleCreateRequest): Promise<TResponse<null>> => {
-  console.log(data);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: null,
+export const createRole = async (data: TRoleCreateRequest): Promise<TResponse<null>> => {
+  const { data: res } = await authApi({
+    url: "/api/roles",
+    method: "POST",
+    data,
   });
+  return res;
 };
 
-export const updateRole = (id: string, data: TRoleUpdateRequest): Promise<TResponse<null>> => {
-  console.log(id, data);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: null,
+export const updateRole = async (id: string, data: TRoleUpdateRequest): Promise<TResponse<null>> => {
+  const { data: res } = await authApi({
+    url: `/api/roles/${id}`,
+    method: "PUT",
+    data,
   });
+  return res;
 };
 
-export const deleteRole = (id: string): Promise<TResponse<null>> => {
-  console.log(id);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: null,
+export const deleteRole = async (id: string): Promise<TResponse<null>> => {
+  const { data: res } = await authApi({
+    url: `/api/roles/${id}`,
+    method: "DELETE",
   });
+  return res;
+};
+
+export const assignRole = async (payload: { userId: string; roleId: string }): Promise<unknown> => {
+  const { data } = await authApi({
+    url: "/api/permissions/assign-role",
+    method: "POST",
+    data: payload,
+  });
+  return data;
 };

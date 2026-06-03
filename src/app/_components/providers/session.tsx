@@ -5,6 +5,7 @@ import { TLoginParam } from "@/api/auth/type";
 import { SessionUser } from "@/libs/localstorage";
 import { SessionToken } from "@/libs/cookies";
 import { usePostLogin } from "@/app/(public)/auth/login/_hooks/use-post-login";
+import { postLogout } from "@/api/auth/api";
 
 type Session = {
   signin: (payload: TLoginParam) => void;
@@ -46,13 +47,22 @@ const SessionProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const signin = (payload: TLoginParam) => {
     setStatus("authenticating");
     postLogin.mutate(payload, {
-      onSuccess: (res) => {
-        setSessionData(res.data);
-        SessionToken.set({
-          access_token: res.data.access_token,
-        });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onSuccess: (res: any) => {
+        const access_token = res?.access_token || res?.data?.access_token || res?.result?.access_token || res?.token || res?.data?.token || res?.result?.token;
+        const refresh_token = res?.refresh_token || res?.data?.refresh_token || res?.result?.refresh_token || res?.refreshToken || res?.data?.refreshToken;
+        const user = res?.user || res?.data?.user || res;
 
-        SessionUser.set(res.data);
+        setSessionData(access_token ? { access_token } : undefined);
+        
+        if (access_token) {
+          SessionToken.set({
+            access_token,
+            refresh_token,
+          });
+        }
+
+        SessionUser.set({ user });
 
         setStatus("authenticated");
 
@@ -71,6 +81,7 @@ const SessionProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
 
   const signout = () => {
     setStatus("unauthenticated");
+    postLogout().catch((err) => console.error("Logout API error:", err));
     setSessionData(undefined);
     SessionUser.remove();
     SessionToken.remove();
@@ -90,6 +101,7 @@ const SessionProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSession = () => {
   return useContext(SessionContext);
 };

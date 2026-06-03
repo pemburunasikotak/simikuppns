@@ -1,102 +1,94 @@
+import { authApi } from "@/libs/axios/api";
 import { TResponse } from "@/commons/types/response";
 import {
   TGetUsersParams,
-  TUserUpdateRequest,
-  TUserDetailResponse,
-  TUserCreateRequest,
-  TUserPaginateResponse,
+  TAuthUsersResponse,
+  TAuthUserItem,
 } from "./type";
 
-export const getUsers = (params: TGetUsersParams): Promise<TUserPaginateResponse> => {
-  console.log(params);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: {
-      data: [],
-      currentPage: 1,
-      total: 10,
-      totalPage: 4,
-      hasPreviousPage: false,
-      hasNextPage: true,
-    },
+export const getUsers = async (params: TGetUsersParams): Promise<TAuthUsersResponse> => {
+  const { data } = await authApi({
+    url: `/api/users`,
+    method: "GET",
+    params,
   });
+  return data;
+  // return Promise.resolve({
+  //   success: true,
+  //   data: [
+  //     {
+  //       id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  //       email: "tjunian@ppns.ac.id",
+  //       name: "Tjunian",
+  //       nip: "123123123",
+  //       type: "EMPLOYEE",
+  //       isActive: true,
+  //       deletedAt: null,
+  //       createdAt: "2026-06-03T01:55:50.956Z",
+  //       updatedAt: "2026-06-03T01:55:50.956Z",
+  //     },
+  //     {
+  //       id: "4fa85f64-5717-4562-b3fc-2c963f66afa7",
+  //       email: "mbar@ppns.ac.id",
+  //       name: "Mbar",
+  //       nip: "123123124",
+  //       type: "EMPLOYEE",
+  //       isActive: true,
+  //       deletedAt: null,
+  //       createdAt: "2026-06-03T01:55:50.956Z",
+  //       updatedAt: "2026-06-03T01:55:50.956Z",
+  //     },
+  //     {
+  //       id: "5fa85f64-5717-4562-b3fc-2c963f66afa8",
+  //       email: "staff@ppns.ac.id",
+  //       name: "Staff Akademik",
+  //       nip: "123123125",
+  //       type: "STAFF",
+  //       isActive: false,
+  //       deletedAt: null,
+  //       createdAt: "2026-06-03T01:55:50.956Z",
+  //       updatedAt: "2026-06-03T01:55:50.956Z",
+  //     }
+  //   ],
+  //   pagination: {
+  //     total: 3,
+  //     page: params.page || 1,
+  //     limit: params.limit || 10,
+  //     totalPages: 1,
+  //   },
+  // });
 };
 
-export const getUser = (id: string): Promise<TUserDetailResponse> => {
-  console.log(id);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: {
-      id: "1",
-      name: "John Doe",
-      email: "john@example.com",
-      phone: "123-456-7890",
-      address: "123 Main St, Anytown, USA",
-      is_active: true,
-      created_at: "2023-01-01T00:00:00.000Z",
-      updated_at: "2023-01-01T00:00:00.000Z",
-      roles: [
-        {
-          id: "1",
-          key: "admin",
-          name: "Admin",
-          description: "Administrator role",
-          created_at: "2023-01-01T00:00:00.000Z",
-          updated_at: "2023-01-01T00:00:00.000Z",
-          permissions: [
-            {
-              id: "1",
-              key: "read",
-              name: "read",
-              description: "Read permission",
-              created_at: "2023-01-01T00:00:00.000Z",
-              updated_at: "2023-01-01T00:00:00.000Z",
-            },
-            {
-              id: "2",
-              key: "write",
-              name: "write",
-              description: "Write permission",
-              created_at: "2023-01-01T00:00:00.000Z",
-              updated_at: "2023-01-01T00:00:00.000Z",
-            },
-          ],
-        },
-      ],
-    },
+export const getUser = async (id: string): Promise<TResponse<TAuthUserItem>> => {
+  const { data } = await authApi({
+    url: `/api/users/${id}`,
+    method: "GET",
   });
+  return data;
 };
 
-export const createUser = (data: TUserCreateRequest): Promise<TResponse<null>> => {
-  console.log(data);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: null,
+export const createUser = async (data: unknown): Promise<TResponse<null>> => {
+  const { data: res } = await authApi({
+    url: "/api/users",
+    method: "POST",
+    data,
   });
+  return res;
 };
 
-export const updateUser = (id: string, data: TUserUpdateRequest): Promise<TResponse<null>> => {
-  console.log(id, data);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: null,
+export const updateUser = async (id: string, data: unknown): Promise<TResponse<null>> => {
+  const { data: res } = await authApi({
+    url: `/api/users/${id}`,
+    method: "PUT",
+    data,
   });
+  return res;
 };
 
-export const deleteUser = (id: string): Promise<TResponse<null>> => {
-  console.log(id);
-  return Promise.resolve({
-    code: 1,
-    message: "success",
-    status: true,
-    result: null,
+export const deleteUser = async (id: string): Promise<TResponse<null>> => {
+  const { data: res } = await authApi({
+    url: `/api/users/${id}`,
+    method: "DELETE",
   });
+  return res;
 };

@@ -86,6 +86,14 @@ const FormDropdownCheckboxField = <T extends FieldValues>({
                           fontSize: "14px",
                         }}
                         label={label}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                        }}
+                        onDelete={(e) => {
+                          e.stopPropagation();
+                          const nextValue = (field.value as string[]).filter((v) => v !== val);
+                          field.onChange(nextValue);
+                        }}
                       />
                     );
                   })}

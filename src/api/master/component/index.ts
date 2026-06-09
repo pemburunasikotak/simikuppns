@@ -10,6 +10,8 @@ import {
     TComponentTargetUpdateRequest,
     TComponentStructureResponse,
     TComponentRealizationResponse,
+    TComponentPicListResponse,
+    TAssignComponentPicRequest,
 } from "./type";
 import { TDefaultResponse } from "@/commons/types/response";
 
@@ -138,7 +140,11 @@ export const getComponentStructure = async (
     params: { year: number },
 ): Promise<TComponentStructureResponse> => {
     const res = await api.get(`/api/components/${id}/structure`, { params });
-    return res.data;
+    const responseData = res.data;
+    if (responseData.data && !responseData.result) {
+        responseData.result = responseData.data;
+    }
+    return responseData;
 };
 
 export const getComponentRealization = async (
@@ -146,6 +152,23 @@ export const getComponentRealization = async (
     params: { year: number },
 ): Promise<TComponentRealizationResponse> => {
     const res = await api.get(`/api/components/${id}/realization`, { params });
+    const responseData = res.data;
+    if (responseData.data && !responseData.result) {
+        responseData.result = responseData.data;
+    }
+    return responseData;
+};
+
+export const getComponentPics = async (componentId: string): Promise<TComponentPicListResponse> => {
+    const res = await api.get(`/api/component-users/${componentId}`);
+    return res.data;
+};
+
+export const assignComponentPics = async (
+    componentId: string,
+    req: TAssignComponentPicRequest,
+): Promise<TDefaultResponse> => {
+    const res = await api.post(`/api/component-users/${componentId}/assign`, req);
     return res.data;
 };
 

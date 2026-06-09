@@ -79,14 +79,23 @@ const ComponentRealizationPage: FC = (): ReactElement => {
 
   const MetricCard = ({ item }: { item: TMetricItem }) => (
     <Card
-      onClick={() =>
-        navigate(
-          generatePath(paths.component.view, {
-            type: item.type.toLowerCase(),
-            id: String(item.id),
-          }),
-        )
-      }
+      onClick={() => {
+        if (item.hasBreakdown) {
+          navigate(
+            generatePath(paths.component.realisasiDetail, {
+              type: item.type.toLowerCase(),
+              id: String(item.id),
+            }),
+          );
+        } else {
+          navigate(
+            generatePath(paths.component.view, {
+              type: item.type.toLowerCase(),
+              id: String(item.id),
+            }),
+          );
+        }
+      }}
       sx={{
         height: "100%",
         display: "flex",

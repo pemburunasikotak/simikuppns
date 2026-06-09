@@ -47,6 +47,7 @@ export const updateComponentRealization = async (payload: {
   year: number;
   value: number;
   documentIds: string[];
+  prodiId?: string;
 }): Promise<TResponse<unknown>> => {
   const res = await api.post("/api/component-realizations", payload);
   const responseData = res.data;

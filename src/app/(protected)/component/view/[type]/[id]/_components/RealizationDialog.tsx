@@ -39,6 +39,7 @@ interface RealizationUpdatePayload {
   year: number;
   value: number;
   documentIds: string[];
+  prodiId?: string;
 }
 
 interface RealizationDialogProps {
@@ -49,6 +50,7 @@ interface RealizationDialogProps {
   updateRealization: UseMutationResult<TResponse<unknown>, unknown, RealizationUpdatePayload>;
   metricType: string;
   selectedMonth?: number | null;
+  prodiId?: string;
 }
 
 const months = [
@@ -81,6 +83,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
   updateRealization,
   metricType,
   selectedMonth,
+  prodiId,
 }) => {
   const isYearly = metricType.toLowerCase() === "tahunan" || metricType.toLowerCase() === "yearly";
 
@@ -213,15 +216,20 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
 
       console.log("Saving realization with documentIds:", finalDocumentIds);
 
-      const newIdComponent = detailData?.result?.realization?.idComponent || idComponent
+      const newIdComponent = detailData?.result?.realization?.idComponent || idComponent;
+      let finalIdComponent = newIdComponent;
+      if (prodiId && finalIdComponent.includes("_")) {
+        finalIdComponent = finalIdComponent.split("_")[0];
+      }
 
       if (isYearly) {
         await updateRealization.mutateAsync({
-          idComponent: newIdComponent,
+          idComponent: finalIdComponent,
           month: 0,
           year: yearData?.year || 0,
           value: monthlyValues[0] || 0,
           documentIds: finalDocumentIds,
+          ...(prodiId ? { prodiId } : {}),
         });
       } else {
         // Only update the selected month if provided, otherwise update all months in monthlyValues
@@ -231,11 +239,12 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
 
         const savePromises = monthsToUpdate.map(([month, value]) =>
           updateRealization.mutateAsync({
-            idComponent: newIdComponent,
+            idComponent: finalIdComponent,
             month: Number(month),
             year: yearData?.year || 0,
             value: value,
             documentIds: finalDocumentIds,
+            ...(prodiId ? { prodiId } : {}),
           })
         );
         await Promise.all(savePromises);
@@ -262,359 +271,359 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
           sx: { borderRadius: "20px", boxShadow: "0 20px 50px rgba(0,0,0,0.12)" },
         }}
       >
-      <DialogTitle sx={{ m: 0, p: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Box>
-          <Typography variant="h6" sx={{ fontWeight: 800, color: "#1e293b" }}>
-            Realisasi {isYearly ? "Tahunan" : "Bulanan"}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Tahun {yearData?.year} • {idComponent}
-          </Typography>
-        </Box>
-        <IconButton onClick={onClose} sx={{ color: "#94a3b8" }}>
-          <CloseOutlined />
-        </IconButton>
-      </DialogTitle>
-      <Divider />
-
-      <DialogContent sx={{ p: 3, backgroundColor: "#fcfcfc", minHeight: 300 }}>
-        {isFetchingDetail ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 10, gap: 2 }}>
-            <CircularProgress size={40} />
-            <Typography variant="body2" color="text.secondary">Memuat data realisasi...</Typography>
+        <DialogTitle sx={{ m: 0, p: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: "#1e293b" }}>
+              Realisasi {isYearly ? "Tahunan" : "Bulanan"}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Tahun {yearData?.year} • {idComponent.split("_")[0]}
+            </Typography>
           </Box>
-        ) : (
-          <Stack spacing={4}>
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 800, color: "#1e293b", display: 'flex', alignItems: 'center', gap: 1 }}>
-                <DescriptionOutlined fontSize="small" color="primary" />
-                Input Nilai Realisasi
-              </Typography>
+          <IconButton onClick={onClose} sx={{ color: "#94a3b8" }}>
+            <CloseOutlined />
+          </IconButton>
+        </DialogTitle>
+        <Divider />
 
-              {isYearly ? (
-                <TextField
-                  fullWidth
-                  label={`Nilai Tahun ${yearData?.year}`}
-                  type="number"
-                  value={monthlyValues[0] || 0}
-                  onChange={(e) => handleValueChange(0, e.target.value)}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "12px",
-                      backgroundColor: "#fff",
-                    },
-                  }}
-                />
-              ) : (
-                <Grid container spacing={2}>
-                  {months
-                    .map((name, index) => ({ name, index }))
-                    .filter(({ index }) => selectedMonth === null || selectedMonth === undefined || index + 1 === selectedMonth)
-                    .map(({ name, index }) => {
-                      const monthNum = index + 1;
-                      return (
-                        <Grid size={{ xs: 12, md: selectedMonth ? 12 : 6 }} key={monthNum}>
-                          <TextField
-                            size="small"
-                            label={selectedMonth ? `Nilai Bulan ${name} ${yearData?.year}` : name}
-                            fullWidth
-                            type="number"
-                            value={monthlyValues[monthNum] || 0}
-                            onChange={(e) => handleValueChange(monthNum, e.target.value)}
-                            sx={{
-                              "& .MuiOutlinedInput-root": {
-                                borderRadius: "12px",
-                                backgroundColor: "#fff",
-                              },
-                            }}
-                          />
-                        </Grid>
-                      );
-                    })}
-                </Grid>
-              )}
+        <DialogContent sx={{ p: 3, backgroundColor: "#fcfcfc", minHeight: 300 }}>
+          {isFetchingDetail ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 10, gap: 2 }}>
+              <CircularProgress size={40} />
+              <Typography variant="body2" color="text.secondary">Memuat data realisasi...</Typography>
             </Box>
+          ) : (
+            <Stack spacing={4}>
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 800, color: "#1e293b", display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <DescriptionOutlined fontSize="small" color="primary" />
+                  Input Nilai Realisasi
+                </Typography>
 
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 800, color: "#1e293b", display: 'flex', alignItems: 'center', gap: 1 }}>
-                <CloudUploadOutlined fontSize="small" color="primary" />
-                Upload Portofolio / Bukti Dukung <span style={{ color: '#ef4444' }}>*</span>
-              </Typography>
+                {isYearly ? (
+                  <TextField
+                    fullWidth
+                    label={`Nilai Tahun ${yearData?.year}`}
+                    // type="number"
+                    value={monthlyValues[0] || 0}
+                    onChange={(e) => handleValueChange(0, e.target.value)}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "12px",
+                        backgroundColor: "#fff",
+                      },
+                    }}
+                  />
+                ) : (
+                  <Grid container spacing={2}>
+                    {months
+                      .map((name, index) => ({ name, index }))
+                      .filter(({ index }) => selectedMonth === null || selectedMonth === undefined || index + 1 === selectedMonth)
+                      .map(({ name, index }) => {
+                        const monthNum = index + 1;
+                        return (
+                          <Grid size={{ xs: 12, md: selectedMonth ? 12 : 6 }} key={monthNum}>
+                            <TextField
+                              size="small"
+                              label={selectedMonth ? `Nilai Bulan ${name} ${yearData?.year}` : name}
+                              fullWidth
+                              type="number"
+                              value={monthlyValues[monthNum] || 0}
+                              onChange={(e) => handleValueChange(monthNum, e.target.value)}
+                              sx={{
+                                "& .MuiOutlinedInput-root": {
+                                  borderRadius: "12px",
+                                  backgroundColor: "#fff",
+                                },
+                              }}
+                            />
+                          </Grid>
+                        );
+                      })}
+                  </Grid>
+                )}
+              </Box>
 
-              <Box
-                sx={{
-                  p: 2,
-                  borderRadius: "16px",
-                  border: "2px dashed",
-                  borderColor: alpha("#6366f1", 0.3),
-                  backgroundColor: alpha("#6366f1", 0.02),
-                  minHeight: "150px",
-                }}
-              >
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                  {fileItems.map((item, index) => (
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 800, color: "#1e293b", display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CloudUploadOutlined fontSize="small" color="primary" />
+                  Upload Portofolio / Bukti Dukung <span style={{ color: '#ef4444' }}>*</span>
+                </Typography>
+
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: "16px",
+                    border: "2px dashed",
+                    borderColor: alpha("#6366f1", 0.3),
+                    backgroundColor: alpha("#6366f1", 0.02),
+                    minHeight: "150px",
+                  }}
+                >
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                    {fileItems.map((item, index) => (
+                      <Box
+                        key={index}
+                        onClick={() => setSelectedFileForDetail(item)}
+                        sx={{
+                          width: 120,
+                          height: 120,
+                          borderRadius: "12px",
+                          overflow: "hidden",
+                          position: "relative",
+                          border: "1px solid #e2e8f0",
+                          backgroundColor: "#fff",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease-in-out",
+                          "&:hover": {
+                            borderColor: "#6366f1",
+                            transform: "translateY(-2px)",
+                            boxShadow: "0 8px 16px rgba(99, 102, 241, 0.1)",
+                            "& .hover-overlay": {
+                              opacity: 1,
+                            },
+                          },
+                        }}
+                      >
+                        {isImageFile(item) ? (
+                          <img
+                            src={item.previewUrl}
+                            alt={item.name}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', p: 1 }}>
+                            <DescriptionOutlined sx={{ fontSize: 32, color: "#6366f1", mb: 0.5 }} />
+                            <Typography variant="caption" sx={{ textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                              {item.name}
+                            </Typography>
+                          </Box>
+                        )}
+
+                        <Box
+                          className="hover-overlay"
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            backgroundColor: "rgba(99, 102, 241, 0.35)",
+                            backdropFilter: "blur(2px)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            opacity: 0,
+                            transition: "opacity 0.2s ease-in-out",
+                          }}
+                        >
+                          <VisibilityOutlined sx={{ color: "#fff", fontSize: 24 }} />
+                        </Box>
+
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveFile(index);
+                          }}
+                          sx={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            zIndex: 10,
+                            backgroundColor: "rgba(255,255,255,0.8)",
+                            "&:hover": { backgroundColor: "#fff" },
+                          }}
+                        >
+                          <DeleteOutline sx={{ fontSize: 16, color: "#ef4444" }} />
+                        </IconButton>
+                      </Box>
+                    ))}
+
                     <Box
-                      key={index}
-                      onClick={() => setSelectedFileForDetail(item)}
+                      component="label"
                       sx={{
                         width: 120,
                         height: 120,
                         borderRadius: "12px",
-                        overflow: "hidden",
-                        position: "relative",
-                        border: "1px solid #e2e8f0",
-                        backgroundColor: "#fff",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                        border: "2px dashed",
+                        borderColor: "#e2e8f0",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
                         cursor: "pointer",
-                        transition: "all 0.2s ease-in-out",
+                        backgroundColor: "#fff",
+                        transition: "all 0.2s",
                         "&:hover": {
                           borderColor: "#6366f1",
-                          transform: "translateY(-2px)",
-                          boxShadow: "0 8px 16px rgba(99, 102, 241, 0.1)",
-                          "& .hover-overlay": {
-                            opacity: 1,
-                          },
+                          backgroundColor: alpha("#6366f1", 0.02),
                         },
                       }}
                     >
-                      {isImageFile(item) ? (
-                        <img
-                          src={item.previewUrl}
-                          alt={item.name}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                      ) : (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', p: 1 }}>
-                          <DescriptionOutlined sx={{ fontSize: 32, color: "#6366f1", mb: 0.5 }} />
-                          <Typography variant="caption" sx={{ textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                            {item.name}
-                          </Typography>
-                        </Box>
-                      )}
-
-                      <Box
-                        className="hover-overlay"
-                        sx={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          height: "100%",
-                          backgroundColor: "rgba(99, 102, 241, 0.35)",
-                          backdropFilter: "blur(2px)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          opacity: 0,
-                          transition: "opacity 0.2s ease-in-out",
+                      <AddOutlined sx={{ fontSize: 32, color: "#94a3b8" }} />
+                      <Typography variant="caption" sx={{ mt: 1, color: "#94a3b8", fontWeight: 600 }}>
+                        Tambah
+                      </Typography>
+                      <input
+                        type="file"
+                        hidden
+                        multiple
+                        onChange={(e) => {
+                          if (e.target.files) handleFileSelect(e.target.files);
                         }}
-                      >
-                        <VisibilityOutlined sx={{ color: "#fff", fontSize: 24 }} />
-                      </Box>
-
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveFile(index);
-                        }}
-                        sx={{
-                          position: "absolute",
-                          top: 4,
-                          right: 4,
-                          zIndex: 10,
-                          backgroundColor: "rgba(255,255,255,0.8)",
-                          "&:hover": { backgroundColor: "#fff" },
-                        }}
-                      >
-                        <DeleteOutline sx={{ fontSize: 16, color: "#ef4444" }} />
-                      </IconButton>
+                      />
                     </Box>
-                  ))}
-
-                  <Box
-                    component="label"
-                    sx={{
-                      width: 120,
-                      height: 120,
-                      borderRadius: "12px",
-                      border: "2px dashed",
-                      borderColor: "#e2e8f0",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      backgroundColor: "#fff",
-                      transition: "all 0.2s",
-                      "&:hover": {
-                        borderColor: "#6366f1",
-                        backgroundColor: alpha("#6366f1", 0.02),
-                      },
-                    }}
-                  >
-                    <AddOutlined sx={{ fontSize: 32, color: "#94a3b8" }} />
-                    <Typography variant="caption" sx={{ mt: 1, color: "#94a3b8", fontWeight: 600 }}>
-                      Tambah
-                    </Typography>
-                    <input
-                      type="file"
-                      hidden
-                      multiple
-                      onChange={(e) => {
-                        if (e.target.files) handleFileSelect(e.target.files);
-                      }}
-                    />
                   </Box>
                 </Box>
+                <Typography variant="caption" sx={{ mt: 1, color: "#64748b", display: 'block' }}>
+                  Format Foto JPG, PNG, JPEG. Ukuran Maksimal 2 MB
+                </Typography>
               </Box>
-              <Typography variant="caption" sx={{ mt: 1, color: "#64748b", display: 'block' }}>
-                Format Foto JPG, PNG, JPEG. Ukuran Maksimal 2 MB
-              </Typography>
-            </Box>
-          </Stack>
-        )}
-      </DialogContent>
+            </Stack>
+          )}
+        </DialogContent>
 
-      <Divider />
-      <DialogActions sx={{ p: 3, backgroundColor: "#fff", justifyContent: 'flex-end', gap: 2 }}>
-        <Button
-          onClick={onClose}
-          sx={{
-            fontWeight: 700,
-            color: "#64748b",
-            textTransform: "none",
-            borderRadius: "10px",
-            px: 4,
-          }}
-        >
-          Batal
-        </Button>
-        <Button
-          variant="contained"
-          startIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : <SaveOutlined />}
-          onClick={handleSaveAll}
-          disabled={isSubmitting}
-          sx={{
-            borderRadius: "12px",
-            px: 5,
-            py: 1.2,
-            textTransform: "none",
-            fontWeight: 700,
-            background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
-            boxShadow: "0 8px 20px rgba(99, 102, 241, 0.3)",
-            "&:hover": {
-              boxShadow: "0 12px 25px rgba(99, 102, 241, 0.4)",
-            },
-          }}
-        >
-          {isSubmitting ? "Menyimpan..." : "Simpan Realisasi"}
-        </Button>
-      </DialogActions>
-    </Dialog>
-
-    {/* Detail Document Dialog */}
-    <Dialog
-      open={!!selectedFileForDetail}
-      onClose={() => setSelectedFileForDetail(null)}
-      maxWidth="md"
-      fullWidth
-      PaperProps={{
-        sx: { borderRadius: "16px", boxShadow: "0 12px 40px rgba(0,0,0,0.15)" },
-      }}
-    >
-      <DialogTitle sx={{ m: 0, p: 2.5, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h6" sx={{ fontWeight: 800, color: "#1e293b", overflow: "hidden", pr: 2 }}>
-          Detail Dokumen
-        </Typography>
-        <IconButton onClick={() => setSelectedFileForDetail(null)} sx={{ color: "#94a3b8" }}>
-          <CloseOutlined />
-        </IconButton>
-      </DialogTitle>
-      <Divider />
-      <DialogContent sx={{ p: 3, display: "flex", justifyContent: "center", alignItems: "center", minHeight: 300, backgroundColor: "#f8fafc" }}>
-        {selectedFileForDetail && (
-          <Box sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-            {isImageFile(selectedFileForDetail) ? (
-              <Box
-                component="img"
-                src={selectedFileForDetail.previewUrl}
-                alt={selectedFileForDetail.name}
-                sx={{
-                  maxWidth: "100%",
-                  maxHeight: "65vh",
-                  objectFit: "contain",
-                  borderRadius: "8px",
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
-                  border: "1px solid #e2e8f0",
-                }}
-              />
-            ) : selectedFileForDetail.name.toLowerCase().endsWith(".pdf") || (selectedFileForDetail.file && selectedFileForDetail.file.type === "application/pdf") ? (
-              <Box sx={{ width: "100%", height: "65vh", borderRadius: "8px", overflow: "hidden", border: "1px solid #e2e8f0", boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}>
-                <iframe
-                  src={selectedFileForDetail.previewUrl}
-                  title={selectedFileForDetail.name}
-                  width="100%"
-                  height="100%"
-                  style={{ border: "none" }}
-                />
-              </Box>
-            ) : (
-              <Stack spacing={3} alignItems="center" sx={{ py: 4 }}>
-                <DescriptionOutlined sx={{ fontSize: 80, color: "#6366f1" }} />
-                <Box sx={{ textAlign: "center" }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#1e293b", mb: 0.5 }}>
-                    {selectedFileForDetail.name}
-                  </Typography>
-                  {selectedFileForDetail.file && (
-                    <Typography variant="caption" color="text.secondary" display="block">
-                      Ukuran: {(selectedFileForDetail.file.size / (1024 * 1024)).toFixed(2)} MB
-                    </Typography>
-                  )}
-                </Box>
-              </Stack>
-            )}
-          </Box>
-        )}
-      </DialogContent>
-      <Divider />
-      <DialogActions sx={{ p: 2.5, backgroundColor: "#fff", gap: 1.5 }}>
-        <Button
-          onClick={() => setSelectedFileForDetail(null)}
-          variant="outlined"
-          sx={{
-            borderRadius: "10px",
-            textTransform: "none",
-            fontWeight: 700,
-            borderColor: "#cbd5e1",
-            color: "#64748b",
-            "&:hover": { borderColor: "#94a3b8", backgroundColor: "#f8fafc" },
-          }}
-        >
-          Tutup
-        </Button>
-        {selectedFileForDetail && (
+        <Divider />
+        <DialogActions sx={{ p: 3, backgroundColor: "#fff", justifyContent: 'flex-end', gap: 2 }}>
+          <Button
+            onClick={onClose}
+            sx={{
+              fontWeight: 700,
+              color: "#64748b",
+              textTransform: "none",
+              borderRadius: "10px",
+              px: 4,
+            }}
+          >
+            Batal
+          </Button>
           <Button
             variant="contained"
-            onClick={() => window.open(selectedFileForDetail.previewUrl, "_blank")}
+            startIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : <SaveOutlined />}
+            onClick={handleSaveAll}
+            disabled={isSubmitting}
+            sx={{
+              borderRadius: "12px",
+              px: 5,
+              py: 1.2,
+              textTransform: "none",
+              fontWeight: 700,
+              background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
+              boxShadow: "0 8px 20px rgba(99, 102, 241, 0.3)",
+              "&:hover": {
+                boxShadow: "0 12px 25px rgba(99, 102, 241, 0.4)",
+              },
+            }}
+          >
+            {isSubmitting ? "Menyimpan..." : "Simpan Realisasi"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Detail Document Dialog */}
+      <Dialog
+        open={!!selectedFileForDetail}
+        onClose={() => setSelectedFileForDetail(null)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: "16px", boxShadow: "0 12px 40px rgba(0,0,0,0.15)" },
+        }}
+      >
+        <DialogTitle sx={{ m: 0, p: 2.5, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Typography variant="h6" sx={{ fontWeight: 800, color: "#1e293b", overflow: "hidden", pr: 2 }}>
+            Detail Dokumen
+          </Typography>
+          <IconButton onClick={() => setSelectedFileForDetail(null)} sx={{ color: "#94a3b8" }}>
+            <CloseOutlined />
+          </IconButton>
+        </DialogTitle>
+        <Divider />
+        <DialogContent sx={{ p: 3, display: "flex", justifyContent: "center", alignItems: "center", minHeight: 300, backgroundColor: "#f8fafc" }}>
+          {selectedFileForDetail && (
+            <Box sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+              {isImageFile(selectedFileForDetail) ? (
+                <Box
+                  component="img"
+                  src={selectedFileForDetail.previewUrl}
+                  alt={selectedFileForDetail.name}
+                  sx={{
+                    maxWidth: "100%",
+                    maxHeight: "65vh",
+                    objectFit: "contain",
+                    borderRadius: "8px",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+                    border: "1px solid #e2e8f0",
+                  }}
+                />
+              ) : selectedFileForDetail.name.toLowerCase().endsWith(".pdf") || (selectedFileForDetail.file && selectedFileForDetail.file.type === "application/pdf") ? (
+                <Box sx={{ width: "100%", height: "65vh", borderRadius: "8px", overflow: "hidden", border: "1px solid #e2e8f0", boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}>
+                  <iframe
+                    src={selectedFileForDetail.previewUrl}
+                    title={selectedFileForDetail.name}
+                    width="100%"
+                    height="100%"
+                    style={{ border: "none" }}
+                  />
+                </Box>
+              ) : (
+                <Stack spacing={3} alignItems="center" sx={{ py: 4 }}>
+                  <DescriptionOutlined sx={{ fontSize: 80, color: "#6366f1" }} />
+                  <Box sx={{ textAlign: "center" }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#1e293b", mb: 0.5 }}>
+                      {selectedFileForDetail.name}
+                    </Typography>
+                    {selectedFileForDetail.file && (
+                      <Typography variant="caption" color="text.secondary" display="block">
+                        Ukuran: {(selectedFileForDetail.file.size / (1024 * 1024)).toFixed(2)} MB
+                      </Typography>
+                    )}
+                  </Box>
+                </Stack>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <Divider />
+        <DialogActions sx={{ p: 2.5, backgroundColor: "#fff", gap: 1.5 }}>
+          <Button
+            onClick={() => setSelectedFileForDetail(null)}
+            variant="outlined"
             sx={{
               borderRadius: "10px",
               textTransform: "none",
               fontWeight: 700,
-              background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
-              boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)",
-              "&:hover": {
-                boxShadow: "0 6px 16px rgba(99, 102, 241, 0.3)",
-              },
+              borderColor: "#cbd5e1",
+              color: "#64748b",
+              "&:hover": { borderColor: "#94a3b8", backgroundColor: "#f8fafc" },
             }}
           >
-            Buka di Tab Baru
+            Tutup
           </Button>
-        )}
-      </DialogActions>
-    </Dialog>
-  </>
-);
+          {selectedFileForDetail && (
+            <Button
+              variant="contained"
+              onClick={() => window.open(selectedFileForDetail.previewUrl, "_blank")}
+              sx={{
+                borderRadius: "10px",
+                textTransform: "none",
+                fontWeight: 700,
+                background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
+                boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)",
+                "&:hover": {
+                  boxShadow: "0 6px 16px rgba(99, 102, 241, 0.3)",
+                },
+              }}
+            >
+              Buka di Tab Baru
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+    </>
+  );
 };
 
 export default RealizationDialog;

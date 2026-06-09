@@ -83,6 +83,7 @@ export const paths = {
     ikp: "/component/ikp",
     iku: "/component/iku",
     realisasi: "/component/realisasi",
+    realisasiDetail: "/component/realisasi/:type/:id",
     create: "/component/create",
     edit: "/component/:id/edit",
     detail: "/component/:id",

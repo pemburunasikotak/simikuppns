@@ -78,6 +78,15 @@ export type TComponentStructureItem = TComponentItem & {
     ikus: Array<{ id: string; code: string; name: string }>;
     realization: unknown;
     children: TComponentStructureItem[];
+    breakdown?: Array<{
+        prodi?: {
+            id: string;
+            code: string;
+            name: string;
+        };
+        value?: number | null;
+        target?: number | null;
+    }>;
 };
 
 export type TComponentStructureResponse = TResponse<TComponentStructureItem>;
@@ -98,3 +107,32 @@ export type TComponentRealizationResponse = TResponse<{
     achievementPercentage: number;
     prodis: TProdiRealizationItem[];
 }>;
+
+// ─── Component PIC (Assignments) ──────────────────────────────────────────────
+
+export type TComponentAssignmentItem = {
+    id: string;
+    componentId: string;
+    userId: string;
+    createdAt?: string;
+    updatedAt?: string;
+    user?: {
+        id: string;
+        name: string;
+        nip: string;
+        email: string;
+        type: string;
+    };
+};
+
+export type TComponentPicListResponse = {
+    success: boolean;
+    data: {
+        component: TComponentItem & { periodType: string; hasBreakdown: boolean };
+        assignments: TComponentAssignmentItem[];
+    };
+};
+
+export type TAssignComponentPicRequest = {
+    userIds: string[];
+};

@@ -21,9 +21,12 @@ import useGetListFormula from "./_hooks/use-get-list-formula";
 import useDeleteFormula from "./_hooks/use-delete-formula";
 import useGetListIKUTarget from "./_hooks/use-get-list-iku-target";
 import ModalAddTargetIKU from "./_components/modal-add-target-iku";
-import { TIKUTargetItem } from "@/api/master/iku/type";
+import { TIKUTargetItem, TIKUAssignmentItem } from "@/api/master/iku/type";
 import useDeleteIKUTarget from "./_hooks/use-delete-iku-target";
 import { useFilter } from "@/app/_hooks/use-filter";
+import useGetListIKUPic from "./_hooks/use-get-list-iku-pic";
+import useAssignIKUPic from "./_hooks/use-assign-iku-pic";
+import ModalAddPic from "./_components/modal-add-pic";
 
 const IKUDetailPage = () => {
     const params = useParams();
@@ -52,6 +55,72 @@ const IKUDetailPage = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [selectedFormula, setSelectedFormula] = useState<any>(null);
     const ikuInfo = detailQuery.data?.result;
+
+    const picQuery = useGetListIKUPic(idIku!);
+    const assignPic = useAssignIKUPic();
+    const [openAddModalPic, setOpenAddModalPic] = useState(false);
+
+    const columnsPic: GridColDef<TIKUAssignmentItem>[] = [
+        {
+            field: "nip",
+            headerName: "NIP",
+            width: 150,
+            renderCell: (params) => params.row.user?.nip || "-",
+        },
+        {
+            field: "name",
+            headerName: "Nama PIC",
+            minWidth: 200,
+            flex: 0.5,
+            renderCell: (params) => params.row.user?.name || "-",
+        },
+        {
+            field: "email",
+            headerName: "Email",
+            minWidth: 250,
+            flex: 1,
+            renderCell: (params) => params.row.user?.email || "-",
+        },
+        {
+            field: "type",
+            headerName: "Tipe",
+            width: 150,
+            renderCell: (params) => params.row.user?.type || "-",
+        },
+        {
+            field: "actions",
+            headerName: "Action",
+            width: 100,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) => (
+                <ActionButtonTable
+                    items={[
+                        {
+                            key: "delete",
+                            type: "delete",
+                            onClick: () => {
+                                modal.confirm({
+                                    icon: <DeleteOutlined sx={{ height: 40, width: 40 }} />,
+                                    description: "Apakah kamu akan menghapus PIC ini ?",
+                                    onOk: () => {
+                                        const remainingUserIds = (picQuery.data?.data?.assignments || [])
+                                            .map((a) => a.userId)
+                                            .filter((uid) => uid !== params.row.userId);
+
+                                        assignPic.mutate({
+                                            ikuId: idIku!,
+                                            req: { userIds: remainingUserIds },
+                                        });
+                                    },
+                                });
+                            },
+                        },
+                    ]}
+                />
+            ),
+        },
+    ];
     const columns: GridColDef<TIKUComponentItem>[] = [
         { field: "code", headerName: "Kode Komponen", width: 150 },
         { field: "name", headerName: "Nama Komponen", minWidth: 200, flex: 0.5 },
@@ -329,6 +398,36 @@ const IKUDetailPage = () => {
                 />
             </Grid>
 
+            <Grid size={{ xs: 12 }} mt={5}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                    <Typography variant="h6" gutterBottom ml={1}>
+                        DAFTAR PIC
+                    </Typography>
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<Add />}
+                        onClick={() => {
+                            setOpenAddModalPic(true);
+                        }}
+                    >
+                        Tambah PIC
+                    </Button>
+                </Box>
+                <DataTable
+                    loading={picQuery.isLoading || assignPic.isPending}
+                    rows={picQuery?.data?.data?.assignments || []}
+                    columns={columnsPic}
+                    paginationInfo={createPaginationInfo({
+                        per_page: filters.per_page ? Number(filters.per_page) : 10,
+                        total: picQuery.data?.data?.assignments?.length || 0,
+                        page: 1,
+                    })}
+                    handleChange={setFilter}
+                    hidePagination={true}
+                />
+            </Grid>
+
             <ModalAddTargetIKU
                 open={openAddModalTarget}
                 onClose={() => {
@@ -355,6 +454,12 @@ const IKUDetailPage = () => {
                 open={openTestModalFormula}
                 onClose={() => setOpenTestModalFormula(false)}
                 formula={selectedTestFormula}
+            />
+            <ModalAddPic
+                open={openAddModalPic}
+                onClose={() => setOpenAddModalPic(false)}
+                ikuId={idIku!}
+                currentPicUserIds={(picQuery.data?.data?.assignments || []).map((a) => a.userId)}
             />
         </Page>
     );

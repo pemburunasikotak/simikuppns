@@ -28,6 +28,7 @@ export type TMetricItem = {
   ikus: TMetricIKU[];
   createdAt: string;
   updatedAt: string;
+  hasBreakdown?: boolean;
 };
 
 export type TMetricTarget = {

@@ -146,3 +146,32 @@ export type TIKUTargetListResponse = TResponse<TIKUTargetItem[]>;
 export type TIKUTargetUpdateRequest = Partial<TIKUTargetCreateRequest>;
 
 export type TIKUTargetDetailResponse = TResponse<TIKUTargetItem>;
+
+// ─── IKU PIC (Assignments) ───────────────────────────────────────────────────
+
+export type TIKUAssignmentItem = {
+    id: string;
+    ikuId: string;
+    userId: string;
+    createdAt?: string;
+    updatedAt?: string;
+    user?: {
+        id: string;
+        name: string;
+        nip: string;
+        email: string;
+        type: string;
+    };
+};
+
+export type TIKUPicListResponse = {
+    success: boolean;
+    data: {
+        iku: TIKUItem & { isDirectInput: boolean; unit: string };
+        assignments: TIKUAssignmentItem[];
+    };
+};
+
+export type TAssignIKUPicRequest = {
+    userIds: string[];
+};

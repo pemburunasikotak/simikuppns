@@ -17,6 +17,8 @@ import {
     TIKUTargetUpdateRequest,
     TIKUTargetDetailResponse,
     TIKUFormulaItem,
+    TIKUPicListResponse,
+    TAssignIKUPicRequest,
 } from "./type";
 import { TDefaultResponse, TResponse } from "@/commons/types/response";
 import { TFilterParams } from "@/commons/types/filter";
@@ -284,5 +286,18 @@ export const editIKUTarget = async (
     req: TIKUTargetUpdateRequest,
 ): Promise<TDefaultResponse> => {
     const res = await api.put(`/api/iku-targets/${params.id}`, { ...req });
+    return res.data;
+};
+
+export const getIKUPics = async (ikuId: string): Promise<TIKUPicListResponse> => {
+    const res = await api.get(`/api/iku-users/${ikuId}`);
+    return res.data;
+};
+
+export const assignIKUPics = async (
+    ikuId: string,
+    req: TAssignIKUPicRequest,
+): Promise<TDefaultResponse> => {
+    const res = await api.post(`/api/iku-users/${ikuId}/assign`, req);
     return res.data;
 };

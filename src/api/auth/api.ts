@@ -44,3 +44,21 @@ export const getValidate = async (): Promise<unknown> => {
   });
   return data;
 };
+
+export const postRegister = async (payload: unknown): Promise<unknown> => {
+  const { data } = await authApi({
+    url: "/api/auth/register",
+    method: "POST",
+    data: payload,
+  });
+  return data;
+};
+
+export const postChangePassword = async (payload: unknown): Promise<unknown> => {
+  const { data } = await authApi({
+    url: "/api/auth/change-password",
+    method: "POST",
+    data: payload,
+  });
+  return data;
+};

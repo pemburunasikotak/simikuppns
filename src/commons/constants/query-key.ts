@@ -12,6 +12,9 @@ export const queryKeys = {
     iku: {
       list: "master-data/iku/list",
       detail: "master-data/iku/detail",
+      pic: {
+        list: "master-data/iku/pic/list",
+      },
       target: {
         list: "master-data/iku/target/list",
       },
@@ -22,6 +25,9 @@ export const queryKeys = {
       delete: "master-data/component/delete",
       edit: "master-data/component/edit",
       create: "master-data/component/create",
+      pic: {
+        list: "master-data/component/pic/list",
+      },
       target: {
         list: "master-data/component/target/list",
       },

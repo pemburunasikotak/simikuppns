@@ -18,7 +18,10 @@ import useModal from "@/app/_components/ui/modal";
 import useGetListComponentTarget from "../../[id]/_hooks/use-get-list-component-target";
 import useDeleteComponentTarget from "../../[id]/_hooks/use-delete-component-target";
 import ModalAddComponentTarget from "../modal-add-component-target";
-import { TComponentTargetItem } from "@/api/master/component/type";
+import { TComponentTargetItem, TComponentAssignmentItem } from "@/api/master/component/type";
+import useGetListComponentPic from "../../[id]/_hooks/use-get-list-component-pic";
+import useAssignComponentPic from "../../[id]/_hooks/use-assign-component-pic";
+import ModalAddPic from "../modal-add-pic";
 
 interface Props {
   loading?: boolean;
@@ -41,6 +44,72 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues, isEdit }: Props) 
   const [openAddModalTarget, setOpenAddModalTarget] = useState(false);
   const [targetModalMode, setTargetModalMode] = useState<"add" | "edit" | "detail">("add");
   const [selectedTarget, setSelectedTarget] = useState<TComponentTargetItem | null>(null);
+
+  const picQuery = useGetListComponentPic(params.id as string);
+  const assignPic = useAssignComponentPic();
+  const [openAddModalPic, setOpenAddModalPic] = useState(false);
+
+  const columnsPic: GridColDef<TComponentAssignmentItem>[] = [
+    {
+      field: "nip",
+      headerName: "NIP",
+      width: 150,
+      renderCell: (params) => params.row.user?.nip || "-",
+    },
+    {
+      field: "name",
+      headerName: "Nama PIC",
+      minWidth: 200,
+      flex: 0.5,
+      renderCell: (params) => params.row.user?.name || "-",
+    },
+    {
+      field: "email",
+      headerName: "Email",
+      minWidth: 250,
+      flex: 1,
+      renderCell: (params) => params.row.user?.email || "-",
+    },
+    {
+      field: "type",
+      headerName: "Tipe",
+      width: 150,
+      renderCell: (params) => params.row.user?.type || "-",
+    },
+    {
+      field: "actions",
+      headerName: "Action",
+      width: 100,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <ActionButtonTable
+          items={[
+            {
+              key: "delete",
+              type: "delete",
+              onClick: () => {
+                modal.confirm({
+                  icon: <DeleteOutlined sx={{ height: 40, width: 40 }} />,
+                  description: "Apakah kamu akan menghapus PIC ini ?",
+                  onOk: () => {
+                    const remainingUserIds = (picQuery.data?.data?.assignments || [])
+                      .map((a) => a.userId)
+                      .filter((uid) => uid !== params.row.userId);
+
+                    assignPic.mutate({
+                      componentId: params.id as string,
+                      req: { userIds: remainingUserIds },
+                    });
+                  },
+                });
+              },
+            },
+          ]}
+        />
+      ),
+    },
+  ];
 
   const columnsTarget: GridColDef<TComponentTargetItem>[] = [
     { field: "year", headerName: "Tahun", width: 100 },
@@ -223,6 +292,41 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues, isEdit }: Props) 
             }}
             target={selectedTarget}
             mode={targetModalMode}
+          />
+
+          <Divider sx={{ my: 4 }} />
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+            <Typography variant="h6">
+              Daftar PIC IKP
+            </Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<Add />}
+              onClick={() => {
+                setOpenAddModalPic(true);
+              }}
+            >
+              Tambah PIC
+            </Button>
+          </Box>
+          <DataTable
+            loading={picQuery.isLoading || assignPic.isPending}
+            rows={picQuery?.data?.data?.assignments || []}
+            columns={columnsPic}
+            paginationInfo={createPaginationInfo({
+              total: picQuery.data?.data?.assignments?.length || 0,
+              page: 1,
+            })}
+            hidePagination={true}
+            handleChange={() => { }}
+          />
+
+          <ModalAddPic
+            open={openAddModalPic}
+            onClose={() => setOpenAddModalPic(false)}
+            componentId={params.id as string}
+            currentPicUserIds={(picQuery.data?.data?.assignments || []).map((a) => a.userId)}
           />
         </>
       )}

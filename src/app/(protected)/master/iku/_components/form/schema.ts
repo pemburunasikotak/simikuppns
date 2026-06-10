@@ -10,6 +10,11 @@ const BaseSchema = zod.object({
   description: zod
     .string({ error: "Deskripsi harus diisi" })
     .min(1, { message: "Deskripsi harus diisi" }),
+  unit: zod
+    .string({ error: "Unit harus diisi" })
+    .min(1, { message: "Unit harus diisi" }),
+  isDirectInput: zod
+    .boolean({ error: "Direct Input harus diisi" }),
 });
 
 export const IKUSchema = BaseSchema;

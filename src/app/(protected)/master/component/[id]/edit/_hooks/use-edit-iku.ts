@@ -1,11 +1,11 @@
 import { TDetailParams } from "@/api/common";
 import { useMutation } from "@tanstack/react-query";
-import { TIKUCreateRequest } from "@/api/master/iku/type";
-import { editIKU } from "@/api/master/iku";
+import { TComponentCreateRequest } from "@/api/master/component/type";
+import { editComponent } from "@/api/master/component";
 
-const useEditIKU = (params: TDetailParams) => {
+const useEditComponent = (params: TDetailParams) => {
   return useMutation({
-    mutationFn: (payload: TIKUCreateRequest) => editIKU(params, payload),
+    mutationFn: (payload: TComponentCreateRequest) => editComponent(params, payload),
     onSuccess: (res) => {
       return res;
     },
@@ -15,4 +15,4 @@ const useEditIKU = (params: TDetailParams) => {
   });
 };
 
-export default useEditIKU;
+export default useEditComponent;

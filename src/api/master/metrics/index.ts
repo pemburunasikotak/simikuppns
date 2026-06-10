@@ -50,6 +50,7 @@ export const updateComponentRealization = async (payload: {
   prodiId?: string;
 }): Promise<TResponse<unknown>> => {
   const res = await api.post("/api/component-realizations", payload);
+  // const res = await api.post("/api/iku-results", payload);
   const responseData = res.data;
   if (responseData.success !== undefined && responseData.status === undefined) {
     responseData.status = responseData.success;

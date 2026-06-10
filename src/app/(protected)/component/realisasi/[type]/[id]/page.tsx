@@ -753,6 +753,7 @@ const RealisasiBreakdownPage: React.FC = () => {
                       metricType={metric?.periodType || ""}
                       selectedMonth={selectedMonth}
                       prodiId={selectedNode.id}
+                      dataType={metric?.dataType || ""}
                     />
                   </>
                 );

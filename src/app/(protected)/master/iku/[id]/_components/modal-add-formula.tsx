@@ -5,14 +5,13 @@ import useCreateFormula from "../_hooks/use-create-formula";
 import useEditFormula from "../_hooks/use-edit-formula";
 import useGetDetailFormula from "../_hooks/use-get-detail-formula";
 import { Add, DeleteOutlined } from "@mui/icons-material";
-import { TComponentItem } from "@/api/master/component/type";
-import { enqueueSnackbar } from "notistack";
 import { TIKUComponentItem, TIKUFormulaStepCreateRequest } from "@/api/master/iku/type";
+import { enqueueSnackbar } from "notistack";
 
 type ModalAddFormulaProps = {
     open: boolean;
     onClose: () => void;
-    master: TComponentItem[];
+    master: TIKUComponentItem[];
     formulas: TIKUComponentItem[];
     formulaId?: string | null;
     idIku?: string | null;

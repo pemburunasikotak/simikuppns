@@ -1,5 +1,5 @@
 import { FormControl, FormLabel, MenuItem, Select } from "@mui/material";
-import { Controller, FieldValues, UseControllerProps } from "react-hook-form";
+import { Controller, Control, FieldValues, UseControllerProps } from "react-hook-form";
 
 import HelperText from "../helper-text";
 
@@ -8,7 +8,9 @@ type DropdownOption = {
   label: string;
 };
 
-type Props<T extends FieldValues> = UseControllerProps<T> & {
+type Props<T extends FieldValues> = Omit<UseControllerProps<T>, "control"> & {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  control?: Control<any>;
   label?: string;
   defaultValue?: string;
   placeholder?: string;

@@ -51,6 +51,7 @@ interface RealizationDialogProps {
   metricType: string;
   selectedMonth?: number | null;
   prodiId?: string;
+  dataType?: string;
 }
 
 const months = [
@@ -73,6 +74,7 @@ interface TFileItem {
   id?: string;
   name: string;
   previewUrl: string;
+  dataType: string;
 }
 
 const RealizationDialog: React.FC<RealizationDialogProps> = ({
@@ -84,8 +86,10 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
   metricType,
   selectedMonth,
   prodiId,
+  dataType
 }) => {
   const isYearly = metricType.toLowerCase() === "tahunan" || metricType.toLowerCase() === "yearly";
+  console.log("dataType", dataType);
 
   const { data: detailData, isLoading: isFetchingDetail } = useGetDetailComponentRealization({
     id: idComponent,
@@ -145,6 +149,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
               id: doc?.id || item.documentId,
               name: doc?.originalName || "Dokumen",
               previewUrl: doc?.url ? (doc.url.startsWith('http') ? doc.url : `${baseUrl}${doc.url}`) : "",
+              dataType: dataType ?? "document"
             };
           }));
         } else {
@@ -178,6 +183,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
       file,
       name: file.name,
       previewUrl: URL.createObjectURL(file),
+      dataType: dataType ?? "document"
     }));
     setFileItems(prev => [...prev, ...newItems]);
   };
@@ -297,23 +303,41 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
               <Box>
                 <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 800, color: "#1e293b", display: 'flex', alignItems: 'center', gap: 1 }}>
                   <DescriptionOutlined fontSize="small" color="primary" />
-                  Input Nilai Realisasi
+                  Input Nilai Realisasiii
                 </Typography>
 
                 {isYearly ? (
-                  <TextField
-                    fullWidth
-                    label={`Nilai Tahun ${yearData?.year}`}
-                    // type="number"
-                    value={monthlyValues[0] || 0}
-                    onChange={(e) => handleValueChange(0, e.target.value)}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "12px",
-                        backgroundColor: "#fff",
-                      },
-                    }}
-                  />
+                  dataType === "number" ? (
+                    <TextField
+                      fullWidth
+                      label={`Nilai Tahun ${yearData?.year}`}
+                      // type="number"
+                      value={monthlyValues[0] || 0}
+                      onChange={(e) => handleValueChange(0, e.target.value)}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "12px",
+                          backgroundColor: "#fff",
+                        },
+                      }}
+                    />
+                  ) : (
+                    <Box>
+                      <TextField
+                        fullWidth
+                        label={`Nilai Tahun ${yearData?.year}`}
+                        // type="number"
+                        value={monthlyValues[0] || 0}
+                        onChange={(e) => handleValueChange(0, e.target.value)}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "12px",
+                            backgroundColor: "#fff",
+                          },
+                        }}
+                      />
+                    </Box>
+                  )
                 ) : (
                   <Grid container spacing={2}>
                     {months
@@ -344,143 +368,145 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
                 )}
               </Box>
 
-              <Box>
-                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 800, color: "#1e293b", display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CloudUploadOutlined fontSize="small" color="primary" />
-                  Upload Portofolio / Bukti Dukung <span style={{ color: '#ef4444' }}>*</span>
-                </Typography>
+              {dataType === "file" && (
+                <Box>
+                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 800, color: "#1e293b", display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CloudUploadOutlined fontSize="small" color="primary" />
+                    Upload Portofolio / Bukti Dukung <span style={{ color: '#ef4444' }}>*</span>
+                  </Typography>
 
-                <Box
-                  sx={{
-                    p: 2,
-                    borderRadius: "16px",
-                    border: "2px dashed",
-                    borderColor: alpha("#6366f1", 0.3),
-                    backgroundColor: alpha("#6366f1", 0.02),
-                    minHeight: "150px",
-                  }}
-                >
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                    {fileItems.map((item, index) => (
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: "16px",
+                      border: "2px dashed",
+                      borderColor: alpha("#6366f1", 0.3),
+                      backgroundColor: alpha("#6366f1", 0.02),
+                      minHeight: "150px",
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                      {fileItems.map((item, index) => (
+                        <Box
+                          key={index}
+                          onClick={() => setSelectedFileForDetail(item)}
+                          sx={{
+                            width: 120,
+                            height: 120,
+                            borderRadius: "12px",
+                            overflow: "hidden",
+                            position: "relative",
+                            border: "1px solid #e2e8f0",
+                            backgroundColor: "#fff",
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                            cursor: "pointer",
+                            transition: "all 0.2s ease-in-out",
+                            "&:hover": {
+                              borderColor: "#6366f1",
+                              transform: "translateY(-2px)",
+                              boxShadow: "0 8px 16px rgba(99, 102, 241, 0.1)",
+                              "& .hover-overlay": {
+                                opacity: 1,
+                              },
+                            },
+                          }}
+                        >
+                          {isImageFile(item) ? (
+                            <img
+                              src={item.previewUrl}
+                              alt={item.name}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          ) : (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', p: 1 }}>
+                              <DescriptionOutlined sx={{ fontSize: 32, color: "#6366f1", mb: 0.5 }} />
+                              <Typography variant="caption" sx={{ textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                                {item.name}
+                              </Typography>
+                            </Box>
+                          )}
+
+                          <Box
+                            className="hover-overlay"
+                            sx={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              width: "100%",
+                              height: "100%",
+                              backgroundColor: "rgba(99, 102, 241, 0.35)",
+                              backdropFilter: "blur(2px)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            }}
+                          >
+                            <VisibilityOutlined sx={{ color: "#fff", fontSize: 24 }} />
+                          </Box>
+
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveFile(index);
+                            }}
+                            sx={{
+                              position: "absolute",
+                              top: 4,
+                              right: 4,
+                              zIndex: 10,
+                              backgroundColor: "rgba(255,255,255,0.8)",
+                              "&:hover": { backgroundColor: "#fff" },
+                            }}
+                          >
+                            <DeleteOutline sx={{ fontSize: 16, color: "#ef4444" }} />
+                          </IconButton>
+                        </Box>
+                      ))}
+
                       <Box
-                        key={index}
-                        onClick={() => setSelectedFileForDetail(item)}
+                        component="label"
                         sx={{
                           width: 120,
                           height: 120,
                           borderRadius: "12px",
-                          overflow: "hidden",
-                          position: "relative",
-                          border: "1px solid #e2e8f0",
-                          backgroundColor: "#fff",
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                          border: "2px dashed",
+                          borderColor: "#e2e8f0",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
                           cursor: "pointer",
-                          transition: "all 0.2s ease-in-out",
+                          backgroundColor: "#fff",
+                          transition: "all 0.2s",
                           "&:hover": {
                             borderColor: "#6366f1",
-                            transform: "translateY(-2px)",
-                            boxShadow: "0 8px 16px rgba(99, 102, 241, 0.1)",
-                            "& .hover-overlay": {
-                              opacity: 1,
-                            },
+                            backgroundColor: alpha("#6366f1", 0.02),
                           },
                         }}
                       >
-                        {isImageFile(item) ? (
-                          <img
-                            src={item.previewUrl}
-                            alt={item.name}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', p: 1 }}>
-                            <DescriptionOutlined sx={{ fontSize: 32, color: "#6366f1", mb: 0.5 }} />
-                            <Typography variant="caption" sx={{ textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                              {item.name}
-                            </Typography>
-                          </Box>
-                        )}
-
-                        <Box
-                          className="hover-overlay"
-                          sx={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            backgroundColor: "rgba(99, 102, 241, 0.35)",
-                            backdropFilter: "blur(2px)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            opacity: 0,
-                            transition: "opacity 0.2s ease-in-out",
+                        <AddOutlined sx={{ fontSize: 32, color: "#94a3b8" }} />
+                        <Typography variant="caption" sx={{ mt: 1, color: "#94a3b8", fontWeight: 600 }}>
+                          Tambah
+                        </Typography>
+                        <input
+                          type="file"
+                          hidden
+                          multiple
+                          onChange={(e) => {
+                            if (e.target.files) handleFileSelect(e.target.files);
                           }}
-                        >
-                          <VisibilityOutlined sx={{ color: "#fff", fontSize: 24 }} />
-                        </Box>
-
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveFile(index);
-                          }}
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            zIndex: 10,
-                            backgroundColor: "rgba(255,255,255,0.8)",
-                            "&:hover": { backgroundColor: "#fff" },
-                          }}
-                        >
-                          <DeleteOutline sx={{ fontSize: 16, color: "#ef4444" }} />
-                        </IconButton>
+                        />
                       </Box>
-                    ))}
-
-                    <Box
-                      component="label"
-                      sx={{
-                        width: 120,
-                        height: 120,
-                        borderRadius: "12px",
-                        border: "2px dashed",
-                        borderColor: "#e2e8f0",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        backgroundColor: "#fff",
-                        transition: "all 0.2s",
-                        "&:hover": {
-                          borderColor: "#6366f1",
-                          backgroundColor: alpha("#6366f1", 0.02),
-                        },
-                      }}
-                    >
-                      <AddOutlined sx={{ fontSize: 32, color: "#94a3b8" }} />
-                      <Typography variant="caption" sx={{ mt: 1, color: "#94a3b8", fontWeight: 600 }}>
-                        Tambah
-                      </Typography>
-                      <input
-                        type="file"
-                        hidden
-                        multiple
-                        onChange={(e) => {
-                          if (e.target.files) handleFileSelect(e.target.files);
-                        }}
-                      />
                     </Box>
                   </Box>
+                  <Typography variant="caption" sx={{ mt: 1, color: "#64748b", display: 'block' }}>
+                    Format Foto JPG, PNG, JPEG. Ukuran Maksimal 2 MB
+                  </Typography>
                 </Box>
-                <Typography variant="caption" sx={{ mt: 1, color: "#64748b", display: 'block' }}>
-                  Format Foto JPG, PNG, JPEG. Ukuran Maksimal 2 MB
-                </Typography>
-              </Box>
+              )}
             </Stack>
           )}
         </DialogContent>

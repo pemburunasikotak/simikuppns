@@ -65,6 +65,6 @@ export const editTransaction = async (
   params: TDetailParams,
   req: TTransactionRequest,
 ): Promise<TDefaultResponse> => {
-  const res = await api.patch(`/api/booking/${params?.id}`, {...req });
+  const res = await api.put(`/api/booking/${params?.id}`, { ...req });
   return res.data;
 };

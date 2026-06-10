@@ -8,6 +8,8 @@ export type TIKUItem = {
     code: string;
     name: string;
     description: string;
+    isDirectInput: boolean;
+    unit: string;
     createdAt?: string | null;
     updatedAt?: string | null;
     deletedAt?: string | null;
@@ -17,12 +19,16 @@ export type TIKUCreateRequest = {
     code: string;
     name: string;
     description: string;
+    isDirectInput: boolean;
+    unit: string;
 }
 
 export type TIKUUpdateRequest = {
     code?: string;
     name?: string;
     description?: string;
+    isDirectInput?: boolean;
+    unit?: string;
 }
 
 export type TGetIKUParams = {

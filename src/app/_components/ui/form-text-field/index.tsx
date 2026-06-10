@@ -9,12 +9,14 @@ import {
   Switch,
   Typography,
 } from "@mui/material";
-import { Controller, FieldValues, UseControllerProps } from "react-hook-form";
+import { Controller, Control, FieldValues, UseControllerProps } from "react-hook-form";
 
 import BaseInputText from "../base-input-text";
 
-type Props<T extends FieldValues> = UseControllerProps<T> &
+type Props<T extends FieldValues> = Omit<UseControllerProps<T>, "control"> &
   React.ComponentProps<typeof BaseInputText> & {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    control?: Control<any>;
     label?: string;
     required?: boolean;
     endLink?: boolean;

@@ -42,6 +42,8 @@ const Component: FC = (): ReactElement => {
     { field: "code", headerName: "Kode IKU", width: 150 },
     { field: "name", headerName: "Nama IKU", minWidth: 200, flex: 0.5 },
     { field: "description", headerName: "Deskripsi", minWidth: 250, flex: 1 },
+    { field: "isDirectInput", headerName: "Direct Input", minWidth: 250, flex: 1 },
+    { field: "unit", headerName: "Unit", minWidth: 250, flex: 1 },
     {
       field: "actions",
       headerName: "Action",

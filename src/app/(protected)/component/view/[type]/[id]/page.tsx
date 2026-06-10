@@ -78,7 +78,6 @@ const MetricDetailPage: FC = (): ReactElement => {
 
   const metric = data?.result?.metric;
   const yearsData = data?.result?.data || [];
-
   return (
     <Page
       topPage={
@@ -337,6 +336,7 @@ const MetricDetailPage: FC = (): ReactElement => {
         updateRealization={updateMutation}
         metricType={metric?.periodType || ""}
         selectedMonth={selectedMonth}
+        dataType={metric?.dataType || "document"}
       />
     </Page>
   );

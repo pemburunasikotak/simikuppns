@@ -10,6 +10,7 @@ export type TComponentItem = {
     description: string;
     dataType: string;
     sourceType: string;
+    periodType: string;
     createdAt?: string | null;
     updatedAt?: string | null;
     deletedAt?: string | null;
@@ -19,6 +20,7 @@ export type TComponentCreateRequest = {
     code: string;
     name: string;
     description: string;
+    periodType: string;
 }
 
 export type TComponentUpdateRequest = {

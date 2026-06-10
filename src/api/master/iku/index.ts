@@ -7,6 +7,7 @@ import {
     TIKUListResponse,
     TGetIKUParams,
     TIKUCreateRequest,
+    TIKUUpdateRequest,
     TIKUComponentCreateRequest,
     TIKUComponentListResponse,
     TIKUFormulaCreateRequest,
@@ -115,9 +116,9 @@ export const deleteIKU = async (params: TDetailParams): Promise<TDefaultResponse
 
 export const editIKU = async (
     params: TDetailParams,
-    req: TIKUCreateRequest,
+    req: TIKUUpdateRequest,
 ): Promise<TDefaultResponse> => {
-    const res = await api.patch(`/api/ikus/${params?.id}`, { ...req });
+    const res = await api.put(`/api/ikus/${params?.id}`, { ...req });
     return res.data;
 };
 

@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router";
 import { useSnackbar } from "notistack";
 
 import { Page } from "@/app/_components/ui";
-import { TIKUCreateRequest } from "@/api/master/iku/type";
+import { TIKUUpdateRequest } from "@/api/master/iku/type";
 import { paths } from "@/commons/constants/paths";
 
 import { TIKUFormData } from "../../_components/form/schema";
@@ -21,7 +21,7 @@ const EditIKUPage = () => {
   const mutation = useEditIKU({ id: params.id! });
 
   const handleSubmit = (data: TIKUFormData) => {
-    const payload: TIKUCreateRequest = data;
+    const payload: TIKUUpdateRequest = data;
 
     mutation.mutate(payload, {
       onSuccess: () => {
@@ -61,6 +61,8 @@ const EditIKUPage = () => {
           code: data?.code,
           name: data?.name,
           description: data?.description,
+          isDirectInput: data?.isDirectInput,
+          unit: data?.unit,
         }}
       />
     </Page>

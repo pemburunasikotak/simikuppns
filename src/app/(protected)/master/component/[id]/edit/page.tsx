@@ -2,34 +2,34 @@ import { useNavigate, useParams } from "react-router";
 import { useSnackbar } from "notistack";
 
 import { Page } from "@/app/_components/ui";
-import { TIKUCreateRequest } from "@/api/master/iku/type";
+import { TComponentCreateRequest } from "@/api/master/component/type";
 import { paths } from "@/commons/constants/paths";
 
 import { TComponentFormData } from "../../_components/form/schema";
-import IKUForm from "../../_components/form";
-import useEditIKU from "./_hooks/use-edit-iku";
-import useGetDetailIKU from "../../_hooks/use-get-detail-iku";
+import ComponentForm from "../../_components/form";
+import useEditComponent from "./_hooks/use-edit-iku";
+import useGetDetailComponent from "../../_hooks/use-get-detail-iku";
 
-const EditIKUPage = () => {
+const EditComponentPage = () => {
   const params = useParams();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const query = useGetDetailIKU({ id: params.id! });
+  const query = useGetDetailComponent({ id: params.id! });
 
   const data = query.data?.result;
 
-  const mutation = useEditIKU({ id: params.id! });
+  const mutation = useEditComponent({ id: params.id! });
 
   const handleSubmit = (data: TComponentFormData) => {
-    const payload: TIKUCreateRequest = data;
+    const payload: TComponentCreateRequest = data;
 
     mutation.mutate(payload, {
       onSuccess: () => {
-        enqueueSnackbar("Berhasil mengubah IKU", { variant: "success" });
-        navigate(paths.master.iku.list);
+        enqueueSnackbar("Berhasil mengubah Component", { variant: "success" });
+        navigate(paths.master.component.list);
       },
       onError: () => {
-        enqueueSnackbar("Gagal mengubah IKU", { variant: "error" });
+        enqueueSnackbar("Gagal mengubah Component", { variant: "error" });
       },
     });
   };
@@ -53,7 +53,7 @@ const EditIKUPage = () => {
         },
       ]}
     >
-      <IKUForm
+      <ComponentForm
         isEdit
         loading={mutation.isPending}
         handleSubmit={handleSubmit}
@@ -61,10 +61,11 @@ const EditIKUPage = () => {
           code: data?.code,
           name: data?.name,
           description: data?.description,
+          periodType: data?.periodType,
         }}
       />
     </Page>
   );
 };
 
-export default EditIKUPage;
+export default EditComponentPage;

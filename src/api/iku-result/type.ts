@@ -9,6 +9,9 @@ export type TIKUResultItem = {
     calculatedAt?: string | null;
     createdAt?: string | null;
     updatedAt?: string | null;
+    textValue?: string;
+    month?: string;
+    documentIds?: string[] | string;
     iku?: {
         id?: string;
         name?: string;

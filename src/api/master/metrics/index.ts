@@ -45,12 +45,34 @@ export const updateComponentRealization = async (payload: {
   idComponent: string;
   month: number;
   year: number;
-  value: number;
+  value: string | number;
   documentIds: string[];
   prodiId?: string;
 }): Promise<TResponse<unknown>> => {
   const res = await api.post("/api/component-realizations", payload);
   // const res = await api.post("/api/iku-results", payload);
+  const responseData = res.data;
+  if (responseData.success !== undefined && responseData.status === undefined) {
+    responseData.status = responseData.success;
+  }
+  if (responseData.data && !responseData.result) {
+    responseData.result = responseData.data;
+  }
+  return responseData;
+};
+
+export const submitIkuResult = async (payload: {
+  idIku: string;
+  month: number;
+  year: number;
+  calculatedValue: number;
+  textValue: string;
+  documentIds: string[];
+  metadata?: Record<string, unknown>;
+  formulaVersion?: string;
+  calculatedAt?: string;
+}): Promise<TResponse<unknown>> => {
+  const res = await api.post("/api/iku-results", payload);
   const responseData = res.data;
   if (responseData.success !== undefined && responseData.status === undefined) {
     responseData.status = responseData.success;

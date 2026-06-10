@@ -1,5 +1,5 @@
 import { api } from "@/libs/axios/api";
-import { TGetIKUResultParams, TIKUResultListResponse } from "./type";
+import { TGetIKUResultParams, TIKUResultListResponse, TIKUResultDetailResponse } from "./type";
 
 export const getListIKUResult = async (
     params?: TGetIKUResultParams,
@@ -28,6 +28,17 @@ export const getListIKUResult = async (
                 hasNextPage: (pagination.page || 1) < (pagination.totalPages || 1)
             };
         }
+    }
+    return responseData;
+};
+
+export const getDetailIKUResult = async (
+    id: string,
+): Promise<TIKUResultDetailResponse> => {
+    const res = await api.get(`/api/iku-results/${id}`);
+    const responseData = res.data;
+    if (responseData.data && !responseData.result) {
+        responseData.result = responseData.data;
     }
     return responseData;
 };

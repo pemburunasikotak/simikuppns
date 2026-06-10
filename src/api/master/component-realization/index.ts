@@ -68,6 +68,7 @@ export const editComponentRealization = async (
     req: TComponentRealizationUpdateRequest,
 ): Promise<TDefaultResponse> => {
     const res = await api.put(`/api/component-realizations/${params?.id}`, { ...req });
+
     return res.data;
 };
 

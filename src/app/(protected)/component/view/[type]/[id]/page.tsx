@@ -337,6 +337,8 @@ const MetricDetailPage: FC = (): ReactElement => {
         metricType={metric?.periodType || ""}
         selectedMonth={selectedMonth}
         dataType={metric?.dataType || "document"}
+        type={metric?.type}
+        unit={metric?.unit}
       />
     </Page>
   );

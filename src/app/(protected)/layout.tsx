@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, Outlet, useLocation } from "react-router";
+import { useEffect, useState, useMemo } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import {
   Alert,
   AppBar,
@@ -52,6 +52,7 @@ import { SIDEBAR_ITEMS, TSidebarItem } from "@/commons/constants/sidebar";
 import { useSession } from "../_components/providers/session";
 import { SessionUser } from "@/libs/localstorage";
 import useChangeProfilePassword from "./_hooks/use-change-profile-password";
+import { useSnackbar } from "notistack";
 
 interface Props {
   item: TSidebarItem;
@@ -166,6 +167,11 @@ type SessionUserProfile = {
   nip?: string;
   type?: string;
   isActive?: boolean;
+  roles?: {
+    id: string;
+    key: string;
+    name: string;
+  }[];
 };
 
 interface ProfileDialogProps {
@@ -457,11 +463,13 @@ const settings = [
 
 const ProtectedLayout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { signout } = useSession();
   const theme = useTheme();
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const [collapsed, setCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
 
   const sessionUser = SessionUser.get();
   const user = (sessionUser?.user as unknown as SessionUserProfile) ?? {};
@@ -473,6 +481,31 @@ const ProtectedLayout = () => {
     .toUpperCase()
     .slice(0, 2);
 
+  const userRoleKeys = useMemo(() => user?.roles?.map((r) => r.key) || [], [user?.roles]);
+  const isAdmin = userRoleKeys.includes("admin_sim_iku");
+  const isUser = userRoleKeys.includes("user_sim_iku");
+
+  const filteredSidebarItems = SIDEBAR_ITEMS.filter((item) => {
+    if (isAdmin) {
+      return true;
+    }
+    if (isUser) {
+      return item.key === "dashboard" || item.key === "component";
+    }
+    return item.key === "dashboard" || item.key === "component";
+  });
+
+  // Redirect if unauthorized page access is attempted
+  useEffect(() => {
+    if (userRoleKeys.length > 0 && !isAdmin) {
+      const isMasterPath = location.pathname.startsWith("/master");
+      const isUserPath = location.pathname.startsWith("/user");
+      if (isMasterPath || isUserPath) {
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [location.pathname, isAdmin, userRoleKeys, navigate]);
+
   const flattenMenus = (items: TSidebarItem[]): TSidebarItem[] => {
     return items.flatMap(({ children, ...item }) => [
       item,
@@ -480,7 +513,7 @@ const ProtectedLayout = () => {
     ]);
   };
 
-  const flattenedMenus = flattenMenus(SIDEBAR_ITEMS);
+  const flattenedMenus = flattenMenus(filteredSidebarItems);
   const activeMenu = flattenedMenus.find((menu) => menu.path === location.pathname);
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -493,6 +526,8 @@ const ProtectedLayout = () => {
       signout();
     } else if (key === "profile") {
       setProfileOpen(true);
+    } else if (key === "settings") {
+      enqueueSnackbar("Fitur sedang dalam pengembangan", { variant: "info" });
     }
   };
 
@@ -541,7 +576,7 @@ const ProtectedLayout = () => {
               boxSizing: "border-box",
             }}
           >
-            {SIDEBAR_ITEMS.map((item) => (
+            {filteredSidebarItems.map((item) => (
               <SidebarItem
                 key={item.key}
                 item={item}
@@ -601,7 +636,12 @@ const ProtectedLayout = () => {
             <Typography variant="h6">{activeMenu?.label}</Typography>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: "none", md: "flex" }, gap: "24px", pr: 4 }}>
-              <IconButton size="large" aria-label="show 17 new notifications" color="inherit">
+              <IconButton
+                size="large"
+                aria-label="show 17 new notifications"
+                color="inherit"
+                onClick={() => enqueueSnackbar("Fitur sedang dalam pengembangan", { variant: "info" })}
+              >
                 <Badge badgeContent={1} color="error">
                   <NotificationsOutlined fontSize="medium" />
                 </Badge>

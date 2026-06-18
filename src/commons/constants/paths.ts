@@ -101,4 +101,11 @@ export const paths = {
     edit: "/user/:id/edit",
     detail: "/user/:id",
   },
+  bidang: {
+    list: "/bidang",
+    create: "/bidang/create",
+    edit: "/bidang/:id/edit",
+    detail: "/bidang/:id",
+  },
 };
+

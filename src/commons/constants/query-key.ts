@@ -99,4 +99,10 @@ export const queryKeys = {
     edit: "user/edit",
     create: "user/create",
   },
+  bidang: {
+    list: "bidang/list",
+    detail: "bidang/detail",
+    byUser: "bidang/byUser",
+  },
 } as const;
+

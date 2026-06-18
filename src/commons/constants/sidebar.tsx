@@ -3,6 +3,7 @@ import {
   ExtensionOutlined,
   SettingsOutlined,
   PeopleOutlined,
+  CorporateFareOutlined,
 } from "@mui/icons-material";
 
 import { paths } from "./paths";
@@ -77,5 +78,11 @@ export const SIDEBAR_ITEMS: TSidebarItem[] = [
     label: "User",
     path: paths.user.list,
     icon: <PeopleOutlined />,
+  },
+  {
+    key: "bidang",
+    label: "Bidang",
+    path: paths.bidang.list,
+    icon: <CorporateFareOutlined />,
   },
 ];

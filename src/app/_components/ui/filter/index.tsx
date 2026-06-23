@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Add, FileDownloadOutlined, SearchOutlined } from "@mui/icons-material";
 import { Box, Button, Collapse, Grid, Stack, TextField, Typography } from "@mui/material";
@@ -38,6 +38,7 @@ interface FilterProps {
   }[];
   defaultValue?: Record<string, unknown>;
   handleDownload?: () => void;
+  debounceDelay?: number;
 }
 
 const Filter = ({
@@ -50,6 +51,7 @@ const Filter = ({
   withAddButton = false,
   defaultValue,
   labelSearch = "",
+  debounceDelay,
 }: FilterProps) => {
   const [moreFilter, setMoreFilter] = useState(false);
   const { control, handleSubmit, watch, reset } = useForm();
@@ -57,20 +59,26 @@ const Filter = ({
   const debounce = useDebounce();
 
   const handleApply = (data: object) => {
-    setFilter(data);
+    setFilter({ ...data, page: 1 });
   };
 
   const searchValue = watch("search_value");
   const start = watch("start_date");
   const end = watch("end_date");
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     debounce({
       cb: () => {
-        setFilter({ search_value: searchValue, start_date: start, end_date: end });
+        setFilter({ search_value: searchValue, start_date: start, end_date: end, page: 1 });
       },
+      delay: debounceDelay,
     });
-  }, [searchValue, start, end, setFilter, debounce]);
+  }, [searchValue, start, end, setFilter, debounce, debounceDelay]);
 
   useEffect(() => {
     if (defaultValue) {

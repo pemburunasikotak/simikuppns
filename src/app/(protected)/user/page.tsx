@@ -238,10 +238,11 @@ const Component: FC = (): ReactElement => {
       topPage={
         <Filter
           variants={["search"]}
-          labelSearch={"Cari user..."}
+          labelSearch={"user..."}
           defaultValue={{
             search_value: filters.search || filters.search_value,
           }}
+          debounceDelay={10000}
           actions={[
             <Button
               key="add"

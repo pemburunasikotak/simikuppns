@@ -57,8 +57,6 @@ interface RealizationDialogProps {
   unit?: string
 }
 
-
-
 interface TFileItem {
   file?: File;
   id?: string;
@@ -142,7 +140,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
         const result = data.result;
         const isText = unit?.toLowerCase() === "text";
         const val = isText ? result.textValue : result.calculatedValue;
-        
+
         setMonthlyValues((prev) => ({
           ...prev,
           [isYearly ? 0 : (Number(result.month) || 0)]: val !== undefined && val !== null ? val : "",
@@ -245,8 +243,9 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
     }));
   };
 
-  const renderInputFields = () => {
+  const renderInputFields = ({ type }: { type?: string }) => {
     const isText = unit?.toLowerCase() === "text";
+    const monthKey = type === "bulan" ? (selectedMonth ?? 0) : 0;
 
     // if (isYearly) {
     return (
@@ -254,9 +253,9 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
         fullWidth
         multiline={isText}
         rows={isText ? 4 : undefined}
-        label={`Nilai Tahun ${yearData?.year}`}
-        value={monthlyValues[0] ?? ""}
-        onChange={(e) => handleValueChange(0, e.target.value)}
+        label={`Nilai ${type === "bulan" ? "Bulanan" : "Tahunan"}`}
+        value={monthlyValues[monthKey] ?? ""}
+        onChange={(e) => handleValueChange(monthKey, e.target.value)}
         sx={{
           "& .MuiOutlinedInput-root": {
             borderRadius: "12px",
@@ -365,7 +364,6 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
           calculatedAt: new Date().toISOString(),
         });
       } else {
-        // Only update the selected month if provided, otherwise update all months in monthlyValues
         const monthsToUpdate = Object.entries(monthlyValues).filter(([month]) =>
           selectedMonth === null || selectedMonth === undefined || Number(month) === selectedMonth
         );
@@ -508,7 +506,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
                     </Typography>
                     {unit === "number" && (
                       <>
-                        {renderInputFields()}
+                        {renderInputFields({ type: 'tahunan' })}
                         <Box sx={{ mt: 2 }}>
                           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 800, color: "#1e293b", display: 'flex', alignItems: 'center', gap: 1 }}>
                             <CloudUploadOutlined fontSize="small" color="primary" />
@@ -794,9 +792,9 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
                   <Box>
                     <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 800, color: "#1e293b", display: 'flex', alignItems: 'center', gap: 1 }}>
                       <DescriptionOutlined fontSize="small" color="primary" />
-                      Input Nilai Realisasiii
+                      Input Nilai Realisasi
                     </Typography>
-                    {renderInputFields()}
+                    {renderInputFields({ type: 'bulan' })}
                   </Box>
 
                   <Box>

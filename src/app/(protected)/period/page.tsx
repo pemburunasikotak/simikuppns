@@ -27,7 +27,7 @@ const PeriodPage: FC = (): ReactElement => {
     order: filters.order || "DESC",
     limit: filters.per_page ? Number(filters.per_page) : 10,
     page: filters.page ? Number(filters.page) : 1,
-    search: filters.search,
+    search: (filters.search_value as string) || (filters.search as string),
   });
 
   const searchQuery = filters.search || filters.search_value || "";

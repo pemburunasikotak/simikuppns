@@ -1,9 +1,9 @@
 import { SessionToken } from "@/libs/cookies";
-import { LoaderFunctionArgs, redirect } from "react-router";
+import { LoaderFunctionArgs } from "react-router";
 
-import { paths } from "./commons/constants/paths";
+// import { paths } from "./commons/constants/paths";
 
-const mappingPublicRoutes = ["/", "/auth/login", "/auth/oauth-callback", "/dashboard"];
+const mappingPublicRoutes = ["/portal-login", "/auth/login", "/auth/login-proker", "/auth/oauth-callback", "/dashboard"];
 
 export const middleware = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
@@ -16,7 +16,11 @@ export const middleware = async ({ request }: LoaderFunctionArgs) => {
   }
 
   if (!SessionTokenData) {
-    return redirect(`${paths.auth.login}?error=Sesi habis. Silakan login kembali.`);
+    // if (pathname === "/") {
+    //   return redirect(`/portal-login?error=Silakan login terlebih dahulu untuk mengakses portal.`);
+    // }
+    // return redirect(`${paths.auth.login}?error=Sesi habis. Silakan login kembali.`);
+    return null;
   }
 
   return null;

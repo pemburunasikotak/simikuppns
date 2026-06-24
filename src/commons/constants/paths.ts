@@ -1,5 +1,6 @@
 export const paths = {
   dashboard: "/dashboard",
+  portalDashboard: "/portal-dashboard",
   transaction: {
     list: "/transactions",
     create: "/transactions/create",
@@ -73,6 +74,7 @@ export const paths = {
   },
   auth: {
     login: "/auth/login",
+    loginProker: "/auth/login-proker",
     register: "/auth/register",
     callback: "/auth/oauth-callback",
     forgotPassword: "/auth/forgot-password",

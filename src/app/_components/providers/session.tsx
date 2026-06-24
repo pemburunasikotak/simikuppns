@@ -54,7 +54,7 @@ const SessionProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
         const user = res?.user || res?.data?.user || res;
 
         setSessionData(access_token ? { access_token } : undefined);
-        
+
         if (access_token) {
           SessionToken.set({
             access_token,
@@ -85,7 +85,7 @@ const SessionProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
     setSessionData(undefined);
     SessionUser.remove();
     SessionToken.remove();
-    navigate("/auth/login");
+    navigate("/");
   };
   return (
     <SessionContext.Provider

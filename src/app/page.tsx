@@ -3,9 +3,11 @@ import { paths } from '../commons/constants/paths';
 import { Typography, Grid, Card, CardContent, CardActionArea, Box } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
+// import { useSnackbar } from 'notistack';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  // const { enqueueSnackbar } = useSnackbar();
 
   return (
     <Box
@@ -149,7 +151,7 @@ export default function LandingPage() {
               },
             }}
           >
-            <CardActionArea onClick={() => alert('SIM PROKER - Segera Hadir')} sx={{ p: 4, height: "100%" }}>
+            <CardActionArea onClick={() => navigate(paths.auth.loginProker)} sx={{ p: 4, height: "100%" }}>
               <CardContent sx={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <Box
                   sx={{

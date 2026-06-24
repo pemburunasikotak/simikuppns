@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Add, FileDownloadOutlined, SearchOutlined } from "@mui/icons-material";
-import { Box, Button, Collapse, Grid, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Collapse, Grid, Stack, TextField, Typography, useTheme, useMediaQuery } from "@mui/material";
 
 import { useDebounce } from "@/app/_hooks/use-debounce";
 import { useFilter } from "@/app/_hooks/use-filter";
@@ -38,7 +38,6 @@ interface FilterProps {
   }[];
   defaultValue?: Record<string, unknown>;
   handleDownload?: () => void;
-  debounceDelay?: number;
 }
 
 const Filter = ({
@@ -51,56 +50,41 @@ const Filter = ({
   withAddButton = false,
   defaultValue,
   labelSearch = "",
-  debounceDelay,
+  handleDownload
 }: FilterProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [moreFilter, setMoreFilter] = useState(false);
-  const { control, handleSubmit, watch, reset, getValues, formState: { isDirty } } = useForm();
+  const { control, handleSubmit, watch, reset } = useForm();
   const { setFilter } = useFilter();
   const debounce = useDebounce();
 
   const handleApply = (data: object) => {
-    setFilter({ ...data, page: 1 });
+    setFilter(data);
   };
 
   const searchValue = watch("search_value");
-  const start = watch("start_date");
-  const end = watch("end_date");
-  const isFirstRender = useRef(true);
+  const start = watch("startDate");
+  const end = watch("endDate");
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-
-    if (!isDirty) {
-      return;
-    }
-
     debounce({
       cb: () => {
-        setFilter({ search_value: searchValue, start_date: start, end_date: end, page: 1 });
+        setFilter({ search_value: searchValue, startDate: start, endDate: end });
       },
-      delay: debounceDelay,
     });
-  }, [searchValue, start, end, debounce, debounceDelay, isDirty, setFilter]);
+  }, [searchValue, start, end, setFilter, debounce]);
 
   useEffect(() => {
     if (defaultValue) {
-      const currentValues = getValues();
-      const hasChanged = Object.keys(defaultValue).some(
-        (key) => (defaultValue[key] ?? "") !== (currentValues[key] ?? "")
-      );
-      if (hasChanged) {
-        reset(defaultValue);
-      }
+      reset(defaultValue);
     }
-  }, [defaultValue, reset, getValues]);
+  }, [defaultValue, reset]);
 
   return (
     <>
       <Stack
-        direction="row"
+        direction={{ xs: "column", sm: "row" }}
         sx={{
           flexWrap: "wrap",
           gap: "16px",
@@ -112,7 +96,8 @@ const Filter = ({
           sx={{
             alignItems: "center",
             flex: 1,
-            minWidth: "500px",
+            width: "100%",
+            minWidth: { xs: "100%", sm: "300px", md: "500px" },
           }}
         >
           <Controller
@@ -140,11 +125,9 @@ const Filter = ({
             <Button
               variant="text"
               sx={{
-                padding: "4px 23px",
+                padding: { xs: "4px 8px", sm: "4px 23px" },
               }}
-              onClick={() => {
-                // setDownloadPopup(true);
-              }}
+              onClick={handleDownload}
             >
               <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                 <Box
@@ -166,6 +149,7 @@ const Filter = ({
                   sx={{
                     fontSize: "15px",
                     fontWeight: 500,
+                    display: { xs: "none", sm: "block" }
                   }}
                 >
                   Excel
@@ -176,28 +160,28 @@ const Filter = ({
         </Stack>
 
         {variants.includes("date_range") ? (
-          <>
-            <Box>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ width: { xs: "100%", sm: "auto" } }}>
+            <Box sx={{ flex: 1 }}>
               <FormDateField
                 control={control}
-                name="start_date"
+                name="startDate"
                 format="YYYY-MM-DD"
                 placeholder="Dari Tanggal"
               />
             </Box>
-            <Box>
+            <Box sx={{ flex: 1 }}>
               <FormDateField
                 control={control}
-                name="end_date"
+                name="endDate"
                 format="YYYY-MM-DD"
                 placeholder="Sampai Tanggal"
               />
             </Box>
-          </>
+          </Stack>
         ) : null}
 
         {withAddButton ? (
-          <Button variant="contained" onClick={onAdd} startIcon={<Add />}>
+          <Button variant="contained" onClick={onAdd} startIcon={<Add />} fullWidth={isMobile}>
             {labelAdd}
           </Button>
         ) : null}

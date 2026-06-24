@@ -122,7 +122,6 @@ const PicPage: FC = (): ReactElement => {
           defaultValue={{
             search_value: filters.search || filters.search_value,
           }}
-          debounceDelay={1000}
         />
       }
     >

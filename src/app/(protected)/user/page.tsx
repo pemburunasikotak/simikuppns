@@ -242,7 +242,6 @@ const Component: FC = (): ReactElement => {
           defaultValue={{
             search_value: filters.search || filters.search_value,
           }}
-          debounceDelay={1000}
           actions={[
             <Button
               key="add"

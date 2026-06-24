@@ -39,10 +39,10 @@ export const getListComponent = async (
             responseData.result = {
                 data: responseData.data,
                 total: responseData.data.length,
-                currentPage: 1,
-                totalPage: 1,
-                hasPreviousPage: false,
-                hasNextPage: false
+                currentPage: responseData.data.page || 1,
+                totalPage: responseData.data.totalPages || 1,
+                hasPreviousPage: (responseData.data.page || 1) > 1,
+                hasNextPage: (responseData.data.page || 1) < (responseData.data.totalPages || 1)
             };
         } else {
             const data = responseData.data.data || [];
@@ -71,10 +71,10 @@ export const getDetailComponent = async (
             responseData.result = {
                 data: responseData.data,
                 total: responseData.data.length,
-                currentPage: 1,
-                totalPage: 1,
-                hasPreviousPage: false,
-                hasNextPage: false
+                currentPage: responseData.data.page || 1,
+                totalPage: responseData.data.totalPages || 1,
+                hasPreviousPage: (responseData.data.page || 1) > 1,
+                hasNextPage: (responseData.data.page || 1) < (responseData.data.totalPages || 1)
             };
         } else {
             responseData.result = responseData.data;

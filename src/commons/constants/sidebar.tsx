@@ -4,6 +4,7 @@ import {
   SettingsOutlined,
   PeopleOutlined,
   CorporateFareOutlined,
+  AssignmentIndOutlined,
 } from "@mui/icons-material";
 
 import { paths } from "./paths";
@@ -78,6 +79,12 @@ export const SIDEBAR_ITEMS: TSidebarItem[] = [
     label: "User",
     path: paths.user.list,
     icon: <PeopleOutlined />,
+  },
+  {
+    key: "pic",
+    label: "PIC",
+    path: paths.pic.list,
+    icon: <AssignmentIndOutlined />,
   },
   {
     key: "bidang",

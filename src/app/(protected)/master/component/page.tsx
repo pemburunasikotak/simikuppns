@@ -98,7 +98,7 @@ const Component: FC = (): ReactElement => {
       topPage={
         <Filter
           variants={["search"]}
-          labelSearch={"Cari IKP..."}
+          labelSearch={"IKP..."}
           defaultValue={{
             search_value: filters.search || filters.search_value,
           }}

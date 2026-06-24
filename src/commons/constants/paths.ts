@@ -109,5 +109,8 @@ export const paths = {
     edit: "/bidang/:id/edit",
     detail: "/bidang/:id",
   },
+  pic: {
+    list: "/pic",
+  },
 };
 

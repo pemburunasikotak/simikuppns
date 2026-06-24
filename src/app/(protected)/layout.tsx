@@ -500,7 +500,8 @@ const ProtectedLayout = () => {
     if (userRoleKeys.length > 0 && !isAdmin) {
       const isMasterPath = location.pathname.startsWith("/master");
       const isUserPath = location.pathname.startsWith("/user");
-      if (isMasterPath || isUserPath) {
+      const isPicPath = location.pathname.startsWith("/pic");
+      if (isMasterPath || isUserPath || isPicPath) {
         navigate("/dashboard", { replace: true });
       }
     }

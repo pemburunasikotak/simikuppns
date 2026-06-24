@@ -1,9 +1,10 @@
-import { authApi } from "@/libs/axios/api";
+import { api, authApi } from "@/libs/axios/api";
 import { TResponse } from "@/commons/types/response";
 import {
   TGetUsersParams,
   TAuthUsersResponse,
   TAuthUserItem,
+  TPICListResponse,
 } from "./type";
 
 export const getUsers = async (params: TGetUsersParams): Promise<TAuthUsersResponse> => {
@@ -57,6 +58,32 @@ export const getUsers = async (params: TGetUsersParams): Promise<TAuthUsersRespo
   //     totalPages: 1,
   //   },
   // });
+};
+
+export const getPICs = async (params: TGetUsersParams): Promise<TPICListResponse> => {
+  const { data } = await api({
+    url: `/api/users/pics`,
+    method: "GET",
+    params,
+  });
+
+  if (data.data && !data.result) {
+    const dataObj = data.data;
+    const pagination = dataObj.pagination || {};
+    const currentPage = pagination.page || dataObj.page || 1;
+    const totalPage = pagination.totalPages || Math.ceil((pagination.total || dataObj.total || 0) / (pagination.limit || dataObj.limit || 10)) || 1;
+
+    data.result = {
+      data: dataObj.data || [],
+      total: pagination.total || dataObj.total || 0,
+      currentPage: currentPage,
+      totalPage: totalPage,
+      hasPreviousPage: currentPage > 1,
+      hasNextPage: currentPage < totalPage,
+    };
+  }
+
+  return data;
 };
 
 export const getUser = async (id: string): Promise<TResponse<TAuthUserItem>> => {

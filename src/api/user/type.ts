@@ -51,3 +51,49 @@ export type TAuthUsersResponse = {
     totalPages: number;
   };
 };
+
+export type TPICIKUItem = {
+  id: string;
+  code: string;
+  name: string;
+};
+
+export type TPICComponentItem = {
+  id: string;
+  code: string;
+  name: string;
+  prodi?: {
+    id: string;
+    name: string;
+  };
+};
+
+export type TPICItem = {
+  id: string;
+  name: string;
+  email: string;
+  ikus: TPICIKUItem[];
+  components: TPICComponentItem[];
+};
+
+export type TPICListResponse = {
+  success: boolean;
+  message?: string;
+  data: {
+    data: TPICItem[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  };
+  result?: {
+    data: TPICItem[];
+    total: number;
+    currentPage: number;
+    totalPage: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+  };
+};

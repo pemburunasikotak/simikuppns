@@ -54,7 +54,7 @@ const Filter = ({
   debounceDelay,
 }: FilterProps) => {
   const [moreFilter, setMoreFilter] = useState(false);
-  const { control, handleSubmit, watch, reset } = useForm();
+  const { control, handleSubmit, watch, reset, getValues, formState: { isDirty } } = useForm();
   const { setFilter } = useFilter();
   const debounce = useDebounce();
 
@@ -72,19 +72,30 @@ const Filter = ({
       isFirstRender.current = false;
       return;
     }
+
+    if (!isDirty) {
+      return;
+    }
+
     debounce({
       cb: () => {
         setFilter({ search_value: searchValue, start_date: start, end_date: end, page: 1 });
       },
       delay: debounceDelay,
     });
-  }, [searchValue, start, end, setFilter, debounce, debounceDelay]);
+  }, [searchValue, start, end, debounce, debounceDelay, isDirty, setFilter]);
 
   useEffect(() => {
     if (defaultValue) {
-      reset(defaultValue);
+      const currentValues = getValues();
+      const hasChanged = Object.keys(defaultValue).some(
+        (key) => (defaultValue[key] ?? "") !== (currentValues[key] ?? "")
+      );
+      if (hasChanged) {
+        reset(defaultValue);
+      }
     }
-  }, [defaultValue, reset]);
+  }, [defaultValue, reset, getValues]);
 
   return (
     <>

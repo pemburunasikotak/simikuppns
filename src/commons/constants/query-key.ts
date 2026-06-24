@@ -98,6 +98,7 @@ export const queryKeys = {
     delete: "user/delete",
     edit: "user/edit",
     create: "user/create",
+    picList: "user/picList",
   },
   bidang: {
     list: "bidang/list",

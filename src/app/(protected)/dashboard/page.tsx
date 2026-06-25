@@ -65,6 +65,12 @@ const Component: FC = (): ReactElement => {
       width: 120,
     },
     {
+      field: "narrative",
+      headerName: "Narasi",
+      minWidth: 150,
+      flex: 0.8,
+    },
+    {
       field: "formulaVersion",
       headerName: "Versi Formula",
       width: 130,

@@ -126,14 +126,16 @@ const addRefreshInterceptor = (instance: AxiosInstance) => {
             isRefreshing = false;
             SessionToken.remove?.();
             if (typeof window !== "undefined") {
-              window.location.href = "/auth/login?error=Sesi habis. Silakan login kembali.";
+              window.location.href = "/"
+              // window.location.href = "/auth/login?error=Sesi habis. Silakan login kembali.";
             }
             return Promise.reject(refreshError);
           }
         } else {
           SessionToken.remove?.();
           if (typeof window !== "undefined") {
-            window.location.href = "/auth/login?error=Sesi habis. Silakan login kembali.";
+            // window.location.href = "/auth/login?error=Sesi habis. Silakan login kembali.";
+            window.location.href = "/"
           }
         }
       }

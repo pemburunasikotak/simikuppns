@@ -48,6 +48,7 @@ export const updateComponentRealization = async (payload: {
   value: string | number;
   documentIds: string[];
   prodiId?: string;
+  narrative?: string;
 }): Promise<TResponse<unknown>> => {
   const res = await api.post("/api/component-realizations", payload);
   // const res = await api.post("/api/iku-results", payload);
@@ -71,6 +72,7 @@ export const submitIkuResult = async (payload: {
   metadata?: Record<string, unknown>;
   formulaVersion?: string;
   calculatedAt?: string;
+  narrative?: string;
 }): Promise<TResponse<unknown>> => {
   const res = await api.post("/api/iku-results", payload);
   const responseData = res.data;

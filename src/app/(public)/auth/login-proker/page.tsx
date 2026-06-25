@@ -45,7 +45,7 @@ const Component: React.FC = () => {
 
   useEffect(() => {
     if (session.status === "authenticated") {
-      navigate(searchParams.get("callbackUrl") || "/dashboard");
+      navigate(searchParams.get("callbackUrl") || "/portal-dashboard");
     }
   }, [session.status, navigate, searchParams]);
 

@@ -11,6 +11,7 @@ export type TIKUResultItem = {
     updatedAt?: string | null;
     textValue?: string;
     month?: string;
+    narrative?: string;
     documentIds?: string[] | string;
     iku?: {
         id?: string;

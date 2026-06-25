@@ -41,6 +41,7 @@ interface RealizationUpdatePayload {
   value: string | number;
   documentIds: string[];
   prodiId?: string;
+  narrative?: string;
 }
 
 interface RealizationDialogProps {
@@ -79,8 +80,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
   type,
   unit
 }) => {
-  const isYearly = metricType.toLowerCase() === "tahunan" || metricType.toLowerCase() === "yearly";
-  console.log("unit", unit);
+  const isYearly = metricType.toLowerCase() === "tahunan" || metricType.toLowerCase() === "yearly" || metricType.toLowerCase() === "";
 
   const { data: componentDetailData, isLoading: isFetchingComponentDetail } = useGetDetailComponentRealization({
     id: idComponent,
@@ -103,6 +103,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
   const [fileItems, setFileItems] = useState<TFileItem[]>([]);
   const [selectedFileForDetail, setSelectedFileForDetail] = useState<TFileItem | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [narrativeValue, setNarrativeValue] = useState<string>("");
   const { enqueueSnackbar } = useSnackbar();
 
   const isImageFile = (item: TFileItem) => {
@@ -126,6 +127,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
       }
       setMonthlyValues(initialValues);
       setFileItems([]);
+      setNarrativeValue("");
     }
   }, [yearData, open, isYearly, idComponent]);
 
@@ -145,6 +147,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
           ...prev,
           [isYearly ? 0 : (Number(result.month) || 0)]: val !== undefined && val !== null ? val : "",
         }));
+        setNarrativeValue(result.narrative || "");
 
         const rawDocIds = result.documentIds;
         let docIds: string[] = [];
@@ -189,6 +192,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
             ...prev,
             [isYearly ? 0 : realization.month]: realization.value !== undefined && realization.value !== null ? realization.value : "",
           }));
+          setNarrativeValue(realization.narrative || "");
 
           const docs = realization.documents || [];
           if (docs.length > 0) {
@@ -362,6 +366,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
           metadata: {},
           formulaVersion: "1.0.0",
           calculatedAt: new Date().toISOString(),
+          narrative: narrativeValue,
         });
       } else {
         const monthsToUpdate = Object.entries(monthlyValues).filter(([month]) =>
@@ -379,6 +384,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
             metadata: {},
             formulaVersion: "1.0.0",
             calculatedAt: new Date().toISOString(),
+            narrative: narrativeValue,
           })
         );
         await Promise.all(savePromises);
@@ -432,6 +438,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
           year: yearData?.year || 0,
           value: isText ? (monthlyValues[0] || "") : (Number(monthlyValues[0]) || 0),
           documentIds: finalDocumentIds,
+          narrative: narrativeValue,
           ...(prodiId ? { prodiId } : {}),
         });
       } else {
@@ -447,6 +454,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
             year: yearData?.year || 0,
             value: isText ? (value || "") : (Number(value) || 0),
             documentIds: finalDocumentIds,
+            narrative: narrativeValue,
             ...(prodiId ? { prodiId } : {}),
           })
         );
@@ -785,6 +793,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
                         </Typography>
                       </Box>
                     )}
+
                   </Box>
                 </>
                 :
@@ -935,6 +944,23 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
                     </Typography>
                   </Box>
                 </>}
+              <Box>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={4}
+                  label="Narasi"
+                  placeholder="Masukkan narasi realisasi..."
+                  value={narrativeValue}
+                  onChange={(e) => setNarrativeValue(e.target.value)}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "12px",
+                      backgroundColor: "#fff",
+                    },
+                  }}
+                />
+              </Box>
             </Stack>
           )}
         </DialogContent>

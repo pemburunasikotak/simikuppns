@@ -80,12 +80,13 @@ const SessionProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   };
 
   const signout = () => {
+    navigate("/");
     setStatus("unauthenticated");
     postLogout().catch((err) => console.error("Logout API error:", err));
     setSessionData(undefined);
     SessionUser.remove();
     SessionToken.remove();
-    navigate("/");
+
   };
   return (
     <SessionContext.Provider

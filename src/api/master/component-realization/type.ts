@@ -10,6 +10,7 @@ export type TComponentRealizationItem = {
     year: number;
     month: number;
     value: number | string;
+    narrative?: string;
     createdAt?: string | null;
     updatedAt?: string | null;
     component?: Record<string, unknown>;
@@ -46,7 +47,7 @@ export type TComponentRealizationCreateRequest = {
     value: number;
     year?: number;
     month?: number;
-
+    narrative?: string;
 };
 
 export type TComponentRealizationUpdateRequest = {
@@ -55,6 +56,7 @@ export type TComponentRealizationUpdateRequest = {
     year?: number;
     month?: number;
     value?: number;
+    narrative?: string;
 };
 
 export type TGetComponentRealizationParams = {

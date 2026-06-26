@@ -1,7 +1,7 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json pnpm-lock.yaml .npmrc ./
-RUN corepack enable && corepack prepare pnpm@8.14.1 --activate && pnpm i --no-frozen-lockfile
+RUN corepack enable && corepack prepare pnpm@8.14.1 --activate && pnpm i --frozen-lockfile --ignore-engines
 COPY . .
 ARG VITE_API_BASE_URL
 ARG VITE_AUTH_API_BASE_URL

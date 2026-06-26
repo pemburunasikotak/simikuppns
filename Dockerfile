@@ -6,7 +6,7 @@ COPY . .
 ARG VITE_API_BASE_URL
 ARG VITE_AUTH_API_BASE_URL
 ARG VITE_BASE_URL
-RUN pnpm run build
+RUN pnpm exec vite build
 
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html

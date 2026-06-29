@@ -25,11 +25,21 @@ export type TDashboardIKUChartDataItem = {
   realization: number | null;
 };
 
+export type TDashboardIKUTableDataItem = {
+  period: string;
+  realization: string;
+  files?: {
+    name: string;
+    url: string;
+  }[];
+};
+
 export type TDashboardIKUItem = {
   ikuId: string;
   ikuCode: string;
   ikuName: string;
   chartData: TDashboardIKUChartDataItem[];
+  tableData: TDashboardIKUTableDataItem[];
 };
 
 export type TDashboardIKUResponse = TResponse<TDashboardIKUItem[]>;

@@ -246,7 +246,11 @@ const MetricDetailPage: FC = (): ReactElement => {
                                 const monthNum = i + 1;
                                 const realization = yearData.realizations.find(r => r.month === monthNum);
                                 const id = realization?.id || null;
-                                const val = realization ? Number(realization.value) : 0;
+
+                                const metrikUnit = metric.unit === "file" || metric.unit === "text"
+                                const val = metrikUnit && realization?.value ? 1 : realization ? Number(realization.value) : 0;
+
+
                                 return (
                                   <Box
                                     key={monthNum}
@@ -298,7 +302,7 @@ const MetricDetailPage: FC = (): ReactElement => {
                                         mt: 0.2
                                       }}
                                     >
-                                      {val}
+                                      {metrikUnit && realization?.value ? "Done" : val}
                                     </Typography>
                                   </Box>
                                 );

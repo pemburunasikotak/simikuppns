@@ -483,11 +483,15 @@ const ProtectedLayout = () => {
 
   const userRoleKeys = useMemo(() => user?.roles?.map((r) => r.key) || [], [user?.roles]);
   const isAdmin = userRoleKeys.includes("admin_sim_iku");
+  const isDewas = userRoleKeys.includes("dewas_sim_iku");
   // const isUser = userRoleKeys.includes("user_sim_iku");
 
   const filteredSidebarItems = SIDEBAR_ITEMS.filter((item) => {
     if (isAdmin) {
       return true;
+    }
+    if (isDewas) {
+      return item.key === "dashboard"
     }
     // if (isUser) {
     //   return item.key === "dashboard" || item.key === "component";

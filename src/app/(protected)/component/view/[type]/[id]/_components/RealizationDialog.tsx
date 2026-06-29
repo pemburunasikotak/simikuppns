@@ -257,7 +257,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
         fullWidth
         multiline={isText}
         rows={isText ? 4 : undefined}
-        label={`Nilai ${type === "bulan" ? "Bulanan" : "Tahunan"}`}
+        label={`Nilai`}
         value={monthlyValues[monthKey] ?? ""}
         onChange={(e) => handleValueChange(monthKey, e.target.value)}
         sx={{
@@ -354,13 +354,16 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
       }
 
       const isText = unit?.toLowerCase() === "text";
+      const isNumber = unit?.toLocaleLowerCase() === "number";
+
+      console.log("monthlyValues", monthlyValues[0], isNumber);
 
       if (isYearly) {
         await submitIkuResultMutation.mutateAsync({
           idIku: finalIdComponent,
           month: 0,
           year: yearData?.year || 0,
-          calculatedValue: isText ? 0 : (Number(monthlyValues[0]) || 0),
+          calculatedValue: isNumber ? (Number(monthlyValues[0]) || 0) : 0,
           textValue: isText ? (monthlyValues[0]?.toString() || "") : "",
           documentIds: finalDocumentIds,
           metadata: {},
@@ -378,7 +381,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
             idIku: finalIdComponent,
             month: Number(month),
             year: yearData?.year || 0,
-            calculatedValue: isText ? 0 : (Number(value) || 0),
+            calculatedValue: isNumber ? (Number(monthlyValues[0]) || 0) : 0,
             textValue: isText ? (value?.toString() || "") : "",
             documentIds: finalDocumentIds,
             metadata: {},

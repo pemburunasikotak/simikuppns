@@ -512,6 +512,22 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
                       <DescriptionOutlined fontSize="small" color="primary" />
                       Input Nilai Realisasi
                     </Typography>
+                    {unit === "text" && (
+                      <TextField
+                        fullWidth
+                        multiline={true}
+                        rows={4}
+                        label={`Deskripsi dan Keterangan`}
+                        value={monthlyValues[isYearly ? 0 : (selectedMonth ?? 0)] ?? ""}
+                        onChange={(e) => handleValueChange(isYearly ? 0 : (selectedMonth ?? 0), e.target.value)}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "12px",
+                            backgroundColor: "#fff",
+                          },
+                        }}
+                      />
+                    )}
                     {unit === "number" && (
                       <>
                         {renderInputFields({ type: 'tahunan' })}
@@ -654,12 +670,12 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
                         </Box>
                       </>
                     )}
-                    {dataType === "file" && (
+                    {unit === "file" && (
                       <Box>
-                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 800, color: "#1e293b", display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {/* <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 800, color: "#1e293b", display: 'flex', alignItems: 'center', gap: 1 }}>
                           <CloudUploadOutlined fontSize="small" color="primary" />
                           Upload Portofolio / Bukti Dukung <span style={{ color: '#ef4444' }}>*</span>
-                        </Typography>
+                        </Typography> */}
 
                         <Box
                           sx={{

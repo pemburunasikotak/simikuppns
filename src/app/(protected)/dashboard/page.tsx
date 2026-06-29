@@ -1,35 +1,82 @@
 import { FC, ReactElement, useState } from "react";
 import { Page } from "@/app/_components/ui";
-import { Card, Grid, Typography, Box, TextField } from "@mui/material";
+import { Card, Grid, Typography, Box, TextField, Link } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { GridColDef } from "@mui/x-data-grid";
-
 import DataTable from "@/app/_components/ui/data-table";
 import { createPaginationInfo } from "@/utils/data-table";
 import { formatDateTimeWIB } from "@/utils/date";
 import { useFilter } from "@/app/_hooks/use-filter";
 import { TGetIKUResultParams, TIKUResultItem } from "@/api/iku-result/type";
-import { TDashboardIKUItem, TDashboardIKUChartDataItem } from "@/api/dashboard/type";
+import { TDashboardIKUItem, TDashboardIKUChartDataItem, TDashboardIKUTableDataItem } from "@/api/dashboard/type";
 import useGetListIKUResult from "./_hooks/use-get-list-iku-result";
 import useGetDashboardIKU from "./_hooks/use-get-dashboard-iku";
 
 const Component: FC = (): ReactElement => {
   const { filters, setFilter } = useFilter<TGetIKUResultParams>();
   const [year, setYear] = useState<number>(new Date().getFullYear());
-
   const dashboardIKUQuery = useGetDashboardIKU({ year });
-
   const ikuResultQuery = useGetListIKUResult({
     order: "DESC",
     limit: filters.per_page ? Number(filters.per_page) : 10,
     page: filters.page ? Number(filters.page) : 1,
   });
-
   const periods = ["Q1", "Q2", "Q3", "Q4", "Year"];
-
-  // Chart data mapping moved to the render loop below
-
   const currentPage = ikuResultQuery.data?.result?.currentPage || 1;
+  const tableColumns: GridColDef<TDashboardIKUTableDataItem>[] = [
+    {
+      field: "period",
+      headerName: "Periode",
+      width: 100,
+    },
+    {
+      field: "realization",
+      headerName: "Realisasi",
+      minWidth: 150,
+      flex: 1,
+    },
+    {
+      field: "files",
+      headerName: "Bukti Dukung",
+      minWidth: 200,
+      flex: 1,
+      renderCell: (params) => {
+        const files = params.row.files || [];
+        if (files.length === 0) return "-";
+        return (
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, alignItems: "center", height: "100%" }}>
+            {files.map((file, fIdx) => {
+              const fileUrl = file.url.startsWith("http") ? file.url : `https://sim.ntech.web.id${file.url}`;
+              return (
+                <Link
+                  key={fIdx}
+                  href={fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  underline="hover"
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    backgroundColor: "#eff6ff",
+                    color: "#2563eb",
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                    "&:hover": {
+                      backgroundColor: "#dbeafe",
+                    }
+                  }}
+                >
+                  {file.name}
+                </Link>
+              );
+            })}
+          </Box>
+        );
+      }
+    }
+  ];
 
   const columns: GridColDef<TIKUResultItem>[] = [
     {
@@ -84,6 +131,9 @@ const Component: FC = (): ReactElement => {
     },
   ];
 
+  const dataDashboardIku = dashboardIKUQuery.data?.result.filter((item: TDashboardIKUItem) => item.chartData.length > 0) || [];
+  const dataDashboardNewIku = dashboardIKUQuery.data?.result.filter((item: TDashboardIKUItem) => item.tableData.length > 0) || [];
+
   return (
     <Page>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -99,7 +149,7 @@ const Component: FC = (): ReactElement => {
       </Box>
 
       <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-        {dashboardIKUQuery.data?.result?.map((iku: TDashboardIKUItem, index: number) => {
+        {dataDashboardIku.map((iku: TDashboardIKUItem, index: number) => {
           const chartData = iku.chartData || [];
           const series = [
             {
@@ -127,6 +177,26 @@ const Component: FC = (): ReactElement => {
                   height={300}
                   barLabel="value"
                   borderRadius={4}
+                />
+              </Card>
+            </Grid>
+          );
+        })}
+        {dataDashboardNewIku.map((iku: TDashboardIKUItem, index: number) => {
+          const tableData = iku.tableData || [];
+
+          return (
+            <Grid key={iku.ikuId || index} size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
+              <Card style={{ padding: 10, height: "100%" }}>
+                <Typography variant="h6" sx={{ marginBottom: 2, fontSize: '1.1rem' }}>
+                  {iku.ikuCode} - {iku.ikuName}
+                </Typography>
+                <DataTable
+                  loading={dashboardIKUQuery.isLoading}
+                  rows={tableData}
+                  columns={tableColumns}
+                  getRowId={(row) => row.period}
+                  hidePagination
                 />
               </Card>
             </Grid>

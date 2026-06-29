@@ -40,11 +40,12 @@ const Component: FC = (): ReactElement => {
       headerName: "Bukti Dukung",
       minWidth: 200,
       flex: 1,
+      cellClassName: "wrap-cell",
       renderCell: (params) => {
         const files = params.row.files || [];
         if (files.length === 0) return "-";
         return (
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, alignItems: "center", height: "100%" }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, alignItems: "flex-start", py: 0.5 }}>
             {files.map((file, fIdx) => {
               const fileUrl = file.url.startsWith("http") ? file.url : `https://sim.ntech.web.id${file.url}`;
               return (
@@ -196,7 +197,18 @@ const Component: FC = (): ReactElement => {
                   rows={tableData}
                   columns={tableColumns}
                   getRowId={(row) => row.period}
+                  getRowHeight={() => 'auto'}
                   hidePagination
+                  sx={{
+                    '& .MuiDataGrid-cell': {
+                      alignItems: 'flex-start',
+                      py: 1,
+                    },
+                    '& .wrap-cell': {
+                      whiteSpace: 'normal',
+                      lineHeight: 'normal',
+                    },
+                  }}
                 />
               </Card>
             </Grid>

@@ -106,6 +106,8 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
   const [narrativeValue, setNarrativeValue] = useState<string>("");
   const { enqueueSnackbar } = useSnackbar();
 
+  console.log('CEK DATA BARU', monthlyValues)
+
   const isImageFile = (item: TFileItem) => {
     if (item.file) {
       return item.file.type.startsWith("image/");
@@ -138,10 +140,12 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
 
     if (type === "IKU") {
       const data = ikuDetailData;
+      // console.log('CEK DATA', data)
       if (data?.result) {
         const result = data.result;
         const isText = unit?.toLowerCase() === "text";
-        const val = isText ? result.textValue : result.calculatedValue;
+        const val = isText ? result.textValue : Number(result.calculatedValue);
+        console.log('CEK DATA', val, result.calculatedValue)
 
         setMonthlyValues((prev) => ({
           ...prev,
@@ -251,6 +255,8 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
     const isText = unit?.toLowerCase() === "text";
     const monthKey = type === "bulan" ? (selectedMonth ?? 0) : 0;
 
+    console.log('HHEHHH', monthlyValues, selectedMonth)
+
     // if (isYearly) {
     return (
       <TextField
@@ -356,8 +362,6 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
       const isText = unit?.toLowerCase() === "text";
       const isNumber = unit?.toLocaleLowerCase() === "number";
 
-      console.log("monthlyValues", monthlyValues[0], isNumber);
-
       if (isYearly) {
         await submitIkuResultMutation.mutateAsync({
           idIku: finalIdComponent,
@@ -381,7 +385,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
             idIku: finalIdComponent,
             month: Number(month),
             year: yearData?.year || 0,
-            calculatedValue: isNumber ? (Number(monthlyValues[0]) || 0) : 0,
+            calculatedValue: isNumber ? (Number(value) || 0) : 0,
             textValue: isText ? (value?.toString() || "") : "",
             documentIds: finalDocumentIds,
             metadata: {},
@@ -410,10 +414,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
       const filesToUpload = fileItems.filter(item => !!item.file).map(item => item.file!);
       const existingIds = fileItems.filter(item => !!item.id).map(item => item.id!);
       if (filesToUpload.length > 0) {
-        console.log("Uploading files...", filesToUpload);
         const res = await uploadDocuments(filesToUpload);
-        console.log("Upload response:", res);
-
         if (res.status && res.result) {
           const uploadedIds = res.result.map((doc: { id: string }) => doc.id);
           finalDocumentIds = [...existingIds, ...uploadedIds];
@@ -423,8 +424,6 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
       } else {
         finalDocumentIds = existingIds;
       }
-
-      console.log("Saving realization with documentIds:", finalDocumentIds);
 
       const newIdComponent = componentDetailData?.result?.realization?.idComponent || idComponent;
       let finalIdComponent = newIdComponent;
@@ -533,7 +532,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
                     )}
                     {unit === "number" && (
                       <>
-                        {renderInputFields({ type: 'tahunan' })}
+                        {renderInputFields({ type: 'bulan' })}
                         <Box sx={{ mt: 2 }}>
                           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 800, color: "#1e293b", display: 'flex', alignItems: 'center', gap: 1 }}>
                             <CloudUploadOutlined fontSize="small" color="primary" />

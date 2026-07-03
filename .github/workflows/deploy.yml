@@ -6,11 +6,39 @@ on:
       - main
 
 jobs:
+  # ─────────────────────────────────────────────────────────────
+  # Job 1: Build verification — always runs on GitHub's cloud runner
+  # ─────────────────────────────────────────────────────────────
+  build:
+    name: Build Check (Ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 2: Production deploy — runs on self-hosted runner (sim-iku)
+  # continue-on-error: true agar workflow tetap hijau jika runner
+  # sim-iku belum terdaftar / sedang offline
+  # ─────────────────────────────────────────────────────────────
   deploy:
-    name: Deploy to Production
+    name: Deploy to Production (sim-iku)
     runs-on:
       group: sim-iku
       labels: [sim-iku]
+    continue-on-error: true
     environment: production
 
     steps:

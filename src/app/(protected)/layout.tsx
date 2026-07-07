@@ -7,7 +7,6 @@ import {
   Badge,
   Box,
   Button,
-  Chip,
   CircularProgress,
   Collapse,
   Dialog,
@@ -315,7 +314,7 @@ const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
           )}
 
           {/* Type badge */}
-          {user?.type && (
+          {/* {user?.type && (
             <Chip
               label={user.type}
               size="small"
@@ -323,7 +322,7 @@ const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
               variant="outlined"
               sx={{ fontWeight: 600, fontSize: "0.7rem" }}
             />
-          )}
+          )} */}
         </Box>
 
         <Divider sx={{ mb: 3 }}>

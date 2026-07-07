@@ -1,13 +1,14 @@
 import { SessionToken } from "@/libs/cookies";
-import { LoaderFunctionArgs } from "react-router";
+import { ProkerSessionToken } from "@/libs/localstorage/proker-session";
+import { LoaderFunctionArgs, redirect } from "react-router";
+import { paths } from "./commons/constants/paths";
 
-// import { paths } from "./commons/constants/paths";
-
-const mappingPublicRoutes = ["/portal-login", "/auth/login", "/auth/login-proker", "/auth/oauth-callback", "/dashboard"];
+const mappingPublicRoutes = ["/portal-login", "/auth/login", "/auth/login-proker", "/auth/oauth-callback", "/dashboard", "/"];
 
 export const middleware = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const SessionTokenData = SessionToken.get();
+  const ProkerTokenData = ProkerSessionToken.get();
 
   const pathname = url.pathname;
 
@@ -15,12 +16,18 @@ export const middleware = async ({ request }: LoaderFunctionArgs) => {
     return null;
   }
 
-  if (!SessionTokenData) {
-    // if (pathname === "/") {
-    //   return redirect(`/portal-login?error=Silakan login terlebih dahulu untuk mengakses portal.`);
-    // }
-    // return redirect(`${paths.auth.login}?error=Sesi habis. Silakan login kembali.`);
+  // Protect Proker routes
+  if (pathname.startsWith("/proker")) {
+    if (!ProkerTokenData) {
+      return redirect(`${paths.auth.loginProker}?error=Sesi habis. Silakan login kembali.`);
+    }
     return null;
+  }
+
+  // Protect IKU routes
+  if (!SessionTokenData) {
+    // return redirect(`${paths.auth.login}?error=Sesi habis. Silakan login kembali.`);
+    return null; // keeping existing logic for IKU
   }
 
   return null;

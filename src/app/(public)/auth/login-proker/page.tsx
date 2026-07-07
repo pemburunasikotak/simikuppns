@@ -10,14 +10,15 @@ import {
   Alert,
   Box,
 } from "@mui/material";
-import { useSession } from "@/app/_components/providers/session";
+import { useProkerSession } from "@/app/_components/providers/proker-session";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useForm } from "react-hook-form";
 import { loginSchema, TLoginFormData } from "../login/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { paths } from "@/commons/constants/paths";
 
 const Component: React.FC = () => {
-  const session = useSession();
+  const session = useProkerSession();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const error = searchParams.get("error");
@@ -45,7 +46,7 @@ const Component: React.FC = () => {
 
   useEffect(() => {
     if (session.status === "authenticated") {
-      navigate(searchParams.get("callbackUrl") || "/portal-dashboard");
+      navigate(searchParams.get("callbackUrl") || paths.proker.dashboard);
     }
   }, [session.status, navigate, searchParams]);
 
@@ -124,7 +125,7 @@ const Component: React.FC = () => {
             ) : null}
             <form onSubmit={handleSubmit(handleLogin)}>
               <TextField
-                label="NIP"
+                label="Username / NIP"
                 variant="outlined"
                 fullWidth
                 {...register("nip")}

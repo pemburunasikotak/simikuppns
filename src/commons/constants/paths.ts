@@ -112,5 +112,14 @@ export const paths = {
   pic: {
     list: "/pic",
   },
+  proker: {
+    dashboard: "/proker/dashboard",
+    unit: "/proker/unit",
+    integrasi: "/proker/integrasi",
+    output: "/proker/output",
+    program: "/proker/program",
+    aktivitas: "/proker/aktivitas",
+    progress: "/proker/progress",
+    evidence: "/proker/evidence",
+  },
 };
-

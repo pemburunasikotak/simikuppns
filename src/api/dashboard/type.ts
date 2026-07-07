@@ -38,6 +38,7 @@ export type TDashboardIKUItem = {
   ikuId: string;
   ikuCode: string;
   ikuName: string;
+  type?: string;
   chartData: TDashboardIKUChartDataItem[];
   tableData: TDashboardIKUTableDataItem[];
 };

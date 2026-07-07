@@ -61,7 +61,7 @@ const Component: FC = (): ReactElement => {
     },
     // { field: "description", headerName: "Deskripsi", minWidth: 250, flex: 1 },
     // { field: "isDirectInput", headerName: "Direct Input", minWidth: 100 },
-    // { field: "unit", headerName: "Unit", minWidth: 100 },
+    { field: "type", headerName: "Tipe", minWidth: 120 },
     {
       field: "actions",
       headerName: "Action",

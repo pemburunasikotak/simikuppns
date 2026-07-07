@@ -105,5 +105,13 @@ export const queryKeys = {
     detail: "bidang/detail",
     byUser: "bidang/byUser",
   },
+  proker: {
+    unit: "proker/unit",
+    output: "proker/output",
+    program: "proker/program",
+    aktivitas: "proker/aktivitas",
+    progress: "proker/progress",
+    evidence: "proker/evidence",
+  },
 } as const;
 

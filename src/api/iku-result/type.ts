@@ -17,6 +17,7 @@ export type TIKUResultItem = {
         id?: string;
         name?: string;
         code?: string;
+        type?: string;
     };
     period?: {
         idPeriod?: string;
@@ -34,6 +35,7 @@ export type TGetIKUResultParams = {
     search_value?: string;
     idIku?: string;
     idPeriod?: string;
+    type?: string;
 };
 
 export type TIKUResultListResponse = TResponsePaginate<TIKUResultItem>;

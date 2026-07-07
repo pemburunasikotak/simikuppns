@@ -1,11 +1,13 @@
 import { FC, ReactElement, useState } from "react";
 import { Page } from "@/app/_components/ui";
-import { Card, Grid, Typography, Box, TextField, Link } from "@mui/material";
+import { Card, Grid, Typography, Box, Link, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { GridColDef } from "@mui/x-data-grid";
 import DataTable from "@/app/_components/ui/data-table";
 import { createPaginationInfo } from "@/utils/data-table";
 import { formatDateTimeWIB } from "@/utils/date";
+import { DatePicker } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
 import { useFilter } from "@/app/_hooks/use-filter";
 import { TGetIKUResultParams, TIKUResultItem } from "@/api/iku-result/type";
 import { TDashboardIKUItem, TDashboardIKUChartDataItem, TDashboardIKUTableDataItem } from "@/api/dashboard/type";
@@ -132,21 +134,39 @@ const Component: FC = (): ReactElement => {
     },
   ];
 
-  const dataDashboardIku = dashboardIKUQuery.data?.result.filter((item: TDashboardIKUItem) => item.chartData.length > 0) || [];
-  const dataDashboardNewIku = dashboardIKUQuery.data?.result.filter((item: TDashboardIKUItem) => item.tableData.length > 0) || [];
+  const dataDashboardIkuRaw = dashboardIKUQuery.data?.result || [];
+  const dataDashboardIkuFiltered = filters.type
+    ? dataDashboardIkuRaw.filter((item: TDashboardIKUItem) => item.type === filters.type || item.ikuCode.startsWith(filters.type as string))
+    : dataDashboardIkuRaw;
+
+  const dataDashboardIku = dataDashboardIkuFiltered.filter((item: TDashboardIKUItem) => item.chartData.length > 0);
+  const dataDashboardNewIku = dataDashboardIkuFiltered.filter((item: TDashboardIKUItem) => item.tableData.length > 0);
+
+  const rawIkuResultData = ikuResultQuery.data?.result?.data || [];
+  const ikuResultData = filters.type
+    ? rawIkuResultData.filter((item) => item.iku?.type === filters.type || item.iku?.code?.startsWith(filters.type as string))
+    : rawIkuResultData;
 
   return (
     <Page>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5" fontWeight="bold">Dashboard IKU</Typography>
-        <TextField
-          label="Filter Tahun"
-          type="number"
-          size="small"
-          value={year}
-          onChange={(e) => setYear(Number(e.target.value))}
-          sx={{ width: 150, backgroundColor: 'background.paper' }}
-        />
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <DatePicker
+            label="Filter Tahun"
+            views={['year']}
+            value={dayjs().year(year)}
+            onChange={(newValue) => {
+              if (newValue) setYear(newValue.year());
+            }}
+            slotProps={{
+              textField: {
+                size: 'small',
+                sx: { width: 150, backgroundColor: 'background.paper' }
+              }
+            }}
+          />
+        </Box>
       </Box>
 
       <Grid container spacing={2} sx={{ marginBottom: 2 }}>
@@ -218,12 +238,27 @@ const Component: FC = (): ReactElement => {
         {/* Tabel IKU Result */}
         <Grid size={{ xs: 12 }}>
           <Card style={{ padding: 16 }}>
-            <Typography variant="h6" sx={{ marginBottom: 2 }}>
-              Hasil Kalkulasi IKU
-            </Typography>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
+              <Typography variant="h6" sx={{ marginBottom: 2 }}>
+                Hasil Kalkulasi IKU
+              </Typography>
+              <FormControl size="small" sx={{ minWidth: 150, backgroundColor: 'background.paper' }}>
+                <InputLabel id="filter-type-label">Tipe IKU</InputLabel>
+                <Select
+                  labelId="filter-type-label"
+                  value={filters.type || ""}
+                  label="Tipe IKU"
+                  onChange={(e) => setFilter({ type: e.target.value as string })}
+                >
+                  <MenuItem value=""><em>Semua</em></MenuItem>
+                  <MenuItem value="IKU_UTAMA">UTAMA</MenuItem>
+                  <MenuItem value="IKU_SPEKTA">SPAKTA</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
             <DataTable
               loading={ikuResultQuery.isLoading}
-              rows={ikuResultQuery.data?.result?.data || []}
+              rows={ikuResultData}
               columns={columns}
               getRowId={(row) => row.idResult}
               paginationInfo={createPaginationInfo({

@@ -1,6 +1,18 @@
 export type TProkerProgram = {
   id: string;
-  name: string; description?: string; outputId?: string;
+  code: string;
+  title: string;
+  description?: string;
+  objective?: string;
+  year: number;
+  unitId?: string;
+  categoryId?: string;
+  categoryName?: string;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  budget?: number;
+  picId?: string;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -20,3 +32,12 @@ export type TProkerProgramResponse = {
     }
   };
 };
+
+export type TProgramActivityPayload = {
+  title: string;
+  description: string;
+  weight: number;
+  startDate: string;
+  endDate: string;
+};
+

@@ -2,6 +2,7 @@ import { FC, ReactElement, useState } from "react";
 import { Button } from "@mui/material";
 import { AddOutlined } from "@mui/icons-material";
 import { GridColDef } from "@mui/x-data-grid";
+import { useNavigate } from "react-router";
 
 import { useGetPrograms } from "./_hooks/use-get-list-program";
 import { TProkerProgram } from "@/api/proker/program/type";
@@ -11,42 +12,61 @@ import Filter from "@/app/_components/ui/filter";
 import DataTable from "@/app/_components/ui/data-table";
 import { createPaginationInfo } from "@/utils/data-table";
 import ActionButtonTable from "@/app/_components/ui/action-button-table";
+import useModal from "@/app/_components/ui/modal";
+import useDeleteProgram from "./_hooks/use-delete-program";
+import { DeleteOutlined } from "@mui/icons-material";
 
 const ProgramPage: FC = (): ReactElement => {
+  const navigate = useNavigate();
+  const modal = useModal();
+  const deleteProgram = useDeleteProgram();
   const [filter, setFilter] = useState<Record<string, unknown>>({ per_page: 10 });
-  const { data, isLoading } = useGetPrograms({ 
-    page: filter.page ? Number(filter.page) : 1, 
-    limit: filter.per_page ? Number(filter.per_page) : 10 
+  const { data, isLoading } = useGetPrograms({
+    page: filter.page ? Number(filter.page) : 1,
+    limit: filter.per_page ? Number(filter.per_page) : 10
   });
-  
+
   const items = data?.data?.items || [];
 
   const columns: GridColDef<TProkerProgram>[] = [
-    { field: "name", headerName: "Nama Program", minWidth: 200, flex: 1 },
+    { field: "title", headerName: "Nama Program", minWidth: 200, flex: 1 },
     { field: "description", headerName: "Deskripsi", minWidth: 250, flex: 1 },
-    { field: "outputId", headerName: "ID Output", minWidth: 150, flex: 0.5 },
+    { field: "budget", headerName: "Anggaran", minWidth: 150, flex: 0.5 },
+    { field: "status", headerName: "Status", minWidth: 120, flex: 0.5 },
     {
       field: "actions",
       headerName: "Aksi",
-      width: 120,
+      width: 150,
       sortable: false,
       filterable: false,
       renderCell: (params) => {
         const actionItems = [
           {
+            key: "detail",
+            type: "detail" as const,
+            onClick: () => {
+              navigate(`/proker/program/${params.row.id}/aktivitas`);
+            },
+          },
+          {
             key: "edit",
             type: "edit" as const,
             onClick: () => {
-              // TODO: implement handleOpenEdit
-              console.log("Edit", params.row);
+              navigate(`/proker/program/${params.row.id}/edit`);
             },
           },
           {
             key: "delete",
             type: "delete" as const,
             onClick: () => {
-              // TODO: implement handleOpenDelete
-              console.log("Delete", params.row);
+              modal.confirm({
+                title: "Hapus Program",
+                description: "Apakah anda yakin ingin menghapus program ini?",
+                icon: <DeleteOutlined sx={{ height: 40, width: 40 }} />,
+                onOk: () => {
+                  deleteProgram.mutate({ id: params.row.id });
+                },
+              });
             },
           },
         ];
@@ -80,8 +100,7 @@ const ProgramPage: FC = (): ReactElement => {
               variant="contained"
               startIcon={<AddOutlined />}
               onClick={() => {
-                // TODO: implement handleOpenAdd
-                console.log("Add");
+                navigate("/proker/program/tambah");
               }}
             >
               Tambah Program

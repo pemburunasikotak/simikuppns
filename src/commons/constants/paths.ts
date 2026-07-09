@@ -118,7 +118,7 @@ export const paths = {
     integrasi: "/proker/integrasi",
     output: "/proker/output",
     program: "/proker/program",
-    aktivitas: "/proker/aktivitas",
+    aktivitas: "/proker/program/:id/aktivitas",
     progress: "/proker/progress",
     evidence: "/proker/evidence",
   },

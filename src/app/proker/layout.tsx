@@ -22,12 +22,7 @@ import {
 import {
   DashboardOutlined,
   CorporateFareOutlined,
-  IntegrationInstructionsOutlined,
-  AssignmentOutlined,
   ListAltOutlined,
-  EventNoteOutlined,
-  TrendingUpOutlined,
-  FolderOpenOutlined,
   Logout,
   Person,
   Settings,
@@ -61,40 +56,10 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
     icon: <CorporateFareOutlined />,
   },
   {
-    key: "proker-integrasi",
-    label: "Integrasi",
-    path: paths.proker.integrasi,
-    icon: <IntegrationInstructionsOutlined />,
-  },
-  {
-    key: "proker-output",
-    label: "Output",
-    path: paths.proker.output,
-    icon: <AssignmentOutlined />,
-  },
-  {
     key: "proker-program",
     label: "Program",
     path: paths.proker.program,
     icon: <ListAltOutlined />,
-  },
-  {
-    key: "proker-aktivitas",
-    label: "Aktivitas",
-    path: paths.proker.aktivitas,
-    icon: <EventNoteOutlined />,
-  },
-  {
-    key: "proker-progress",
-    label: "Progress",
-    path: paths.proker.progress,
-    icon: <TrendingUpOutlined />,
-  },
-  {
-    key: "proker-evidence",
-    label: "Evidence",
-    path: paths.proker.evidence,
-    icon: <FolderOpenOutlined />,
   },
 ];
 

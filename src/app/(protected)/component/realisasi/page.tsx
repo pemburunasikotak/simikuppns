@@ -110,7 +110,6 @@ const ComponentRealizationPage: FC = (): ReactElement => {
         boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.07)",
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         "&:hover": {
-          transform: "translateY(-8px)",
           boxShadow: "0 12px 48px 0 rgba(31, 38, 135, 0.15)",
           "& .action-buttons": {
             opacity: 1,
@@ -189,12 +188,7 @@ const ComponentRealizationPage: FC = (): ReactElement => {
             fontWeight: 700,
             mb: 1,
             color: "#1e293b",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
             lineHeight: 1.3,
-            minHeight: "2.6em",
           }}
         >
           {item.name}
@@ -205,10 +199,6 @@ const ComponentRealizationPage: FC = (): ReactElement => {
           sx={{
             color: "#64748b",
             mb: 2,
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
             fontSize: "0.875rem",
           }}
         >
@@ -329,12 +319,6 @@ const ComponentRealizationPage: FC = (): ReactElement => {
 
   return (
     <Page
-      // breadcrumbs={[
-      //   {
-      //     label: "Realisasi Komponen",
-      //     path: null,
-      //   },
-      // ]}
       topPage={
         <Filter
           variants={["search"]}
@@ -425,13 +409,11 @@ const ComponentRealizationPage: FC = (): ReactElement => {
           <>
             <Grid container spacing={3}>
               {metrics.map((item) => (
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={item.id}>
+                <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4 }} key={item.id}>
                   <MetricCard item={item} />
                 </Grid>
               ))}
             </Grid>
-
-            {/* Intersection Observer Target */}
             <Box
               ref={ref}
               sx={{

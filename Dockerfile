@@ -1,14 +1,23 @@
 FROM node:20-alpine AS builder
+
 WORKDIR /app
+
 COPY package*.json pnpm-lock.yaml .npmrc ./
+
 RUN corepack enable && corepack prepare pnpm@9.12.1 --activate && pnpm i --frozen-lockfile
+
 COPY . .
+
 ARG VITE_API_BASE_URL
 ARG VITE_AUTH_API_BASE_URL
 ARG VITE_BASE_URL
+ARG VITE_PROKER_API_BASE_URL
+
 RUN pnpm exec vite build
 
 FROM nginx:alpine
+
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 EXPOSE 80

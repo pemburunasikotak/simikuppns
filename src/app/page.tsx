@@ -169,7 +169,7 @@ export default function LandingPage() {
                   SIM PROKER
                 </Typography>
                 <Typography variant="body1" sx={{ color: "rgba(255, 255, 255, 0.8)", lineHeight: 1.6 }}>
-                  Sistem Informasi Manajemen Proker (Segera Hadir).
+                  Sistem Informasi Manajemen Proker.
                 </Typography>
               </CardContent>
             </CardActionArea>

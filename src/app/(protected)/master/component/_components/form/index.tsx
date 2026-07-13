@@ -215,7 +215,7 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues, isEdit }: Props) 
             required
             options={[
               { value: "monthly", label: "Bulanan" },
-              { value: "quarterly", label: "Triwulan" },
+              // { value: "quarterly", label: "Triwulan" },
               { value: "yearly", label: "Tahunan" },
             ]}
           />

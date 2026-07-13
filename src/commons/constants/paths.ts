@@ -121,5 +121,6 @@ export const paths = {
     aktivitas: "/proker/program/:id/aktivitas",
     progress: "/proker/progress",
     evidence: "/proker/evidence",
+    manajemenProgram: "/proker/manajemenProgram",
   },
 };

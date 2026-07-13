@@ -61,6 +61,12 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
     path: paths.proker.program,
     icon: <ListAltOutlined />,
   },
+  {
+    key: "proker-manajemen-program",
+    label: "Manajemen Program",
+    path: paths.proker.manajemenProgram,
+    icon: <CorporateFareOutlined />,
+  },
 ];
 
 interface SidebarItemProps {

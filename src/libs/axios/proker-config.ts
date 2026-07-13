@@ -3,15 +3,15 @@ import axios from "axios";
 import { env } from "../env";
 import { ProkerSessionToken } from "../localstorage/proker-session";
 
-const baseURL = 'https://proker.ntech.web.id'
+// const baseURL = 'https://proker.ntech.web.id'
 export const prokerAxios = axios.create({
-  // baseURL: env.VITE_PROKER_API_BASE_URL,
-  baseURL: baseURL,
+  baseURL: env.VITE_PROKER_API_BASE_URL,
+  // baseURL: baseURL,
 });
 
 const prokerAxiosConfig: AxiosRequestConfig = {
-  // baseURL: env.VITE_PROKER_API_BASE_URL,
-  baseURL: baseURL,
+  baseURL: env.VITE_PROKER_API_BASE_URL,
+  // baseURL: baseURL,
   paramsSerializer: (params: Record<string, unknown> | undefined) => {
     const queryString = Object.entries(params || {})
       .filter(([, value]) => value !== undefined && value !== "")

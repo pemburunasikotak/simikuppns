@@ -160,7 +160,7 @@ const Component: FC = (): ReactElement => {
               label="Tipe IKU"
               onChange={(e) => setFilter({ type: e.target.value as string })}
             >
-              <MenuItem value=""><em>SEMUA</em></MenuItem>
+              <MenuItem value="">SEMUA</MenuItem>
               <MenuItem value="IKU_UTAMA">UTAMA</MenuItem>
               <MenuItem value="IKU_SPEKTA">SPEKTA</MenuItem>
             </Select>

@@ -152,6 +152,19 @@ const Component: FC = (): ReactElement => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5" fontWeight="bold">Dashboard IKU</Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
+          <FormControl size="small" sx={{ minWidth: 150, backgroundColor: 'background.paper' }}>
+            <InputLabel id="filter-type-label">Tipe IKU</InputLabel>
+            <Select
+              labelId="filter-type-label"
+              value={filters.type || ""}
+              label="Tipe IKU"
+              onChange={(e) => setFilter({ type: e.target.value as string })}
+            >
+              <MenuItem value=""><em>Semua</em></MenuItem>
+              <MenuItem value="IKU_UTAMA">UTAMA</MenuItem>
+              <MenuItem value="IKU_SPEKTA">SPAKTA</MenuItem>
+            </Select>
+          </FormControl>
           <DatePicker
             label="Filter Tahun"
             views={['year']}
@@ -242,19 +255,7 @@ const Component: FC = (): ReactElement => {
               <Typography variant="h6" sx={{ marginBottom: 2 }}>
                 Hasil Kalkulasi IKU
               </Typography>
-              <FormControl size="small" sx={{ minWidth: 150, backgroundColor: 'background.paper' }}>
-                <InputLabel id="filter-type-label">Tipe IKU</InputLabel>
-                <Select
-                  labelId="filter-type-label"
-                  value={filters.type || ""}
-                  label="Tipe IKU"
-                  onChange={(e) => setFilter({ type: e.target.value as string })}
-                >
-                  <MenuItem value=""><em>Semua</em></MenuItem>
-                  <MenuItem value="IKU_UTAMA">UTAMA</MenuItem>
-                  <MenuItem value="IKU_SPEKTA">SPAKTA</MenuItem>
-                </Select>
-              </FormControl>
+
             </div>
             <DataTable
               loading={ikuResultQuery.isLoading}

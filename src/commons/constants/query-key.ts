@@ -113,5 +113,11 @@ export const queryKeys = {
     progress: "proker/progress",
     evidence: "proker/evidence",
   },
+  unit: {
+    list: "unit/list",
+    detail: "unit/detail",
+    users: "unit/users",
+    ikus: "unit/ikus",
+  },
 } as const;
 

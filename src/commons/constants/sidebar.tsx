@@ -86,10 +86,16 @@ export const SIDEBAR_ITEMS: TSidebarItem[] = [
     path: paths.pic.list,
     icon: <AssignmentIndOutlined />,
   },
+  // {
+  //   key: "bidang",
+  //   label: "Bidang",
+  //   path: paths.bidang.list,
+  //   icon: <CorporateFareOutlined />,
+  // },
   {
-    key: "bidang",
-    label: "Bidang",
-    path: paths.bidang.list,
+    key: "unit",
+    label: "Unit",
+    path: paths.unit.list,
     icon: <CorporateFareOutlined />,
   },
 ];

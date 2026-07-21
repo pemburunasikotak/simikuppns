@@ -112,6 +112,10 @@ export const paths = {
   pic: {
     list: "/pic",
   },
+  unit: {
+    list: "/unit",
+    detail: "/unit/:id",
+  },
   proker: {
     dashboard: "/proker/dashboard",
     unit: "/proker/unit",

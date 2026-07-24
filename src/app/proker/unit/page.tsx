@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import {
   Typography,
   Button,
@@ -24,6 +25,7 @@ import { Page } from "@/app/_components/ui";
 import Filter from "@/app/_components/ui/filter";
 
 export default function UnitPage() {
+  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
   const query = useGetProkerUnits();
@@ -111,11 +113,16 @@ export default function UnitPage() {
     {
       field: "actions",
       headerName: "Aksi",
-      width: 120,
+      width: 150,
       sortable: false,
       filterable: false,
       renderCell: (params) => {
         const items = [
+          {
+            key: "detail",
+            type: "detail" as const,
+            onClick: () => navigate(`/proker/unit/${params.row.id}`),
+          },
           {
             key: "edit",
             type: "edit" as const,

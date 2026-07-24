@@ -50,6 +50,7 @@ export type TUnitUserItem = {
   createdAt: string;
   updatedAt?: string | null;
   memberType: "PIC" | "MEMBER";
+  items?: TUnitUserItem;
 };
 
 export type TUnitUsersResponse = {

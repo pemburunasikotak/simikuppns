@@ -51,7 +51,7 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
   },
   {
     key: "proker-unit",
-    label: "Manajemen Unit",
+    label: "Unit",
     path: paths.proker.unit,
     icon: <CorporateFareOutlined />,
   },

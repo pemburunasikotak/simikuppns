@@ -4,33 +4,34 @@ import { useNavigate, useParams } from "react-router";
 import { Page } from "@/app/_components/ui";
 import { TDefaultProgramPayload } from "@/api/proker/manajemenProgram/type";
 
-import DefaultProgramForm from "../../_components/form";
-import useUpdateDefaultProgram from "../../_hooks/use-update-default-program";
-import useGetDefaultProgram from "../../_hooks/use-get-default-program";
-import { TDefaultProgramFormData } from "../../_components/form/schema";
+import DefaultProgramForm from "../../../../_components/form";
+import useUpdateDefaultProgram from "../../../../_hooks/use-update-default-program";
+import useGetDefaultProgram from "../../../../_hooks/use-get-default-program";
+import { TDefaultProgramFormData } from "../../../../_components/form/schema";
 
 const EditDefaultProgramPage = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id, programId } = useParams<{ id: string; programId: string }>();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
-  const { data: programData, isLoading } = useGetDefaultProgram(id as string, !!id);
+  const { data: programData, isLoading } = useGetDefaultProgram(programId as string, !!programId);
   const mutation = useUpdateDefaultProgram();
 
   const handleSubmit = (data: TDefaultProgramFormData) => {
-    if (!id) return;
+    if (!programId) return;
 
     const payload: TDefaultProgramPayload = {
       ikuId: data.ikuId.value,
       ikuCode: data.ikuCode,
       title: data.title,
       description: data.description,
+      indicators: data.indicators && data.indicators.length > 0 ? data.indicators.map(ind => ({ ...ind, status: "DRAFT" })) : undefined,
     };
 
-    mutation.mutate({ id, payload }, {
+    mutation.mutate({ id: programId, payload }, {
       onSuccess: () => {
         enqueueSnackbar("Berhasil mengubah Program", { variant: "success" });
-        navigate("/proker/manajemenProgram");
+        navigate(`/proker/manajemenProgram/${id}`);
       },
       onError: () => {
         enqueueSnackbar("Gagal mengubah Program", { variant: "error" });
@@ -65,6 +66,10 @@ const EditDefaultProgramPage = () => {
         {
           label: "Manajemen Program",
           path: "/proker/manajemenProgram",
+        },
+        {
+          label: "Program",
+          path: `/proker/manajemenProgram/${id}`,
         },
         {
           label: "Edit Program",

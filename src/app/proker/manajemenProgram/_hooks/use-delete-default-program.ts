@@ -7,7 +7,7 @@ export const useDeleteDefaultProgram = () => {
   return useMutation({
     mutationFn: ({ id }: { id: string }) => deleteDefaultProgram(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["proker", "default-program", "list"] });
+      queryClient.invalidateQueries({ queryKey: ["proker", "default-program"] });
     },
   });
 };

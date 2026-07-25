@@ -1,8 +1,8 @@
 import React from "react";
-import { DeleteOutline, EditOutlined, Lock, VisibilityOutlined } from "@mui/icons-material";
-import { ButtonProps, Button as MuiButton, Stack, styled } from "@mui/material";
+import { AssignmentOutlined, DeleteOutline, EditOutlined, Lock, VisibilityOutlined } from "@mui/icons-material";
+import { ButtonProps, Button as MuiButton, Stack, styled, Tooltip } from "@mui/material";
 
-type ItemType = "detail" | "delete" | "edit" | "lock";
+type ItemType = "detail" | "delete" | "edit" | "lock" | "assign";
 interface Props {
   items: {
     key: React.Key;
@@ -25,6 +25,7 @@ const ActionButtonTable = ({ items }: Props) => {
     delete: "error",
     edit: "warning",
     lock: "warning",
+    assign: "primary",
   };
 
   const itemIcon: Record<ItemType, React.ReactNode> = {
@@ -32,7 +33,17 @@ const ActionButtonTable = ({ items }: Props) => {
     delete: <DeleteOutline fontSize="small" />,
     edit: <EditOutlined fontSize="small" />,
     lock: <Lock fontSize="small" />,
+    assign: <AssignmentOutlined fontSize="small" />,
   };
+
+  const itemLabel: Record<ItemType, string> = {
+    detail: "Detail",
+    delete: "Hapus",
+    edit: "Ubah",
+    lock: "Kunci",
+    assign: "Tugaskan",
+  };
+
   return (
     <Stack
       direction="row"
@@ -45,22 +56,29 @@ const ActionButtonTable = ({ items }: Props) => {
         width: "100%",
       }}
     >
-      {items.map((item) =>
-        item.render ? (
-          item.render
-        ) : (
-          <Button
-            key={item.key}
-            variant="text"
-            color={item.type ? itemColor[item.type] : undefined}
-            onClick={item.onClick}
-            size="small"
-            disabled={item.disabled}
-          >
-            {item.type ? itemIcon[item.type] : undefined}
-          </Button>
-        ),
-      )}
+      {items.map((item) => {
+        if (item.render) {
+          return <React.Fragment key={item.key}>{item.render}</React.Fragment>;
+        }
+
+        const label = item.label || (item.type ? itemLabel[item.type] : "");
+
+        return (
+          <Tooltip key={item.key} title={label} arrow placement="top">
+            <span>
+              <Button
+                variant="text"
+                color={item.type ? itemColor[item.type] : undefined}
+                onClick={item.onClick}
+                size="small"
+                disabled={item.disabled}
+              >
+                {item.type ? itemIcon[item.type] : undefined}
+              </Button>
+            </span>
+          </Tooltip>
+        );
+      })}
     </Stack>
   );
 };

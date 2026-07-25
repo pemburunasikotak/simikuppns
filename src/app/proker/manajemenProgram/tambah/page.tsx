@@ -16,16 +16,17 @@ const CreateDefaultProgramPage = () => {
 
   const handleSubmit = (data: TDefaultProgramFormData) => {
     const payload: TDefaultProgramPayload = {
-      ikuId: data.ikuId.value,
-      ikuCode: data.ikuCode,
+      ikuId: data.ikuId?.value || "",
+      ikuCode: data.ikuCode || "",
       title: data.title,
       description: data.description,
+      indicators: data.indicators && data.indicators.length > 0 ? data.indicators.map(ind => ({ ...ind, status: "DRAFT" })) : undefined,
     };
 
     mutation.mutate(payload, {
       onSuccess: () => {
         enqueueSnackbar("Berhasil menambahkan Program", { variant: "success" });
-        navigate("/proker/manajemenProgram");
+        navigate(-1);
       },
       onError: () => {
         enqueueSnackbar("Gagal menambahkan Program", { variant: "error" });

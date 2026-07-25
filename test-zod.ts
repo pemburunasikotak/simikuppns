@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const defaultProgramSchema = z.object({
+const defaultProgramSchema = z.object({
   ikuId: z.object({
     value: z.string(),
     label: z.string(),
@@ -15,4 +15,15 @@ export const defaultProgramSchema = z.object({
   })).optional(),
 });
 
-export type TDefaultProgramFormData = z.infer<typeof defaultProgramSchema>;
+const data = {
+  ikuId: { value: "123", label: "IKU" },
+  ikuCode: "IKU-01",
+  title: "Test",
+  description: "Test desc",
+  indicators: [
+    { name: "Ind", unit: "Unit", order: "1" }
+  ]
+};
+
+const result = defaultProgramSchema.safeParse(data);
+console.log(JSON.stringify(result, null, 2));

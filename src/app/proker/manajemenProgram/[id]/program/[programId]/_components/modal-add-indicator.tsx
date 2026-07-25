@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, Grid } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -58,10 +58,10 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
-  const unitOptions = unitsData?.items.map((unit) => ({
+  const unitOptions = useMemo(() => unitsData?.items.map((unit) => ({
     value: unit.id,
     label: unit.name,
-  })) || [];
+  })) || [], [unitsData]);
 
   const { control, handleSubmit, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -110,7 +110,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
         });
       }
     }
-  }, [open, mode, selectedIndicator, reset, unitOptions.length]);
+  }, [open, mode, selectedIndicator, reset, unitOptions]);
 
   const handleClose = () => {
     reset();

@@ -34,7 +34,7 @@ const EditAktivitasPage: FC = (): ReactElement => {
       {
         onSuccess: () => {
           enqueueSnackbar("Berhasil mengubah aktivitas", { variant: "success" });
-          navigate(`/proker/program/${id}/aktivitas`);
+          navigate(`/proker/program/${id}`);
         },
         onError: () => {
           enqueueSnackbar("Gagal mengubah aktivitas", { variant: "error" });
@@ -44,7 +44,7 @@ const EditAktivitasPage: FC = (): ReactElement => {
   };
 
   const handleCancel = () => {
-    navigate(`/proker/program/${id}/aktivitas`);
+    navigate(`/proker/program/${id}`);
   };
 
   const defaultValues = activityData ? {
@@ -69,7 +69,7 @@ const EditAktivitasPage: FC = (): ReactElement => {
         },
         {
           label: "Aktivitas",
-          path: `/proker/program/${id}/aktivitas`,
+          path: `/proker/program/${id}`,
         },
         {
           label: "Edit",

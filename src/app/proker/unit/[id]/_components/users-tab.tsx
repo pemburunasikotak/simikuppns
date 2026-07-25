@@ -29,6 +29,7 @@ import { useFilter } from "@/app/_hooks/use-filter";
 import useGetUnitUsers from "../_hooks/use-get-unit-users";
 import useAssignUsers from "../_hooks/use-assign-users";
 import useGetListUser from "../_hooks/use-get-list-user";
+import useGetUnitDetails from "../_hooks/use-get-unit-details";
 import { getErrorMessage } from "./utils";
 import { TUnitUserItem } from "../_hooks/use-get-unit-users";
 import TabPanel from "./tab-panel";
@@ -80,6 +81,20 @@ const UsersTab: FC<UsersTabProps> = ({ unitId, value, index }) => {
 
   const allUsers = extractArray(allUsersQuery.data);
   const assignUserMutation = useAssignUsers(unitId);
+  const detailQuery = useGetUnitDetails(unitId);
+
+  const handleOpenAssign = () => {
+    if (detailQuery.data?.users && detailQuery.data.users.length > 0) {
+      const rows = detailQuery.data.users.map((u: { id?: string; userId?: string; user?: { id?: string }; memberType?: string; type?: string }) => ({
+        userId: u.id || u.userId || (u.user && u.user.id) || "",
+        type: (u.memberType || u.type || "PIC") as "PIC" | "MEMBER",
+      }));
+      setAssignRows(rows);
+    } else {
+      setAssignRows([{ userId: "", type: "PIC" }]);
+    }
+    setIsAssignUserOpen(true);
+  };
 
   const handleAddRow = () => setAssignRows((prev) => [...prev, { userId: "", type: "PIC" }]);
   const handleRemoveRow = (idx: number) => setAssignRows((prev) => prev.filter((_, i) => i !== idx));
@@ -146,7 +161,7 @@ const UsersTab: FC<UsersTabProps> = ({ unitId, value, index }) => {
         <Button
           variant="contained"
           startIcon={<PersonAddOutlined />}
-          onClick={() => setIsAssignUserOpen(true)}
+          onClick={handleOpenAssign}
         >
           Tambah Anggota
         </Button>

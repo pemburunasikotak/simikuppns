@@ -1,3 +1,5 @@
+import { TDefaultProgramIndicator } from "../manajemenProgram/type";
+
 export type TProkerProgram = {
   id: string;
   code: string;
@@ -15,6 +17,7 @@ export type TProkerProgram = {
   picId?: string;
   createdAt?: string;
   updatedAt?: string;
+  indicators?: TDefaultProgramIndicator[];
 };
 
 export type TProkerProgramPayload = Omit<TProkerProgram, 'id' | 'createdAt' | 'updatedAt'>;

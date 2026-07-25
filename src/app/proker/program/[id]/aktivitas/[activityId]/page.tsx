@@ -24,7 +24,7 @@ const DetailAktivitasPage: FC = (): ReactElement => {
         },
         {
           label: "Aktivitas",
-          path: `/proker/program/${id}/aktivitas`,
+          path: `/proker/program/${id}`,
         },
         {
           label: "Detail",

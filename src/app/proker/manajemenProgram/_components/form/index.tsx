@@ -15,9 +15,10 @@ interface Props {
   loading?: boolean;
   handleSubmit: (data: TDefaultProgramFormData) => void;
   defaultValues?: Partial<TDefaultProgramFormData>;
+  isEditMode?: boolean;
 }
 
-const DefaultProgramForm = ({ loading, handleSubmit, defaultValues }: Props) => {
+const DefaultProgramForm = ({ loading, handleSubmit, defaultValues, isEditMode }: Props) => {
   const form = useForm<TDefaultProgramFormData>({
     resolver: zodResolver(defaultProgramSchema),
     mode: "onChange",
@@ -98,23 +99,23 @@ const DefaultProgramForm = ({ loading, handleSubmit, defaultValues }: Props) => 
   return (
     <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log("Form Errors:", errors))}>
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12 }} sx={{ display: queryIkuId ? "none" : "block" }}>
+        <Grid size={{ xs: 12 }} sx={{ display: (queryIkuId || isEditMode) ? "none" : "block" }}>
           <FormAutoCompleteField
             label="Pilih IKU"
             control={form.control}
             name="ikuId"
-            required={!queryIkuId}
+            required={!queryIkuId && !isEditMode}
             placeholder="Pilih IKU"
             options={ikuOptions}
           />
         </Grid>
-        <Grid size={{ xs: 12 }} sx={{ display: queryIkuId ? "none" : "block" }}>
+        <Grid size={{ xs: 12 }} sx={{ display: (queryIkuId || isEditMode) ? "none" : "block" }}>
           <FormTextField
             variant="filled"
             label="Kode IKU"
             control={form.control}
             name="ikuCode"
-            required={!queryIkuId}
+            required={!queryIkuId && !isEditMode}
             InputProps={{ readOnly: true }}
             placeholder="Otomatis terisi setelah memilih IKU"
           />

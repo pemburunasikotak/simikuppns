@@ -1,5 +1,5 @@
 import { FC, ReactElement, useState } from "react";
-import { Button } from "@mui/material";
+import { Button, Chip, Stack, Tooltip } from "@mui/material";
 import { AddOutlined } from "@mui/icons-material";
 import { GridColDef } from "@mui/x-data-grid";
 import { useNavigate } from "react-router";
@@ -29,10 +29,34 @@ const ProgramPage: FC = (): ReactElement => {
   const items = data?.data?.items || [];
 
   const columns: GridColDef<TProkerProgram>[] = [
+    { field: "code", headerName: "Kode Program", width: 150 },
     { field: "title", headerName: "Nama Program", minWidth: 200, flex: 1 },
     { field: "description", headerName: "Deskripsi", minWidth: 250, flex: 1 },
-    { field: "budget", headerName: "Anggaran", minWidth: 150, flex: 0.5 },
-    { field: "status", headerName: "Status", minWidth: 120, flex: 0.5 },
+    { field: "objective", headerName: "Objective", minWidth: 200, flex: 1 },
+    { field: "year", headerName: "Tahun", width: 100 },
+    {
+      field: "indicators",
+      headerName: "Indikator",
+      minWidth: 200,
+      flex: 1,
+      renderCell: (params) => {
+        const indicators = params.row.indicators || [];
+        if (indicators.length === 0) return "-";
+        
+        return (
+          <Tooltip title={indicators.map((ind) => ind.name).join(", ")}>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ height: "100%", overflow: "hidden" }}>
+              {indicators.slice(0, 2).map((ind, i) => (
+                <Chip key={i} label={ind.name} size="small" variant="outlined" />
+              ))}
+              {indicators.length > 2 && (
+                <Chip label={`+${indicators.length - 2}`} size="small" variant="outlined" />
+              )}
+            </Stack>
+          </Tooltip>
+        );
+      },
+    },
     {
       field: "actions",
       headerName: "Aksi",
@@ -45,7 +69,7 @@ const ProgramPage: FC = (): ReactElement => {
             key: "detail",
             type: "detail" as const,
             onClick: () => {
-              navigate(`/proker/program/${params.row.id}/aktivitas`);
+              navigate(`/proker/program/${params.row.id}`);
             },
           },
           {

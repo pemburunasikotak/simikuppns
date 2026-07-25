@@ -26,7 +26,7 @@ const TambahAktivitasPage: FC = (): ReactElement => {
     createMutation.mutate(payload, {
       onSuccess: () => {
         enqueueSnackbar("Berhasil menambahkan aktivitas", { variant: "success" });
-        navigate(`/proker/program/${id}/aktivitas`);
+        navigate(`/proker/program/${id}`);
       },
       onError: () => {
         enqueueSnackbar("Gagal menambahkan aktivitas", { variant: "error" });
@@ -35,7 +35,7 @@ const TambahAktivitasPage: FC = (): ReactElement => {
   };
 
   const handleCancel = () => {
-    navigate(`/proker/program/${id}/aktivitas`);
+    navigate(`/proker/program/${id}`);
   };
 
   return (
@@ -52,7 +52,7 @@ const TambahAktivitasPage: FC = (): ReactElement => {
         },
         {
           label: "Aktivitas",
-          path: `/proker/program/${id}/aktivitas`,
+          path: `/proker/program/${id}`,
         },
         {
           label: "Tambah",

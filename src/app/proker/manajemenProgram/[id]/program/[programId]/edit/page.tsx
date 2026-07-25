@@ -52,6 +52,11 @@ const EditDefaultProgramPage = () => {
         ikuCode: programData.data.ikuCode,
         title: programData.data.title,
         description: programData.data.description,
+        indicators: programData.data.indicators?.map(indicator => ({
+          name: indicator.name,
+          unit: indicator.unit,
+          order: indicator.order,
+        })) || [],
       }
     : {};
 
@@ -81,6 +86,7 @@ const EditDefaultProgramPage = () => {
         loading={mutation.isPending}
         handleSubmit={handleSubmit}
         defaultValues={defaultValues}
+        isEditMode={true}
       />
     </Page>
   );

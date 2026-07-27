@@ -196,7 +196,7 @@ export default function StructureView() {
                     </ListItemIcon>
                     <ListItemText
                       primary={<Typography variant="body2" fontWeight={selectedIkuId === iku.id ? "bold" : "medium"}>{iku.name}</Typography>}
-                      secondary={<Typography variant="caption" color="textSecondary" noWrap>{iku.description}</Typography>}
+                      secondary={<Typography variant="caption" color="textSecondary" sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>{iku.description}</Typography>}
                     />
                   </ListItemButton>
                 ))

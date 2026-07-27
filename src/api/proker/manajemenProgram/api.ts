@@ -39,6 +39,11 @@ export const getListIkuProker = async (params?: Record<string, unknown>): Promis
   return data;
 };
 
+export const getIkuUnits = async (ikuId: string): Promise<{ data: Record<string, unknown>[] }> => {
+  const { data } = await prokerAxiosInstance.get(`/api/v1/ikus/${ikuId}/units`);
+  return data;
+};
+
 export const getDefaultProgramsByIku = async (ikuId: string): Promise<TDefaultProgram[]> => {
   const { data } = await prokerAxiosInstance.get(`/api/v1/default-programs/by-iku/${ikuId}`);
   // If the API returns `{ isSuccess: true, data: [...] }`

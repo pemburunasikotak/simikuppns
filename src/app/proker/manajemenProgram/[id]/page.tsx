@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router";
-import { Typography, Box, Button, Chip, Dialog, DialogTitle, DialogContent, DialogActions, Autocomplete, TextField } from "@mui/material";
+import { Typography, Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Autocomplete, TextField } from "@mui/material";
 import { ArrowBack, AddOutlined, DeleteOutlined } from "@mui/icons-material";
 import { GridColDef } from "@mui/x-data-grid";
 
@@ -54,25 +54,18 @@ const DetailDefaultProgramPage = () => {
     },
     {
       field: "indicators",
-      headerName: "Indikator",
+      headerName: "Jumlah Indikator",
       minWidth: 300,
       flex: 1.5,
       renderCell: (params) => {
         const indicators = params.row.indicators || [];
-        if (!indicators.length) return <Typography variant="body2" color="textSecondary" sx={{ py: 1.5 }}>Belum ada indikator</Typography>;
-        return (
-          <Box display="flex" flexWrap="wrap" gap={0.5} py={1}>
-            {indicators.map((ind) => (
-              <Chip key={ind.id} label={`${ind.name} (${ind.unit})`} size="small" variant="outlined" />
-            ))}
-          </Box>
-        );
+        return <Typography variant="body2" color="textSecondary" sx={{ py: 1.5 }}>{indicators.length} Indikator</Typography>;
       },
     },
     {
       field: "actions",
       headerName: "Aksi",
-      width: 200,
+      width: 150,
       sortable: false,
       filterable: false,
       renderCell: (params) => {
@@ -84,14 +77,14 @@ const DetailDefaultProgramPage = () => {
               navigate(`/proker/manajemenProgram/${id}/program/${params.row.id}`);
             },
           },
-          {
-            key: "assign",
-            type: "assign" as const,
-            onClick: () => {
-              setAssignPayload({ defaultProgramId: params.row.id, unitId: "", period: new Date().getFullYear() });
-              setIsAssignModalOpen(true);;
-            },
-          },
+          // {
+          //   key: "assign",
+          //   type: "assign" as const,
+          //   onClick: () => {
+          //     setAssignPayload({ defaultProgramId: params.row.id, unitId: "", period: new Date().getFullYear() });
+          //     setIsAssignModalOpen(true);;
+          //   },
+          // },
           {
             key: "edit",
             type: "edit" as const,

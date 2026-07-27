@@ -14,7 +14,8 @@ import useGetDefaultProgram from "../../../_hooks/use-get-default-program";
 import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
 import useDeleteProgramIndicator from "./_hooks/use-delete-program-indicator";
 import useAssignProgramIndicator from "./_hooks/use-assign-program-indicator";
-import { useGetProkerUnits } from "@/app/proker/unit/_hooks/use-get-units";
+// import { useGetProkerUnits } from "@/app/proker/unit/_hooks/use-get-units";
+import useGetIkuUnits from "./_hooks/use-get-iku-units";
 import ModalAddIndicator from "./_components/modal-add-indicator";
 
 const DetailProgramPage = () => {
@@ -30,7 +31,9 @@ const DetailProgramPage = () => {
   const [openAssignModal, setOpenAssignModal] = useState(false);
   const [assignPayload, setAssignPayload] = useState<{ unitId: string; defaultProgramIndicatorId: string; period: number } | null>(null);
 
-  const { data: unitsData } = useGetProkerUnits();
+  const { data: unitsDataResponse } = useGetIkuUnits(id as string);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const unitsData = { items: unitsDataResponse?.data?.map((item: any) => item.unit) || [] };
   const assignMutation = useAssignProgramIndicator();
 
   const { data: response, isLoading } = useGetDefaultProgram(programId as string, !!programId);
@@ -198,8 +201,10 @@ const DetailProgramPage = () => {
           <Box display="flex" flexDirection="column" gap={2} mt={1}>
             <Autocomplete
               options={unitsData?.items || []}
-              getOptionLabel={(opt) => opt.name}
-              onChange={(_, val) => setAssignPayload(prev => prev ? { ...prev, unitId: val?.id || "" } : null)}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              getOptionLabel={(opt: any) => opt?.name || ""}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onChange={(_, val: any) => setAssignPayload(prev => prev ? { ...prev, unitId: val?.id || "" } : null)}
               renderInput={(params) => <TextField {...params} label="Pilih Unit" fullWidth />}
             />
             <TextField
@@ -223,8 +228,10 @@ const DetailProgramPage = () => {
                     enqueueSnackbar("Berhasil menugaskan indikator", { variant: "success" });
                     setOpenAssignModal(false);
                   },
-                  onError: () => {
-                    enqueueSnackbar("Gagal menugaskan indikator", { variant: "error" });
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  onError: (error: any) => {
+                    const errorMessage = error?.response?.data?.message || "Gagal menugaskan indikator";
+                    enqueueSnackbar(errorMessage, { variant: "error" });
                   }
                 });
               }

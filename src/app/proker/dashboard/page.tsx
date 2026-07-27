@@ -15,10 +15,10 @@ import {
   AccountBalanceWalletOutlined
 } from "@mui/icons-material";
 import { useGetProkerDashboard } from "./_hooks/use-get-dashboard";
+import StructureView from "./_components/structure-view";
 
 export default function ProkerDashboardPage() {
   const { data, isLoading, isError, error } = useGetProkerDashboard();
-
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
@@ -26,7 +26,6 @@ export default function ProkerDashboardPage() {
       </Box>
     );
   }
-
   if (isError) {
     return (
       <Box sx={{ p: 2 }}>
@@ -34,7 +33,6 @@ export default function ProkerDashboardPage() {
       </Box>
     );
   }
-
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -43,7 +41,6 @@ export default function ProkerDashboardPage() {
       maximumFractionDigits: 0
     }).format(value);
   };
-
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -52,7 +49,6 @@ export default function ProkerDashboardPage() {
       </Box>
 
       <Grid container spacing={3}>
-        {/* Total Programs */}
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ height: '100%', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
             <CardContent>
@@ -65,8 +61,6 @@ export default function ProkerDashboardPage() {
             </CardContent>
           </Card>
         </Grid>
-
-        {/* Running Programs */}
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ height: '100%', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
             <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -82,8 +76,6 @@ export default function ProkerDashboardPage() {
             </CardContent>
           </Card>
         </Grid>
-
-        {/* Completed Programs */}
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ height: '100%', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
             <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -99,8 +91,6 @@ export default function ProkerDashboardPage() {
             </CardContent>
           </Card>
         </Grid>
-
-        {/* Delayed Programs */}
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ height: '100%', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
             <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -116,8 +106,6 @@ export default function ProkerDashboardPage() {
             </CardContent>
           </Card>
         </Grid>
-
-        {/* Budget and Progress */}
         <Grid size={{ xs: 12, md: 6 }}>
           <Card sx={{ height: '100%', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
             <CardContent>
@@ -153,8 +141,6 @@ export default function ProkerDashboardPage() {
             </CardContent>
           </Card>
         </Grid>
-
-        {/* Programs by Status Summary */}
         <Grid size={{ xs: 12, md: 6 }}>
           <Card sx={{ height: '100%', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
             <CardContent>
@@ -172,6 +158,8 @@ export default function ProkerDashboardPage() {
           </Card>
         </Grid>
       </Grid>
+
+      <StructureView />
     </Box>
   );
 }

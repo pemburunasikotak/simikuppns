@@ -39,7 +39,7 @@ export const getListIkuProker = async (params?: Record<string, unknown>): Promis
   return data;
 };
 
-export const getIkuUnits = async (ikuId: string): Promise<{ data: Record<string, unknown>[] }> => {
+export const getIkuUnits = async (ikuId: string): Promise<{ data: import("./type").TIkuUnit[] }> => {
   const { data } = await prokerAxiosInstance.get(`/api/v1/ikus/${ikuId}/units`);
   return data;
 };
@@ -58,6 +58,15 @@ export const assignDefaultProgramToUnit = async (payload: TAssignDefaultProgramP
   return data;
 };
 
+export const assignIndicatorToUnit = async (payload: import("./type").TAssignIndicatorToUnitPayload): Promise<unknown> => {
+  const { data } = await prokerAxiosInstance.post("/api/v1/default-programs/indicators/assign", payload);
+  return data;
+};
+
+export const getAssignmentStructure = async (params?: Record<string, unknown>): Promise<import("./type").TAssignmentStructureResponse> => {
+  const { data } = await prokerAxiosInstance.get("/api/v1/default-programs/assignment-structure", { params });
+  return data;
+};
 export const getListProgramIndicator = async (programId: string, params?: Record<string, unknown>): Promise<TDefaultProgramIndicatorResponse> => {
   const { data } = await prokerAxiosInstance.get(`/api/v1/programs/${programId}/indicators`, { params });
   return data;

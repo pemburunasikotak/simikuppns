@@ -64,6 +64,15 @@ export type TProkerIku = {
   updatedAt: string;
 };
 
+export type TIkuUnit = {
+  id: string;
+  name?: string;
+  unit?: {
+    id: string;
+    name: string;
+  };
+};
+
 export type TProkerIkuListResponse = {
   isSuccess: boolean;
   message: string;
@@ -112,4 +121,51 @@ export type TCreateDefaultProgramIndicatorPayload = {
   name: string;
   unit: string;
   order: number;
+};
+
+export type TAssignmentStructureIndicator = {
+  id: string;
+  name: string;
+  unit: string;
+  order: number;
+  assignedUnits: {
+    unitId: string;
+    unitName: string;
+  }[];
+  isAssigned: boolean;
+};
+
+export type TAssignmentStructureProgram = {
+  id: string;
+  title: string;
+  description: string;
+  order: number;
+  indicators: TAssignmentStructureIndicator[];
+};
+
+export type TAssignmentStructureItem = {
+  iku: {
+    id: string;
+    code: string;
+    name: string;
+    description: string;
+  };
+  totalPrograms: number;
+  totalIndicators: number;
+  programs: TAssignmentStructureProgram[];
+};
+
+export type TAssignmentStructureResponse = {
+  isSuccess?: boolean;
+  message?: string;
+  items?: TAssignmentStructureItem[];
+  data?: {
+    items: TAssignmentStructureItem[];
+  }
+};
+
+export type TAssignIndicatorToUnitPayload = {
+  unitId: string;
+  defaultProgramIndicatorId: string;
+  period: number;
 };

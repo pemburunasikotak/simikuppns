@@ -43,7 +43,7 @@ const DetailProgramPage = () => {
     { field: "name", headerName: "Nama Indikator", minWidth: 250, flex: 1 },
     { field: "unit", headerName: "Satuan", width: 150 },
     // { field: "status", headerName: "Status", width: 150 },
-    { field: "order", headerName: "Urutan", width: 100, align: "center", headerAlign: "center" },
+    // { field: "order", headerName: "Urutan", width: 100, align: "center", headerAlign: "center" },
     {
       field: "actions",
       headerName: "Aksi",
@@ -138,12 +138,12 @@ const DetailProgramPage = () => {
             <Typography variant="h6" gutterBottom>
               Informasi Program
             </Typography>
-            <Box mb={2}>
+            {/* <Box mb={2}>
               <Typography variant="subtitle2" color="textSecondary">
                 Kode IKU
               </Typography>
               <Typography variant="body1">{program?.ikuCode || "-"}</Typography>
-            </Box>
+            </Box> */}
             <Box mb={2}>
               <Typography variant="subtitle2" color="textSecondary">
                 Judul Program

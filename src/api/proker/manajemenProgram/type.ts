@@ -107,3 +107,9 @@ export type TDefaultProgramIndicatorResponse = {
   message: string;
   data: TDefaultProgramIndicator[];
 };
+
+export type TCreateDefaultProgramIndicatorPayload = {
+  name: string;
+  unit: string;
+  order: number;
+};

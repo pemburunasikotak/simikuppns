@@ -28,7 +28,15 @@ export default function UnitPage() {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
-  const query = useGetProkerUnits();
+  const [filter, setFilter] = useState<Record<string, unknown>>({ per_page: 10 });
+  
+  const queryParams = {
+    ...filter,
+    page: filter.page ? Number(filter.page) : 1,
+    limit: filter.per_page ? Number(filter.per_page) : 10,
+  };
+  
+  const query = useGetProkerUnits(queryParams);
   const createMutation = useCreateProkerUnit();
   const updateMutation = useUpdateProkerUnit();
   const deleteMutation = useDeleteProkerUnit();
@@ -38,7 +46,6 @@ export default function UnitPage() {
 
   const [selectedUnit, setSelectedUnit] = useState<TProkerUnit | null>(null);
   const [formData, setFormData] = useState({ name: "", description: "" });
-  const [filter, setFilter] = useState<Record<string, unknown>>({ per_page: 10 });
 
   const handleOpenAdd = () => {
     setSelectedUnit(null);
@@ -168,7 +175,7 @@ export default function UnitPage() {
               startIcon={<AddOutlined />}
               onClick={handleOpenAdd}
             >
-              Tambah User
+              Tambah Unit
             </Button>,
           ]}
         />

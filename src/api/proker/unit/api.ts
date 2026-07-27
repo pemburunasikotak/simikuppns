@@ -1,8 +1,8 @@
 import prokerAxiosInstance from "@/libs/axios/proker-config";
 import { TProkerUnit, TProkerUnitPayload, TProkerUnitResponse } from "./type";
 
-export const getProkerUnits = async (): Promise<TProkerUnitResponse['data']> => {
-  const { data } = await prokerAxiosInstance.get("/api/v1/units");
+export const getProkerUnits = async (params?: Record<string, unknown>): Promise<TProkerUnitResponse['data']> => {
+  const { data } = await prokerAxiosInstance.get("/api/v1/units", { params });
   return data?.data || { items: [], pagination: { page: 1, limit: 10, totalItems: 0, totalPages: 0 } };
 };
 

@@ -45,19 +45,19 @@ const EditDefaultProgramPage = () => {
 
   const defaultValues: Partial<TDefaultProgramFormData> = programData?.data
     ? {
-        ikuId: {
-          value: programData.data.ikuId,
-          label: programData.data.title || "Selected IKU",
-        },
-        ikuCode: programData.data.ikuCode,
-        title: programData.data.title,
-        description: programData.data.description,
-        indicators: programData.data.indicators?.map(indicator => ({
-          name: indicator.name,
-          unit: indicator.unit,
-          order: indicator.order,
-        })) || [],
-      }
+      ikuId: {
+        value: programData.data.ikuId,
+        label: programData.data.title || "Selected IKU",
+      },
+      ikuCode: programData.data.ikuCode,
+      title: programData.data.title,
+      description: programData.data.description,
+      indicators: programData.data.indicators?.map(indicator => ({
+        name: indicator.name,
+        unit: indicator.unit,
+        order: indicator.order,
+      })) || [],
+    }
     : {};
 
   return (

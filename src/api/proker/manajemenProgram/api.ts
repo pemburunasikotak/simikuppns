@@ -63,6 +63,11 @@ export const createProgramIndicator = async (programId: string, payload: TDefaul
   return data;
 };
 
+export const createDefaultProgramIndicator = async (id: string, payload: import("./type").TCreateDefaultProgramIndicatorPayload): Promise<unknown> => {
+  const { data } = await prokerAxiosInstance.post(`/api/v1/default-programs/${id}/indicators`, payload);
+  return data;
+};
+
 export const updateProgramIndicator = async (programId: string, id: string, payload: TDefaultProgramIndicatorPayload): Promise<unknown> => {
   const { data } = await prokerAxiosInstance.put(`/api/v1/programs/${programId}/indicators/${id}`, payload);
   return data;

@@ -40,6 +40,7 @@ export type TProkerSidebarItem = {
   label: string;
   path: string;
   icon: React.ReactNode;
+  roles?: string[];
 };
 
 const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
@@ -48,24 +49,28 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
     label: "Dashboard",
     path: paths.proker.dashboard,
     icon: <DashboardOutlined />,
+    roles: ["admin_sim_proker", "user_sim_proker"],
   },
   {
     key: "proker-unit",
     label: "Unit",
     path: paths.proker.unit,
     icon: <CorporateFareOutlined />,
+    roles: ["admin_sim_proker"],
   },
   {
     key: "proker-program",
     label: "Program",
     path: paths.proker.program,
     icon: <ListAltOutlined />,
+    roles: ["admin_sim_proker", "user_sim_proker"],
   },
   {
     key: "proker-manajemen-program",
     label: "Manajemen Program",
     path: paths.proker.manajemenProgram,
     icon: <CorporateFareOutlined />,
+    roles: ["admin_sim_proker"],
   },
 ];
 
@@ -168,7 +173,13 @@ const ProkerLayout = () => {
     .toUpperCase()
     .slice(0, 2);
 
-  const activeMenu = PROKER_SIDEBAR_ITEMS.find((menu) => location.pathname.startsWith(menu.path));
+  const userRoleKeys = user?.roles?.map((r: { key: string }) => r.key) || [];
+  const filteredSidebarItems = PROKER_SIDEBAR_ITEMS.filter((item) => {
+    if (!item.roles) return true;
+    return item.roles.some((role) => userRoleKeys.includes(role));
+  });
+
+  const activeMenu = filteredSidebarItems.find((menu) => location.pathname.startsWith(menu.path));
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
@@ -232,7 +243,7 @@ const ProkerLayout = () => {
               boxSizing: "border-box",
             }}
           >
-            {PROKER_SIDEBAR_ITEMS.map((item) => (
+            {filteredSidebarItems.map((item) => (
               <SidebarItem
                 key={item.key}
                 item={item}

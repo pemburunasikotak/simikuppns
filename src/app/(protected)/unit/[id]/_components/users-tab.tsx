@@ -53,6 +53,19 @@ const UsersTab: FC<UsersTabProps> = ({ unitId, value, index }) => {
   const allUsersQuery = useGetListUser({ limit: 100, page: 1 });
   const assignUserMutation = useAssignUsers(unitId);
 
+  const handleOpenAssign = () => {
+    if (usersQuery.data?.data && usersQuery.data.data.length > 0) {
+      const rows = usersQuery.data.data.map((u: { id?: string; userId?: string; user?: { id?: string }; memberType?: string; type?: string }) => ({
+        userId: u.id || u.userId || (u.user && u.user.id) || "",
+        type: (u.memberType || u.type || "PIC") as "PIC" | "MEMBER",
+      }));
+      setAssignRows(rows);
+    } else {
+      setAssignRows([{ userId: "", type: "PIC" }]);
+    }
+    setIsAssignUserOpen(true);
+  };
+
   const handleAddRow = () => setAssignRows((prev) => [...prev, { userId: "", type: "PIC" }]);
   const handleRemoveRow = (idx: number) => setAssignRows((prev) => prev.filter((_, i) => i !== idx));
   const handleRowChange = (idx: number, field: "userId" | "type", val: string) =>
@@ -118,7 +131,7 @@ const UsersTab: FC<UsersTabProps> = ({ unitId, value, index }) => {
         <Button
           variant="contained"
           startIcon={<PersonAddOutlined />}
-          onClick={() => setIsAssignUserOpen(true)}
+          onClick={handleOpenAssign}
         >
           Tambah Anggota
         </Button>

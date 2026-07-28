@@ -46,7 +46,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
       if (mode === "edit" && selectedIndicator) {
         reset({
           name: selectedIndicator.name,
-          unit: selectedIndicator.unit,
+          unit: typeof selectedIndicator.unit === 'string' ? selectedIndicator.unit : selectedIndicator.unit?.name || "",
           order: selectedIndicator.order,
         });
       } else {

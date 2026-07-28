@@ -42,7 +42,7 @@ const ProgramPage: FC = (): ReactElement => {
       renderCell: (params) => {
         const indicators = params.row.indicators || [];
         if (indicators.length === 0) return "-";
-        
+
         return (
           <Tooltip title={indicators.map((ind) => ind.name).join(", ")}>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ height: "100%", overflow: "hidden" }}>
@@ -103,8 +103,8 @@ const ProgramPage: FC = (): ReactElement => {
     <Page
       breadcrumbs={[
         {
-          label: "Manajemen Program",
-          path: "/proker/program",
+          label: "Proker Program",
+          path: "/proker",
         },
         {
           label: "Program",

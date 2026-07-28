@@ -1,5 +1,5 @@
 import prokerAxiosInstance from "@/libs/axios/proker-config";
-import { TProkerProgram, TProkerProgramPayload, TProkerProgramResponse, TProgramActivityPayload } from "./type";
+import { TProkerProgram, TProkerProgramPayload, TProkerProgramResponse, TProkerProgramDetailResponse, TProgramActivityPayload } from "./type";
 import { TProkerAktivitas } from "../aktivitas/type";
 
 export const getListProgram = async (params?: Record<string, unknown>): Promise<TProkerProgramResponse> => {
@@ -7,7 +7,7 @@ export const getListProgram = async (params?: Record<string, unknown>): Promise<
   return data;
 };
 
-export const getProgramById = async (id: string): Promise<{ isSuccess: boolean; data: TProkerProgram }> => {
+export const getProgramById = async (id: string): Promise<TProkerProgramDetailResponse> => {
   const { data } = await prokerAxiosInstance.get(`/api/v1/programs/${id}`);
   return data;
 };

@@ -16,9 +16,17 @@ import {
 } from "@mui/icons-material";
 import { useGetProkerDashboard } from "./_hooks/use-get-dashboard";
 import StructureView from "./_components/structure-view";
+import { useMemo } from "react";
+import { ProkerSessionUser } from "@/libs/localstorage/proker-session";
 
 export default function ProkerDashboardPage() {
   const { data, isLoading, isError, error } = useGetProkerDashboard();
+
+  const sessionUser = ProkerSessionUser.get();
+  const user = (sessionUser?.user as { roles?: { key: string }[] }) ?? {};
+  const userRoleKeys = useMemo(() => user?.roles?.map((r: { key: string }) => r.key) || [], [user?.roles]);
+  const isAdmin = userRoleKeys.includes("admin_sim_iku");
+
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
@@ -159,7 +167,7 @@ export default function ProkerDashboardPage() {
         </Grid>
       </Grid>
 
-      <StructureView />
+      {isAdmin && <StructureView />}
     </Box>
   );
 }

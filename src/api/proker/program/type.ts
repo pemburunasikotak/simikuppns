@@ -36,6 +36,12 @@ export type TProkerProgramResponse = {
   };
 };
 
+export type TProkerProgramDetailResponse = {
+  isSuccess: boolean;
+  message: string;
+  data: TProkerProgram;
+};
+
 export type TProgramActivityPayload = {
   title: string;
   description: string;

@@ -54,7 +54,7 @@ const EditDefaultProgramPage = () => {
       description: programData.data.description,
       indicators: programData.data.indicators?.map(indicator => ({
         name: indicator.name,
-        unit: indicator.unit,
+        unit: typeof indicator.unit === 'string' ? indicator.unit : indicator.unit?.name || "",
         order: indicator.order,
       })) || [],
     }

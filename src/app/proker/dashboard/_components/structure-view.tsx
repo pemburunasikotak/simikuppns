@@ -285,9 +285,9 @@ export default function StructureView() {
                                       <Typography variant="body2" color="textSecondary">Satuan: {indicator.unit}</Typography>
                                     </TableCell>
                                     <TableCell>
-                                      {indicator.isAssigned && indicator.assignedUnits && indicator.assignedUnits.length > 0 ? (
-                                        <Box display="flex" gap={1} flexWrap="wrap">
-                                          {indicator.assignedUnits.map((u, idx) => (
+                                      <Box display="flex" flexWrap="wrap" alignItems="center" gap={1}>
+                                        {indicator.isAssigned && indicator.assignedUnits && indicator.assignedUnits.length > 0 ? (
+                                          indicator.assignedUnits.map((u, idx) => (
                                             <Chip
                                               key={idx}
                                               label={u.unitName}
@@ -295,10 +295,8 @@ export default function StructureView() {
                                               color="success"
                                               variant="outlined"
                                             />
-                                          ))}
-                                        </Box>
-                                      ) : (
-                                        <Box display="flex" gap={1} alignItems="center">
+                                          ))
+                                        ) : (
                                           <Chip
                                             label="Belum diassign ke unit"
                                             size="small"
@@ -306,20 +304,20 @@ export default function StructureView() {
                                             variant="outlined"
                                             sx={{ bgcolor: '#fff5f5' }}
                                           />
-                                          <Button
-                                            size="small"
-                                            variant="text"
-                                            sx={{ textTransform: 'none' }}
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setAssignIndicatorId(indicator.id);
-                                              setAssignModalOpen(true);
-                                            }}
-                                          >
-                                            Assign Unit
-                                          </Button>
-                                        </Box>
-                                      )}
+                                        )}
+                                        <Button
+                                          size="small"
+                                          variant="text"
+                                          sx={{ textTransform: 'none', minWidth: 'max-content', py: 0 }}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setAssignIndicatorId(indicator.id);
+                                            setAssignModalOpen(true);
+                                          }}
+                                        >
+                                          + Assign Unit
+                                        </Button>
+                                      </Box>
                                     </TableCell>
                                   </TableRow>
                                 ))}

@@ -1,9 +1,17 @@
 export type TDefaultProgramIndicator = {
   id: string;
-  defaultProgramId: string;
+  defaultProgramId?: string;
+  programId?: string;
   unitId?: string;
   name: string;
-  unit: string;
+  unit?: {
+    id: string;
+    name: string;
+    description?: string;
+    createdAt?: string;
+    updatedAt?: string;
+  } | string;
+  unit_measurement?: string;
   targetQ1?: number;
   targetQ2?: number;
   targetQ3?: number;

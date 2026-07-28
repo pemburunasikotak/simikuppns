@@ -4,7 +4,7 @@ import { Box, Tab, Tabs } from "@mui/material";
 
 import { Page } from "@/app/_components/ui";
 
-import AktivitasTab from "./_components/aktivitas-tab";
+
 import IndicatorTab from "./_components/indicator-tab";
 
 const ProgramDetailPage: FC = (): ReactElement => {
@@ -21,13 +21,13 @@ const ProgramDetailPage: FC = (): ReactElement => {
           path: "/proker",
         },
         {
-          label: "Manajemen Program",
-          path: "/proker/program",
-        },
-        {
           label: "Program",
           path: "/proker/program",
         },
+        // {
+        //   label: "Program",
+        //   path: "/proker/program",
+        // },
         {
           label: "Detail",
           path: `/proker/program/${id}`,
@@ -36,13 +36,13 @@ const ProgramDetailPage: FC = (): ReactElement => {
     >
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
         <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)}>
-          <Tab label="Aktivitas" />
+          {/* <Tab label="Aktivitas" /> */}
           <Tab label="Indikator" />
         </Tabs>
       </Box>
 
-      {tabValue === 0 && <AktivitasTab />}
-      {tabValue === 1 && <IndicatorTab />}
+      {/* {tabValue === 0 && <AktivitasTab />} */}
+      {tabValue === 0 && <IndicatorTab />}
     </Page>
   );
 };

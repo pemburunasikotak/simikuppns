@@ -31,3 +31,8 @@ export const createProgramActivity = async (id: string, payload: TProgramActivit
   const { data } = await prokerAxiosInstance.post(`/api/v1/programs/${id}/activities`, payload);
   return data;
 };
+
+export const setProgramIndicatorTarget = async (programId: string, id: string, payload: import('./type').TSetProgramIndicatorTargetPayload): Promise<{ isSuccess: boolean; data: unknown }> => {
+  const { data } = await prokerAxiosInstance.post(`/api/v1/programs/${programId}/indicators/${id}/set-target`, payload);
+  return data;
+};

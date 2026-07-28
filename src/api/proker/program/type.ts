@@ -50,3 +50,10 @@ export type TProgramActivityPayload = {
   endDate: string;
 };
 
+export type TSetProgramIndicatorTargetPayload = {
+  targetQ1: number;
+  targetQ2: number;
+  targetQ3: number;
+  targetQ4: number;
+};
+

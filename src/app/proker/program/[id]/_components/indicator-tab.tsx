@@ -1,7 +1,9 @@
 import { FC, ReactElement, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { Box, Typography } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
+// import EditIcon from "@mui/icons-material/Edit";
+// import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 import useGetProgram from "../../_hooks/use-get-program";
 import useGetListProgramIndicator from "../_hooks/use-get-list-program-indicator";
@@ -13,6 +15,7 @@ import ModalSetTarget from "./modal-set-target";
 
 const IndicatorTab: FC = (): ReactElement => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const [params, setParams] = useState({
     page: 1,
@@ -21,12 +24,15 @@ const IndicatorTab: FC = (): ReactElement => {
 
   const { data: programData } = useGetProgram(id as string);
   const program = programData?.data;
+
   const [targetModalOpen, setTargetModalOpen] = useState(false);
   const [selectedIndicator, setSelectedIndicator] = useState<TDefaultProgramIndicator | null>(null);
+
   const handleOpenTargetModal = (indicator: TDefaultProgramIndicator) => {
     setSelectedIndicator(indicator);
     setTargetModalOpen(true);
   };
+
   const { data: indicatorsResponse, isLoading } = useGetListProgramIndicator(id as string, params);
   const isPaginated = indicatorsResponse?.data && !Array.isArray(indicatorsResponse.data);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,14 +64,23 @@ const IndicatorTab: FC = (): ReactElement => {
       align: "center",
       headerAlign: "center",
       renderCell: (params) => {
+        const actionItems = [];
         if (params.row.status === "ASSIGNED_TO_UNIT") {
-          const actionItems = [
-            {
-              key: "assign",
-              type: "assign" as const,
-              onClick: () => handleOpenTargetModal(params.row),
-            },
-          ];
+          actionItems.push({
+            key: "assign",
+            type: "assign" as const,
+            onClick: () => handleOpenTargetModal(params.row),
+          });
+        }
+        if (params.row.status === "IN_PROGRESS") {
+          actionItems.push({
+            key: "detail",
+            type: "detail" as const,
+            onClick: () => navigate(`/proker/program/${id}/indicator/${params.row.id}`),
+          });
+        }
+
+        if (actionItems.length > 0) {
           return <ActionButtonTable items={actionItems} />;
         }
         return null;

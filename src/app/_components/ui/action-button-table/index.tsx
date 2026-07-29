@@ -8,6 +8,8 @@ interface Props {
     key: React.Key;
     type?: ItemType;
     label?: string;
+    icon?: React.ReactNode;
+    color?: ButtonProps["color"];
     onClick?: () => void;
     disabled?: boolean;
     render?: React.ReactNode;
@@ -68,12 +70,12 @@ const ActionButtonTable = ({ items }: Props) => {
             <span>
               <Button
                 variant="text"
-                color={item.type ? itemColor[item.type] : undefined}
+                color={item.type ? itemColor[item.type] : item.color}
                 onClick={item.onClick}
                 size="small"
                 disabled={item.disabled}
               >
-                {item.type ? itemIcon[item.type] : undefined}
+                {item.icon ? item.icon : (item.type ? itemIcon[item.type] : undefined)}
               </Button>
             </span>
           </Tooltip>

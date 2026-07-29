@@ -57,3 +57,18 @@ export type TSetProgramIndicatorTargetPayload = {
   targetQ4: number;
 };
 
+export type TAddIndicatorRealizationPayload = {
+  month: number;
+  realization: number;
+  remark: string;
+};
+
+export type TIndicatorRealizationItem = {
+  id: string;
+  indicatorId: string;
+  month: number;
+  realization: number;
+  remark: string;
+  createdAt: string;
+  updatedAt: string;
+};

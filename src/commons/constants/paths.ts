@@ -123,6 +123,7 @@ export const paths = {
     output: "/proker/output",
     program: "/proker/program",
     aktivitas: "/proker/program/:id/aktivitas",
+    indicatorDetail: "/proker/program/:id/indicator/:indicatorId",
     progress: "/proker/progress",
     evidence: "/proker/evidence",
     manajemenProgram: "/proker/manajemenProgram",

@@ -36,3 +36,13 @@ export const setProgramIndicatorTarget = async (programId: string, id: string, p
   const { data } = await prokerAxiosInstance.post(`/api/v1/programs/${programId}/indicators/${id}/set-target`, payload);
   return data;
 };
+
+export const addIndicatorRealization = async (programId: string, id: string, payload: import('./type').TAddIndicatorRealizationPayload): Promise<{ isSuccess: boolean; data: unknown }> => {
+  const { data } = await prokerAxiosInstance.post(`/api/v1/programs/${programId}/indicators/${id}/realizations`, payload);
+  return data;
+};
+
+export const getIndicatorRealizations = async (programId: string, id: string): Promise<{ isSuccess: boolean; data: import('./type').TIndicatorRealizationItem[] }> => {
+  const { data } = await prokerAxiosInstance.get(`/api/v1/programs/${programId}/indicators/${id}/realizations`);
+  return data;
+};

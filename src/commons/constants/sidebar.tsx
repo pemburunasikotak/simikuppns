@@ -3,7 +3,7 @@ import {
   ExtensionOutlined,
   SettingsOutlined,
   PeopleOutlined,
-  CorporateFareOutlined,
+  // CorporateFareOutlined,
   AssignmentIndOutlined,
 } from "@mui/icons-material";
 
@@ -92,10 +92,4 @@ export const SIDEBAR_ITEMS: TSidebarItem[] = [
   //   path: paths.bidang.list,
   //   icon: <CorporateFareOutlined />,
   // },
-  {
-    key: "unit",
-    label: "Unit",
-    path: paths.unit.list,
-    icon: <CorporateFareOutlined />,
-  },
 ];

@@ -52,6 +52,13 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
     roles: ["admin_sim_proker", "user_sim_proker"],
   },
   {
+    key: "unit",
+    label: "Manajemen Unit",
+    path: paths.unit.list,
+    icon: <CorporateFareOutlined />,
+    roles: ["admin_sim_proker"],
+  },
+  {
     key: "proker-unit",
     label: "Unit",
     path: paths.proker.unit,

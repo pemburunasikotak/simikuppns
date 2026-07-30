@@ -106,7 +106,6 @@ const IndicatorTab: FC = (): ReactElement => {
 
       <Box sx={{ mb: 3 }}>
         <Typography variant="h6" fontWeight="bold">Daftar Indikator Program</Typography>
-
       </Box>
       <DataTable
         loading={isLoading}

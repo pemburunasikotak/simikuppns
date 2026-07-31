@@ -224,7 +224,7 @@ const Component: FC = (): ReactElement => {
                   {
                     data: [
                       { id: 0, value: summary.achieved, label: 'Tercapai', color: '#22c55e' }, // Vibrant Green
-                      { id: 1, value: summary.notAchieved, label: 'Belum', color: '#ef4444' }, // Vibrant Red
+                      { id: 1, value: summary.notAchieved, label: 'Tidak Tercapai', color: '#ef4444' }, // Vibrant Red
                     ],
                     innerRadius: 65,
                     outerRadius: 85,
@@ -268,7 +268,7 @@ const Component: FC = (): ReactElement => {
                     {
                       data: [
                         { id: 0, value: total.achieved, label: 'Tercapai', color: '#22c55e' },
-                        { id: 1, value: total.notAchieved, label: 'Belum', color: '#ef4444' },
+                        { id: 1, value: total.notAchieved, label: 'Tidak Tercapai', color: '#ef4444' },
                       ],
                       innerRadius: 65,
                       outerRadius: 85,

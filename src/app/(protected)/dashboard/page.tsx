@@ -247,7 +247,7 @@ const Component: FC = (): ReactElement => {
             </Card>
           </Grid>
         ))}
-        {dashboardSummaryQuery.data?.data && dashboardSummaryQuery.data.data.length > 0 && (() => {
+        {/* {dashboardSummaryQuery.data?.data && dashboardSummaryQuery.data.data.length > 0 && (() => {
           const total = dashboardSummaryQuery.data.data.reduce(
             (acc, curr) => {
               if (curr.period.startsWith('Q')) {
@@ -291,7 +291,7 @@ const Component: FC = (): ReactElement => {
               </Card>
             </Grid>
           );
-        })()}
+        })()} */}
       </Grid>
 
       <Grid container spacing={2} sx={{ marginBottom: 2 }}>

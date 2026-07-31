@@ -44,3 +44,14 @@ export type TDashboardIKUItem = {
 };
 
 export type TDashboardIKUResponse = TResponse<TDashboardIKUItem[]>;
+
+export type TDashboardSummaryItem = {
+  period: string;
+  achieved: number;
+  notAchieved: number;
+};
+
+export type TDashboardSummaryResponse = {
+  success: boolean;
+  data: TDashboardSummaryItem[];
+};

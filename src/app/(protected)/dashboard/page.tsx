@@ -2,6 +2,8 @@ import { FC, ReactElement, useState } from "react";
 import { Page } from "@/app/_components/ui";
 import { Card, Grid, Typography, Box, Link, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
+import { PieChart } from "@mui/x-charts/PieChart";
+import { useDrawingArea } from "@mui/x-charts/hooks";
 import { GridColDef } from "@mui/x-data-grid";
 import DataTable from "@/app/_components/ui/data-table";
 import { createPaginationInfo } from "@/utils/data-table";
@@ -13,11 +15,40 @@ import { TGetIKUResultParams, TIKUResultItem } from "@/api/iku-result/type";
 import { TDashboardIKUItem, TDashboardIKUChartDataItem, TDashboardIKUTableDataItem } from "@/api/dashboard/type";
 import useGetListIKUResult from "./_hooks/use-get-list-iku-result";
 import useGetDashboardIKU from "./_hooks/use-get-dashboard-iku";
+import useGetDashboardSummary from "./_hooks/use-get-dashboard-summary";
+
+function PieCenterLabel({ achieved, total }: { achieved: number; total: number }) {
+  const { width, height, left, top } = useDrawingArea();
+  const percentage = total > 0 ? ((achieved / total) * 100).toFixed(1) : "0.0";
+  return (
+    <>
+      <text
+        x={left + width / 2}
+        y={top + height / 2 - 8}
+        textAnchor="middle"
+        dominantBaseline="central"
+        style={{ fontSize: '24px', fontWeight: 500, fill: '#1f2937', fontFamily: 'sans-serif' }}
+      >
+        {percentage}%
+      </text>
+      <text
+        x={left + width / 2}
+        y={top + height / 2 + 18}
+        textAnchor="middle"
+        dominantBaseline="central"
+        style={{ fontSize: '14px', fill: '#6b7280', fontFamily: 'sans-serif' }}
+      >
+        {achieved} dari {total}
+      </text>
+    </>
+  );
+}
 
 const Component: FC = (): ReactElement => {
   const { filters, setFilter } = useFilter<TGetIKUResultParams>();
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const dashboardIKUQuery = useGetDashboardIKU({ year });
+  const dashboardSummaryQuery = useGetDashboardSummary({ year });
   const ikuResultQuery = useGetListIKUResult({
     order: "DESC",
     limit: filters.per_page ? Number(filters.per_page) : 10,
@@ -181,6 +212,87 @@ const Component: FC = (): ReactElement => {
           />
         </Box>
       </Box>
+
+      {/* Summary Section */}
+      <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+        {dashboardSummaryQuery.data?.data?.map((summary, index) => (
+          <Grid key={index} size={{ xs: 12, sm: 6, md: 4 }}>
+            <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Typography variant="h6" color="primary" sx={{ mb: 1 }}>{summary.period}</Typography>
+              <PieChart
+                series={[
+                  {
+                    data: [
+                      { id: 0, value: summary.achieved, label: 'Tercapai', color: '#22c55e' }, // Vibrant Green
+                      { id: 1, value: summary.notAchieved, label: 'Belum', color: '#ef4444' }, // Vibrant Red
+                    ],
+                    innerRadius: 65,
+                    outerRadius: 85,
+                    paddingAngle: 2,
+                    cornerRadius: 4,
+                  }
+                ]}
+                width={280}
+                height={230}
+                margin={{ right: 5, left: 5, top: 5, bottom: 50 }}
+                slotProps={{
+                  legend: {
+                    direction: 'horizontal',
+                    position: { vertical: 'bottom', horizontal: 'center' },
+                  }
+                }}
+              >
+                <PieCenterLabel achieved={summary.achieved} total={summary.achieved + summary.notAchieved} />
+              </PieChart>
+            </Card>
+          </Grid>
+        ))}
+        {dashboardSummaryQuery.data?.data && dashboardSummaryQuery.data.data.length > 0 && (() => {
+          const total = dashboardSummaryQuery.data.data.reduce(
+            (acc, curr) => {
+              if (curr.period.startsWith('Q')) {
+                acc.achieved += curr.achieved;
+                acc.notAchieved += curr.notAchieved;
+              }
+              return acc;
+            },
+            { achieved: 0, notAchieved: 0 }
+          );
+
+          return (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Typography variant="h6" color="primary" sx={{ mb: 1 }}>Total (Q1 - Q4)</Typography>
+                <PieChart
+                  series={[
+                    {
+                      data: [
+                        { id: 0, value: total.achieved, label: 'Tercapai', color: '#22c55e' },
+                        { id: 1, value: total.notAchieved, label: 'Belum', color: '#ef4444' },
+                      ],
+                      innerRadius: 65,
+                      outerRadius: 85,
+                      paddingAngle: 2,
+                      cornerRadius: 4,
+                    }
+                  ]}
+                  width={280}
+                  height={230}
+                  margin={{ right: 5, left: 5, top: 5, bottom: 50 }}
+                  slotProps={{
+                    legend: {
+                      direction: 'horizontal',
+                      position: { vertical: 'bottom', horizontal: 'center' },
+                    }
+                  }}
+                >
+                  <PieCenterLabel achieved={total.achieved} total={total.achieved + total.notAchieved} />
+                </PieChart>
+              </Card>
+            </Grid>
+          );
+        })()}
+      </Grid>
 
       <Grid container spacing={2} sx={{ marginBottom: 2 }}>
         {dataDashboardIku.map((iku: TDashboardIKUItem, index: number) => {

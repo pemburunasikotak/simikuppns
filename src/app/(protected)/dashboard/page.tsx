@@ -48,7 +48,7 @@ const Component: FC = (): ReactElement => {
   const { filters, setFilter } = useFilter<TGetIKUResultParams>();
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const dashboardIKUQuery = useGetDashboardIKU({ year });
-  const dashboardSummaryQuery = useGetDashboardSummary({ year });
+  const dashboardSummaryQuery = useGetDashboardSummary({ year, type: filters.type as string });
   const ikuResultQuery = useGetListIKUResult({
     order: "DESC",
     limit: filters.per_page ? Number(filters.per_page) : 10,
@@ -294,6 +294,9 @@ const Component: FC = (): ReactElement => {
         })()} */}
       </Grid>
 
+      <Typography variant="h6" fontWeight="bold" sx={{ mt: 4, mb: 2 }}>
+        GRUP BY TYPE IKU {filters.type ? String(filters.type).replace('IKU_', '') : 'SEMUA'}
+      </Typography>
       <Grid container spacing={2} sx={{ marginBottom: 2 }}>
         {dataDashboardIku.map((iku: TDashboardIKUItem, index: number) => {
           const chartData = iku.chartData || [];
@@ -365,7 +368,7 @@ const Component: FC = (): ReactElement => {
           <Card style={{ padding: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
               <Typography variant="h6" sx={{ marginBottom: 2 }}>
-                Hasil Kalkulasi IKU
+                Hasil Kalkulasi IKU By {filters.type ? String(filters.type).replace('IKU_', '') : 'SEMUA'}
               </Typography>
 
             </div>

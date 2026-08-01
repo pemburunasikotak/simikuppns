@@ -41,7 +41,7 @@ export const getDashboardIKU = async (params: { year: number }): Promise<TDashbo
   return responseData;
 };
 
-export const getDashboardSummary = async (params: { year: number }): Promise<import('./type').TDashboardSummaryResponse> => {
+export const getDashboardSummary = async (params: { year: number; type?: string }): Promise<import('./type').TDashboardSummaryResponse> => {
   const res = await api.get("/api/dashboard/summary", { params });
   return res.data;
 };

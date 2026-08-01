@@ -119,6 +119,7 @@ export const paths = {
   proker: {
     dashboard: "/proker/dashboard",
     unit: "/proker/unit",
+    masterUnit: "/proker/master-unit",
     integrasi: "/proker/integrasi",
     output: "/proker/output",
     program: "/proker/program",

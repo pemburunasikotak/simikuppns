@@ -1,6 +1,6 @@
 import { FC, ReactElement, useState } from "react";
 import { Page } from "@/app/_components/ui";
-import { Card, Grid, Typography, Box, Link, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
+import { Card, Grid, Typography, Box, Link } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { useDrawingArea } from "@mui/x-charts/hooks";
@@ -166,24 +166,26 @@ const Component: FC = (): ReactElement => {
   ];
 
   const dataDashboardIkuRaw = dashboardIKUQuery.data?.result || [];
-  const dataDashboardIkuFiltered = filters.type
-    ? dataDashboardIkuRaw.filter((item: TDashboardIKUItem) => item.type === filters.type || item.ikuCode.startsWith(filters.type as string))
-    : dataDashboardIkuRaw;
 
-  const dataDashboardIku = dataDashboardIkuFiltered.filter((item: TDashboardIKUItem) => item.chartData.length > 0);
-  const dataDashboardNewIku = dataDashboardIkuFiltered.filter((item: TDashboardIKUItem) => item.tableData.length > 0);
+  const dataDashboardIkuUtama = dataDashboardIkuRaw.filter((item: TDashboardIKUItem) => item.type === "IKU_UTAMA" || item.ikuCode?.startsWith("IKU_UTAMA"));
+  const dataDashboardIkuSpekta = dataDashboardIkuRaw.filter((item: TDashboardIKUItem) => item.type === "IKU_SPEKTA" || item.ikuCode?.startsWith("IKU_SPEKTA"));
+
+  const dataDashboardIkuChartUtama = dataDashboardIkuUtama.filter((item: TDashboardIKUItem) => item.chartData?.length > 0);
+  const dataDashboardIkuTableUtama = dataDashboardIkuUtama.filter((item: TDashboardIKUItem) => item.tableData?.length > 0);
+
+  const dataDashboardIkuChartSpekta = dataDashboardIkuSpekta.filter((item: TDashboardIKUItem) => item.chartData?.length > 0);
+  const dataDashboardIkuTableSpekta = dataDashboardIkuSpekta.filter((item: TDashboardIKUItem) => item.tableData?.length > 0);
 
   const rawIkuResultData = ikuResultQuery.data?.result?.data || [];
-  const ikuResultData = filters.type
-    ? rawIkuResultData.filter((item) => item.iku?.type === filters.type || item.iku?.code?.startsWith(filters.type as string))
-    : rawIkuResultData;
+  const ikuResultUtama = rawIkuResultData.filter((item) => item.iku?.type === "IKU_UTAMA" || item.iku?.code?.startsWith("IKU_UTAMA"));
+  const ikuResultSpekta = rawIkuResultData.filter((item) => item.iku?.type === "IKU_SPEKTA" || item.iku?.code?.startsWith("IKU_SPEKTA"));
 
   return (
     <Page>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5" fontWeight="bold">Dashboard IKU</Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <FormControl size="small" sx={{ minWidth: 150, backgroundColor: 'background.paper' }}>
+          {/* <FormControl size="small" sx={{ minWidth: 150, backgroundColor: 'background.paper' }}>
             <InputLabel id="filter-type-label">Tipe IKU</InputLabel>
             <Select
               labelId="filter-type-label"
@@ -195,7 +197,7 @@ const Component: FC = (): ReactElement => {
               <MenuItem value="IKU_UTAMA">UTAMA</MenuItem>
               <MenuItem value="IKU_SPEKTA">SPEKTA</MenuItem>
             </Select>
-          </FormControl>
+          </FormControl> */}
           <DatePicker
             label="Filter Tahun"
             views={['year']}
@@ -294,98 +296,204 @@ const Component: FC = (): ReactElement => {
         })()} */}
       </Grid>
 
-      <Typography variant="h6" fontWeight="bold" sx={{ mt: 4, mb: 2 }}>
-        GRUP BY TYPE IKU {filters.type ? String(filters.type).replace('IKU_', '') : 'SEMUA'}
-      </Typography>
-      <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-        {dataDashboardIku.map((iku: TDashboardIKUItem, index: number) => {
-          const chartData = iku.chartData || [];
-          const series = [
-            {
-              label: "Target",
-              data: periods.map((p) => chartData.find((d: TDashboardIKUChartDataItem) => d.period === p)?.target || 0),
-              color: "#D1FADF",
-            },
-            {
-              label: "Realisasi",
-              data: periods.map((p) => chartData.find((d: TDashboardIKUChartDataItem) => d.period === p)?.realization || 0),
-              color: "#4D96FF",
-            },
-          ];
-
-          return (
-            <Grid key={iku.ikuId || index} size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
-              <Card style={{ padding: 10, height: "100%" }}>
-                <Typography variant="h6" sx={{ marginBottom: 2, fontSize: '1.1rem' }}>
-                  {iku.ikuCode} - {iku.ikuName}
-                </Typography>
-                <BarChart
-                  loading={dashboardIKUQuery.isLoading}
-                  xAxis={[{ data: periods, scaleType: "band" }]}
-                  series={series}
-                  height={300}
-                  barLabel="value"
-                  borderRadius={4}
-                />
-              </Card>
-            </Grid>
-          );
-        })}
-        {dataDashboardNewIku.map((iku: TDashboardIKUItem, index: number) => {
-          const tableData = iku.tableData || [];
-
-          return (
-            <Grid key={iku.ikuId || index} size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
-              <Card style={{ padding: 10, height: "100%" }}>
-                <Typography variant="h6" sx={{ marginBottom: 2, fontSize: '1.1rem' }}>
-                  {iku.ikuCode} - {iku.ikuName}
-                </Typography>
-                <DataTable
-                  loading={dashboardIKUQuery.isLoading}
-                  rows={tableData}
-                  columns={tableColumns}
-                  getRowId={(row) => row.period}
-                  getRowHeight={() => 'auto'}
-                  hidePagination
-                  sx={{
-                    '& .MuiDataGrid-cell': {
-                      alignItems: 'flex-start',
-                      py: 1,
-                    },
-                    '& .wrap-cell': {
-                      whiteSpace: 'normal',
-                      lineHeight: 'normal',
-                    },
-                  }}
-                />
-              </Card>
-            </Grid>
-          );
-        })}
-
-        {/* Tabel IKU Result */}
-        <Grid size={{ xs: 12 }}>
-          <Card style={{ padding: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
-              <Typography variant="h6" sx={{ marginBottom: 2 }}>
-                Hasil Kalkulasi IKU By {filters.type ? String(filters.type).replace('IKU_', '') : 'SEMUA'}
+      <Grid container spacing={2} sx={{ marginBottom: 2, mt: 2 }}>
+        {(!filters.type || filters.type === 'IKU_UTAMA') && (
+          <>
+            <Grid size={{ xs: 12 }}>
+              <Typography variant="h6" fontWeight="bold" sx={{ mt: 2, mb: 1 }}>
+                GRUP BY TYPE IKU UTAMA
               </Typography>
+            </Grid>
+            {dataDashboardIkuChartUtama.map((iku: TDashboardIKUItem, index: number) => {
+              const chartData = iku.chartData || [];
+              const series = [
+                {
+                  label: "Target",
+                  data: periods.map((p) => chartData.find((d: TDashboardIKUChartDataItem) => d.period === p)?.target || 0),
+                  color: "#D1FADF",
+                },
+                {
+                  label: "Realisasi",
+                  data: periods.map((p) => chartData.find((d: TDashboardIKUChartDataItem) => d.period === p)?.realization || 0),
+                  color: "#4D96FF",
+                },
+              ];
 
-            </div>
-            <DataTable
-              loading={ikuResultQuery.isLoading}
-              rows={ikuResultData}
-              columns={columns}
-              getRowId={(row) => row.idResult}
-              paginationInfo={createPaginationInfo({
-                per_page: filters.per_page ? Number(filters.per_page) : 10,
-                total: ikuResultQuery.data?.result?.total || 0,
-                page: ikuResultQuery.data?.result?.currentPage || 1,
-              })}
-              handleChange={setFilter}
-            />
-          </Card>
-        </Grid>
+              return (
+                <Grid key={`utama-chart-${iku.ikuId || index}`} size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
+                  <Card style={{ padding: 10, height: "100%" }}>
+                    <Typography variant="h6" sx={{ marginBottom: 2, fontSize: '1.1rem' }}>
+                      {iku.ikuCode} - {iku.ikuName}
+                    </Typography>
+                    <BarChart
+                      loading={dashboardIKUQuery.isLoading}
+                      xAxis={[{ data: periods, scaleType: "band" }]}
+                      series={series}
+                      height={300}
+                      barLabel="value"
+                      borderRadius={4}
+                    />
+                  </Card>
+                </Grid>
+              );
+            })}
+            {dataDashboardIkuTableUtama.map((iku: TDashboardIKUItem, index: number) => {
+              const tableData = iku.tableData || [];
+
+              return (
+                <Grid key={`utama-table-${iku.ikuId || index}`} size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
+                  <Card style={{ padding: 10, height: "100%" }}>
+                    <Typography variant="h6" sx={{ marginBottom: 2, fontSize: '1.1rem' }}>
+                      {iku.ikuCode} - {iku.ikuName}
+                    </Typography>
+                    <DataTable
+                      loading={dashboardIKUQuery.isLoading}
+                      rows={tableData}
+                      columns={tableColumns}
+                      getRowId={(row) => row.period}
+                      getRowHeight={() => 'auto'}
+                      hidePagination
+                      sx={{
+                        '& .MuiDataGrid-cell': {
+                          alignItems: 'flex-start',
+                          py: 1,
+                        },
+                        '& .wrap-cell': {
+                          whiteSpace: 'normal',
+                          lineHeight: 'normal',
+                        },
+                      }}
+                    />
+                  </Card>
+                </Grid>
+              );
+            })}
+          </>
+        )}
+
+        {(!filters.type || filters.type === 'IKU_SPEKTA') && (
+          <>
+            <Grid size={{ xs: 12 }}>
+              <Typography variant="h6" fontWeight="bold" sx={{ mt: 2, mb: 1 }}>
+                GRUP BY TYPE IKU SPEKTA
+              </Typography>
+            </Grid>
+            {dataDashboardIkuChartSpekta.map((iku: TDashboardIKUItem, index: number) => {
+              const chartData = iku.chartData || [];
+              const series = [
+                {
+                  label: "Target",
+                  data: periods.map((p) => chartData.find((d: TDashboardIKUChartDataItem) => d.period === p)?.target || 0),
+                  color: "#D1FADF",
+                },
+                {
+                  label: "Realisasi",
+                  data: periods.map((p) => chartData.find((d: TDashboardIKUChartDataItem) => d.period === p)?.realization || 0),
+                  color: "#4D96FF",
+                },
+              ];
+
+              return (
+                <Grid key={`spekta-chart-${iku.ikuId || index}`} size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
+                  <Card style={{ padding: 10, height: "100%" }}>
+                    <Typography variant="h6" sx={{ marginBottom: 2, fontSize: '1.1rem' }}>
+                      {iku.ikuCode} - {iku.ikuName}
+                    </Typography>
+                    <BarChart
+                      loading={dashboardIKUQuery.isLoading}
+                      xAxis={[{ data: periods, scaleType: "band" }]}
+                      series={series}
+                      height={300}
+                      barLabel="value"
+                      borderRadius={4}
+                    />
+                  </Card>
+                </Grid>
+              );
+            })}
+            {dataDashboardIkuTableSpekta.map((iku: TDashboardIKUItem, index: number) => {
+              const tableData = iku.tableData || [];
+
+              return (
+                <Grid key={`spekta-table-${iku.ikuId || index}`} size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
+                  <Card style={{ padding: 10, height: "100%" }}>
+                    <Typography variant="h6" sx={{ marginBottom: 2, fontSize: '1.1rem' }}>
+                      {iku.ikuCode} - {iku.ikuName}
+                    </Typography>
+                    <DataTable
+                      loading={dashboardIKUQuery.isLoading}
+                      rows={tableData}
+                      columns={tableColumns}
+                      getRowId={(row) => row.period}
+                      getRowHeight={() => 'auto'}
+                      hidePagination
+                      sx={{
+                        '& .MuiDataGrid-cell': {
+                          alignItems: 'flex-start',
+                          py: 1,
+                        },
+                        '& .wrap-cell': {
+                          whiteSpace: 'normal',
+                          lineHeight: 'normal',
+                        },
+                      }}
+                    />
+                  </Card>
+                </Grid>
+              );
+            })}
+          </>
+        )}
+
+        {/* Tabel IKU Result Utama */}
+        {(!filters.type || filters.type === 'IKU_UTAMA') && (
+          <Grid size={{ xs: 12 }}>
+            <Card style={{ padding: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
+                <Typography variant="h6" sx={{ marginBottom: 2 }}>
+                  Hasil Kalkulasi IKU UTAMA
+                </Typography>
+              </div>
+              <DataTable
+                loading={ikuResultQuery.isLoading}
+                rows={ikuResultUtama}
+                columns={columns}
+                getRowId={(row) => row.idResult}
+                paginationInfo={createPaginationInfo({
+                  per_page: filters.per_page ? Number(filters.per_page) : 10,
+                  total: ikuResultQuery.data?.result?.total || 0,
+                  page: ikuResultQuery.data?.result?.currentPage || 1,
+                })}
+                handleChange={setFilter}
+              />
+            </Card>
+          </Grid>
+        )}
+
+        {/* Tabel IKU Result Spekta */}
+        {(!filters.type || filters.type === 'IKU_SPEKTA') && (
+          <Grid size={{ xs: 12 }}>
+            <Card style={{ padding: 16, marginTop: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
+                <Typography variant="h6" sx={{ marginBottom: 2 }}>
+                  Hasil Kalkulasi IKU SPEKTA
+                </Typography>
+              </div>
+              <DataTable
+                loading={ikuResultQuery.isLoading}
+                rows={ikuResultSpekta}
+                columns={columns}
+                getRowId={(row) => row.idResult}
+                paginationInfo={createPaginationInfo({
+                  per_page: filters.per_page ? Number(filters.per_page) : 10,
+                  total: ikuResultQuery.data?.result?.total || 0,
+                  page: ikuResultQuery.data?.result?.currentPage || 1,
+                })}
+                handleChange={setFilter}
+              />
+            </Card>
+          </Grid>
+        )}
       </Grid>
     </Page>
   );

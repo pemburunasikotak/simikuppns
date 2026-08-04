@@ -44,7 +44,15 @@ const DetailProgramPage = () => {
 
   const columns: GridColDef<TDefaultProgramIndicator>[] = [
     { field: "name", headerName: "Nama Indikator", minWidth: 250, flex: 1 },
-    { field: "unit", headerName: "Satuan", width: 150 },
+    {
+      field: "unit",
+      headerName: "Satuan",
+      width: 150,
+      renderCell: (params) => 
+        typeof params.row.masterUnitType === "string" 
+          ? params.row.masterUnitType 
+          : params.row.masterUnitType?.name?.toString() || "-",
+    },
     // { field: "status", headerName: "Status", width: 150 },
     // { field: "order", headerName: "Urutan", width: 100, align: "center", headerAlign: "center" },
     {

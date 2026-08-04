@@ -11,6 +11,13 @@ export type TDefaultProgramIndicator = {
     createdAt?: string;
     updatedAt?: string;
   } | string;
+  masterUnitType?: {
+    id: string;
+    name?: string;
+    description?: string;
+    createdAt?: string;
+    updatedAt?: string;
+  } | string;
   unit_measurement?: string;
   targetQ1?: number;
   targetQ2?: number;

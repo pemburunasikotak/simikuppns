@@ -46,3 +46,8 @@ export const getIndicatorRealizations = async (programId: string, id: string): P
   const { data } = await prokerAxiosInstance.get(`/api/v1/programs/${programId}/indicators/${id}/realizations`);
   return data;
 };
+
+export const getIndicatorUsers = async (programId: string, id: string, params?: Record<string, unknown>): Promise<{ data: { items: { id: string; name: string; [key: string]: unknown }[] } }> => {
+  const { data } = await prokerAxiosInstance.get(`/api/v1/programs/${programId}/indicators/${id}/users`, { params });
+  return data;
+};

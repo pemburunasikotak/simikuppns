@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import { Button, Grid, Stack } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { Button, Grid, Stack, FormControl, FormGroup, FormLabel } from "@mui/material";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import FormTextField from "@/app/_components/ui/form-text-field";
+import BaseInputText from "@/app/_components/ui/base-input-text";
 import FormDropdownField from "@/app/_components/ui/form-dropdown-field";
 
 import { ProgramSchema, TProgramFormData } from "./schema";
@@ -86,13 +87,38 @@ const ProgramForm = ({ loading, handleSubmit, defaultValues }: Props) => {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <FormTextField
-            variant="filled"
-            label="Anggaran (Rp)"
+          <Controller
             control={form.control}
             name="budget"
-            type="number"
-            placeholder="Ex: 50000000"
+            render={({ field, fieldState }) => (
+              <FormControl variant="standard" sx={{ width: "100%" }}>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <FormLabel htmlFor={field.name} error={fieldState.invalid}>
+                    Anggaran (Rp)
+                  </FormLabel>
+                </div>
+                <FormGroup>
+                  <BaseInputText
+                    variant="filled"
+                    id={field.name}
+                    value={
+                      field.value
+                        ? new Intl.NumberFormat("id-ID").format(
+                            Number(field.value.toString().replace(/\D/g, ""))
+                          )
+                        : ""
+                    }
+                    onChange={(e) => {
+                      const rawValue = e.target.value.replace(/\D/g, "");
+                      field.onChange(rawValue ? Number(rawValue) : undefined);
+                    }}
+                    placeholder="Ex: 50.000.000"
+                    error={fieldState.invalid}
+                    helperText={fieldState.error?.message}
+                  />
+                </FormGroup>
+              </FormControl>
+            )}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>

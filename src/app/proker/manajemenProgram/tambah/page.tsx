@@ -20,7 +20,12 @@ const CreateDefaultProgramPage = () => {
       ikuCode: data.ikuCode || "",
       title: data.title,
       description: data.description,
-      indicators: data.indicators && data.indicators.length > 0 ? data.indicators.map(ind => ({ ...ind, status: "DRAFT" })) : undefined,
+      indicators: data.indicators && data.indicators.length > 0 ? data.indicators.map(ind => ({
+        name: ind.name,
+        unit: ind.masterUnitTypeId,
+        order: ind.order,
+        status: "DRAFT",
+      })) : undefined,
     };
 
     mutation.mutate(payload, {

@@ -25,7 +25,12 @@ const EditDefaultProgramPage = () => {
       ikuCode: data.ikuCode,
       title: data.title,
       description: data.description,
-      indicators: data.indicators && data.indicators.length > 0 ? data.indicators.map(ind => ({ ...ind, status: "DRAFT" })) : undefined,
+      indicators: data.indicators && data.indicators.length > 0 ? data.indicators.map(ind => ({
+        name: ind.name,
+        unit: ind.masterUnitTypeId,
+        order: ind.order,
+        status: "DRAFT"
+      })) : undefined,
     };
 
     mutation.mutate({ id: programId, payload }, {
@@ -54,7 +59,7 @@ const EditDefaultProgramPage = () => {
       description: programData.data.description,
       indicators: programData.data.indicators?.map(indicator => ({
         name: indicator.name,
-        unit: typeof indicator.unit === 'string' ? indicator.unit : indicator.unit?.name || "",
+        masterUnitTypeId: typeof indicator.masterUnitType === 'string' ? indicator.masterUnitType : indicator.masterUnitType?.id || "",
         order: indicator.order,
       })) || [],
     }

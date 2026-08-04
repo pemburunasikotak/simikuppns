@@ -15,6 +15,8 @@ import ActionButtonTable from "@/app/_components/ui/action-button-table";
 import useModal from "@/app/_components/ui/modal";
 import useDeleteProgram from "./_hooks/use-delete-program";
 import { DeleteOutlined } from "@mui/icons-material";
+import { ProkerSessionUser } from "@/libs/localstorage/proker-session";
+
 
 const ProgramPage: FC = (): ReactElement => {
   const navigate = useNavigate();
@@ -26,7 +28,12 @@ const ProgramPage: FC = (): ReactElement => {
     limit: filter.per_page ? Number(filter.per_page) : 10
   });
 
+  const user = ProkerSessionUser.get()?.user;
+  const userRoleKeys = user?.roles?.map((r: { key: string }) => r.key) || [];
+  const isAdmin = userRoleKeys.includes("admin_sim_proker");
+
   const items = data?.data?.items || [];
+
 
   const columns: GridColDef<TProkerProgram>[] = [
     { field: "code", headerName: "Kode Program", width: 150 },
@@ -72,27 +79,31 @@ const ProgramPage: FC = (): ReactElement => {
               navigate(`/proker/program/${params.row.id}`);
             },
           },
-          {
-            key: "edit",
-            type: "edit" as const,
-            onClick: () => {
-              navigate(`/proker/program/${params.row.id}/edit`);
-            },
-          },
-          {
-            key: "delete",
-            type: "delete" as const,
-            onClick: () => {
-              modal.confirm({
-                title: "Hapus Program",
-                description: "Apakah anda yakin ingin menghapus program ini?",
-                icon: <DeleteOutlined sx={{ height: 40, width: 40 }} />,
-                onOk: () => {
-                  deleteProgram.mutate({ id: params.row.id });
+          ...(isAdmin
+            ? [
+                {
+                  key: "edit",
+                  type: "edit" as const,
+                  onClick: () => {
+                    navigate(`/proker/program/${params.row.id}/edit`);
+                  },
                 },
-              });
-            },
-          },
+                {
+                  key: "delete",
+                  type: "delete" as const,
+                  onClick: () => {
+                    modal.confirm({
+                      title: "Hapus Program",
+                      description: "Apakah anda yakin ingin menghapus program ini?",
+                      icon: <DeleteOutlined sx={{ height: 40, width: 40 }} />,
+                      onOk: () => {
+                        deleteProgram.mutate({ id: params.row.id });
+                      },
+                    });
+                  },
+                },
+              ]
+            : []),
         ];
         return <ActionButtonTable items={actionItems} />;
       },
@@ -118,18 +129,22 @@ const ProgramPage: FC = (): ReactElement => {
           defaultValue={{
             search_value: filter.search || filter.search_value,
           }}
-          actions={[
-            <Button
-              key="add"
-              variant="contained"
-              startIcon={<AddOutlined />}
-              onClick={() => {
-                navigate("/proker/program/tambah");
-              }}
-            >
-              Tambah Program
-            </Button>,
-          ]}
+          actions={
+            isAdmin
+              ? [
+                  <Button
+                    key="add"
+                    variant="contained"
+                    startIcon={<AddOutlined />}
+                    onClick={() => {
+                      navigate("/proker/program/tambah");
+                    }}
+                  >
+                    Tambah Program
+                  </Button>,
+                ]
+              : []
+          }
         />
       }
     >

@@ -1,6 +1,7 @@
 import { FC, ReactElement, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
+import { AddOutlined } from "@mui/icons-material";
 import { GridColDef } from "@mui/x-data-grid";
 // import EditIcon from "@mui/icons-material/Edit";
 // import AddCircleIcon from "@mui/icons-material/AddCircle";
@@ -12,6 +13,7 @@ import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
 import DataTable from "@/app/_components/ui/data-table";
 import ActionButtonTable from "@/app/_components/ui/action-button-table";
 import ModalSetTarget from "./modal-set-target";
+import ModalAddIndicator from "./modal-add-indicator";
 
 const IndicatorTab: FC = (): ReactElement => {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +29,9 @@ const IndicatorTab: FC = (): ReactElement => {
 
   const [targetModalOpen, setTargetModalOpen] = useState(false);
   const [selectedIndicator, setSelectedIndicator] = useState<TDefaultProgramIndicator | null>(null);
+
+  const [openModalIndicator, setOpenModalIndicator] = useState(false);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
 
   const handleOpenTargetModal = (indicator: TDefaultProgramIndicator) => {
     setSelectedIndicator(indicator);
@@ -56,6 +61,7 @@ const IndicatorTab: FC = (): ReactElement => {
     { field: "targetQ2", headerName: "Target Q2", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
     { field: "targetQ3", headerName: "Target Q3", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
     { field: "targetQ4", headerName: "Target Q4", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
+    { field: "status", headerName: "Status", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
     // { field: "order", headerName: "Urutan", width: 100, align: "center", headerAlign: "center" },
     {
       field: "action",
@@ -65,6 +71,15 @@ const IndicatorTab: FC = (): ReactElement => {
       headerAlign: "center",
       renderCell: (params) => {
         const actionItems = [];
+        actionItems.push({
+          key: "edit",
+          type: "edit" as const,
+          onClick: () => {
+            setSelectedIndicator(params.row);
+            setModalMode("edit");
+            setOpenModalIndicator(true);
+          },
+        });
         if (params.row.status === "ASSIGNED_TO_UNIT") {
           actionItems.push({
             key: "assign",
@@ -104,8 +119,19 @@ const IndicatorTab: FC = (): ReactElement => {
         )}
       </Box>
 
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="h6" fontWeight="bold">Daftar Indikator Program</Typography>
+        <Button
+          variant="contained"
+          startIcon={<AddOutlined />}
+          onClick={() => {
+            setSelectedIndicator(null);
+            setModalMode("add");
+            setOpenModalIndicator(true);
+          }}
+        >
+          Tambah Indikator
+        </Button>
       </Box>
       <DataTable
         loading={isLoading}
@@ -131,6 +157,13 @@ const IndicatorTab: FC = (): ReactElement => {
           setSelectedIndicator(null);
         }}
         programId={id as string}
+        selectedIndicator={selectedIndicator}
+      />
+      <ModalAddIndicator
+        open={openModalIndicator}
+        onClose={() => setOpenModalIndicator(false)}
+        programId={id as string}
+        mode={modalMode}
         selectedIndicator={selectedIndicator}
       />
     </Box>

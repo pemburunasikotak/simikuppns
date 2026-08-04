@@ -7,6 +7,8 @@ import { useSearchParams } from "react-router";
 
 import FormTextField from "@/app/_components/ui/form-text-field";
 import FormAutoCompleteField from "@/app/_components/ui/form-auto-complete";
+import FormDropdownField from "@/app/_components/ui/form-dropdown-field";
+import { useGetProkerMasterUnits } from "@/app/proker/master-unit/_hooks/use-get-master-units";
 
 import { defaultProgramSchema, TDefaultProgramFormData } from "./schema";
 import useGetListIkuProker from "../../_hooks/use-get-list-iku-proker";
@@ -33,6 +35,10 @@ const DefaultProgramForm = ({ loading, handleSubmit, defaultValues, isEditMode }
   const queryIkuId = searchParams.get("ikuId");
 
   const { data: ikuData } = useGetListIkuProker({ limit: 50 });
+  
+  const { data: unitTypesData } = useGetProkerMasterUnits({ limit: 50 });
+  const unitOptions = unitTypesData?.items?.map(unit => ({ value: unit.id, label: unit.name })) || [];
+
   const ikuOptions =
     ikuData?.data?.items
       ?.filter((iku) => (queryIkuId ? iku.id === queryIkuId : true))
@@ -148,7 +154,7 @@ const DefaultProgramForm = ({ loading, handleSubmit, defaultValues, isEditMode }
             <Button
               variant="outlined"
               startIcon={<Add />}
-              onClick={() => append({ name: "", unit: "", order: fields.length + 1 })}
+              onClick={() => append({ name: "", masterUnitTypeId: "", order: fields.length + 1 })}
             >
               Tambah Indikator
             </Button>
@@ -168,11 +174,11 @@ const DefaultProgramForm = ({ loading, handleSubmit, defaultValues, isEditMode }
                     />
                   </Grid>
                   <Grid size={{ xs: 12, sm: 4 }}>
-                    <FormTextField
-                      variant="filled"
+                    <FormDropdownField
                       label="Satuan"
                       control={form.control}
-                      name={`indicators.${index}.unit`}
+                      name={`indicators.${index}.masterUnitTypeId`}
+                      options={unitOptions}
                       required
                     />
                   </Grid>

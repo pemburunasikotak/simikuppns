@@ -8,7 +8,7 @@ import FormTextField from "@/app/_components/ui/form-text-field";
 import FormDropdownField from "@/app/_components/ui/form-dropdown-field";
 import { useGetProkerMasterUnits } from "@/app/proker/master-unit/_hooks/use-get-master-units";
 import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
-import useCreateDefaultProgramIndicator from "../_hooks/use-create-default-program-indicator";
+import useCreateProgramIndicator from "../_hooks/use-create-program-indicator";
 import useUpdateProgramIndicator from "../_hooks/use-update-program-indicator";
 
 type ModalAddIndicatorProps = {
@@ -29,7 +29,7 @@ type FormData = z.infer<typeof schema>;
 
 const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }: ModalAddIndicatorProps) => {
   const { enqueueSnackbar } = useSnackbar();
-  const createMutation = useCreateDefaultProgramIndicator();
+  const createMutation = useCreateProgramIndicator();
   const updateMutation = useUpdateProgramIndicator();
 
   const isPending = createMutation.isPending || updateMutation.isPending;
@@ -81,15 +81,21 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   };
 
   const onSubmit = (data: FormData) => {
-    const basePayload: { name: string; unit: string; order: number } = {
+    const fullPayload: import("@/api/proker/manajemenProgram/type").TDefaultProgramIndicatorPayload = {
       name: data.name,
       unit: data.masterUnitTypeId,
       order: data.order,
+      unitId: mode === "edit" && selectedIndicator ? selectedIndicator.unitId || data.masterUnitTypeId || "" : data.masterUnitTypeId,
+      targetQ1: mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ1 || 0) : 0,
+      targetQ2: mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ2 || 0) : 0,
+      targetQ3: mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ3 || 0) : 0,
+      targetQ4: mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ4 || 0) : 0,
+      status: mode === "edit" && selectedIndicator ? selectedIndicator.status || "DRAFT" : "DRAFT",
     };
 
     if (mode === "add") {
       createMutation.mutate(
-        { id: programId, payload: basePayload },
+        { programId, payload: fullPayload },
         {
           onSuccess: () => {
             enqueueSnackbar("Berhasil menambahkan indikator", { variant: "success" });
@@ -102,17 +108,8 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
       );
     } else {
       if (!selectedIndicator) return;
-      const updatePayload = {
-        ...basePayload,
-        unitId: selectedIndicator.unitId || "",
-        targetQ1: selectedIndicator.targetQ1 || 0,
-        targetQ2: selectedIndicator.targetQ2 || 0,
-        targetQ3: selectedIndicator.targetQ3 || 0,
-        targetQ4: selectedIndicator.targetQ4 || 0,
-        status: selectedIndicator.status || "DRAFT",
-      };
       updateMutation.mutate(
-        { programId, id: selectedIndicator.id, payload: updatePayload },
+        { programId, id: selectedIndicator.id, payload: fullPayload },
         {
           onSuccess: () => {
             enqueueSnackbar("Berhasil mengubah indikator", { variant: "success" });
@@ -170,4 +167,3 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
 };
 
 export default ModalAddIndicator;
-

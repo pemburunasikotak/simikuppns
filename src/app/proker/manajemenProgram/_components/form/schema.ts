@@ -10,7 +10,7 @@ export const defaultProgramSchema = z.object({
   description: z.string().min(1, "Deskripsi wajib diisi"),
   indicators: z.array(z.object({
     name: z.string().min(1, "Nama wajib diisi"),
-    unit: z.string().min(1, "Satuan wajib diisi"),
+    masterUnitTypeId: z.string().min(1, "Satuan wajib dipilih"),
     order: z.coerce.number().min(1, "Minimal 1"),
   })).optional(),
 });

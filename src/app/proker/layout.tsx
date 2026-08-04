@@ -34,6 +34,8 @@ import { useProkerSession } from "@/app/_components/providers/proker-session";
 import { ProkerSessionUser } from "@/libs/localstorage/proker-session";
 import { useSession } from "@/app/_components/providers/session";
 import { paths } from "@/commons/constants/paths";
+import ProfileDialog from "../_components/ui/profile-dialog";
+import { useSnackbar } from "notistack";
 
 export type TProkerSidebarItem = {
   key: string;
@@ -174,6 +176,8 @@ const ProkerLayout = () => {
   const theme = useTheme();
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
 
   const user = ProkerSessionUser.get()?.user;
   const { signout: signoutProker } = useProkerSession();
@@ -204,6 +208,10 @@ const ProkerLayout = () => {
     if (key === "logout") {
       signoutProker();
       signoutIku();
+    } else if (key === "profile") {
+      setProfileOpen(true);
+    } else if (key === "settings") {
+      enqueueSnackbar("Fitur sedang dalam pengembangan", { variant: "info" });
     }
   };
 
@@ -383,6 +391,9 @@ const ProkerLayout = () => {
           <Outlet />
         </Box>
       </Box>
+
+      {/* ── Profile Dialog ── */}
+      <ProfileDialog open={profileOpen} onClose={() => setProfileOpen(false)} user={user} />
     </Box>
   );
 };

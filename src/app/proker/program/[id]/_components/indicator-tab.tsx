@@ -1,5 +1,5 @@
 import { FC, ReactElement, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useParams } from "react-router";
 import { Box, Typography, Button } from "@mui/material";
 import { AddOutlined } from "@mui/icons-material";
 import { GridColDef } from "@mui/x-data-grid";
@@ -17,7 +17,6 @@ import ModalAddIndicator from "./modal-add-indicator";
 
 const IndicatorTab: FC = (): ReactElement => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
 
   const [params, setParams] = useState({
     page: 1,
@@ -56,7 +55,21 @@ const IndicatorTab: FC = (): ReactElement => {
 
   const columns: GridColDef<TDefaultProgramIndicator>[] = [
     { field: "name", headerName: "Nama Indikator", minWidth: 250, flex: 1 },
-    { field: "unit_measurement", headerName: "Satuan", width: 100 },
+    {
+      field: "unit_measurement",
+      headerName: "Satuan",
+      width: 150,
+      renderCell: (params) => {
+        const masterUnitType = params.row.masterUnitType;
+        if (typeof masterUnitType === "object" && masterUnitType?.name) {
+          return masterUnitType.name;
+        }
+        if (typeof masterUnitType === "string") {
+          return masterUnitType;
+        }
+        return params.row.unit_measurement || "-";
+      }
+    },
     { field: "targetQ1", headerName: "Target Q1", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
     { field: "targetQ2", headerName: "Target Q2", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
     { field: "targetQ3", headerName: "Target Q3", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
@@ -66,7 +79,7 @@ const IndicatorTab: FC = (): ReactElement => {
     {
       field: "action",
       headerName: "Aksi",
-      width: 150,
+      width: 100,
       align: "center",
       headerAlign: "center",
       renderCell: (params) => {
@@ -88,11 +101,11 @@ const IndicatorTab: FC = (): ReactElement => {
         });
         // }
         // if (params.row.status === "IN_PROGRESS") {
-        actionItems.push({
-          key: "detail",
-          type: "detail" as const,
-          onClick: () => navigate(`/proker/program/${id}/indicator/${params.row.id}`),
-        });
+        // actionItems.push({
+        //   key: "detail",
+        //   type: "detail" as const,
+        //   onClick: () => navigate(`/proker/program/${id}/indicator/${params.row.id}`),
+        // });
         // }
 
         if (actionItems.length > 0) {

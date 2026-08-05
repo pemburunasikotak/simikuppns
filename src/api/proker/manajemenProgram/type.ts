@@ -25,6 +25,12 @@ export type TDefaultProgramIndicator = {
   targetQ4?: number;
   status?: string;
   order: number;
+  pics?: {
+    id: string;
+    indicatorId: string;
+    userId: string;
+    createdAt?: string;
+  }[];
   createdAt?: string;
   updatedAt?: string;
 };
@@ -118,13 +124,17 @@ export type TDefaultProgramIndicatorPayload = {
   masterUnitTypeId: string;
   unitId: string;
   name: string;
-  unit: string;
+  unit?: string;
   targetQ1: number;
   targetQ2: number;
   targetQ3: number;
   targetQ4: number;
   status: string;
   order: number;
+  budget?: number;
+  picIds?: string[];
+  propsal?: unknown;
+  rab?: unknown;
 };
 
 export type TDefaultProgramIndicatorResponse = {

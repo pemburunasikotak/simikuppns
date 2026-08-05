@@ -5,6 +5,7 @@ import {
   TDefaultProgramResponse,
   TProkerIkuListResponse,
   TAssignDefaultProgramPayload,
+  TDefaultProgramIndicatorPayload,
   TDefaultProgramIndicatorResponse,
 } from "./type";
 
@@ -71,10 +72,8 @@ export const getListProgramIndicator = async (programId: string, params?: Record
   return data;
 };
 
-export const createProgramIndicator = async (programId: string, payload: FormData): Promise<unknown> => {
-  const { data } = await prokerAxiosInstance.post(`/api/v1/programs/${programId}/indicators`, payload, {
-    headers: { "Content-Type": "multipart/form-data" }
-  });
+export const createProgramIndicator = async (programId: string, payload: TDefaultProgramIndicatorPayload): Promise<unknown> => {
+  const { data } = await prokerAxiosInstance.post(`/api/v1/programs/${programId}/indicators`, payload);
   return data;
 };
 
@@ -83,10 +82,8 @@ export const createDefaultProgramIndicator = async (id: string, payload: import(
   return data;
 };
 
-export const updateProgramIndicator = async (programId: string, id: string, payload: FormData): Promise<unknown> => {
-  const { data } = await prokerAxiosInstance.put(`/api/v1/programs/${programId}/indicators/${id}`, payload, {
-    headers: { "Content-Type": "multipart/form-data" }
-  });
+export const updateProgramIndicator = async (programId: string, id: string, payload: TDefaultProgramIndicatorPayload): Promise<unknown> => {
+  const { data } = await prokerAxiosInstance.put(`/api/v1/programs/${programId}/indicators/${id}`, payload);
   return data;
 };
 

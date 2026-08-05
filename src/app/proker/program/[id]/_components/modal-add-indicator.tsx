@@ -101,11 +101,15 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
           masterUnitTypeId = selectedIndicator.unit;
         }
 
+        const initialPicIds = Array.isArray(selectedIndicator.pics)
+          ? selectedIndicator.pics.map((pic) => pic.userId).filter(Boolean)
+          : [];
+
         reset({
           name: selectedIndicator.name,
           masterUnitTypeId,
           unitId: selectedIndicator.unitId || "",
-          picIds: [],
+          picIds: initialPicIds,
           order: selectedIndicator.order,
           targetQ1: selectedIndicator.targetQ1 || 0,
           targetQ2: selectedIndicator.targetQ2 || 0,
@@ -153,41 +157,22 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   };
 
   const onSubmit = (data: FormData) => {
-    const fullPayload = new window.FormData();
-    
-    fullPayload.append("name", data.name);
-    fullPayload.append("masterUnitTypeId", data.masterUnitTypeId);
-    fullPayload.append("unitId", mode === "edit" && selectedIndicator ? data.unitId || selectedIndicator.unitId || "" : data.unitId);
-    fullPayload.append("order", String(data.order));
-    
-    const tQ1 = data.targetQ1 !== undefined && data.targetQ1 !== null ? data.targetQ1 : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ1 || 0) : 0);
-    const tQ2 = data.targetQ2 !== undefined && data.targetQ2 !== null ? data.targetQ2 : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ2 || 0) : 0);
-    const tQ3 = data.targetQ3 !== undefined && data.targetQ3 !== null ? data.targetQ3 : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ3 || 0) : 0);
-    const tQ4 = data.targetQ4 !== undefined && data.targetQ4 !== null ? data.targetQ4 : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ4 || 0) : 0);
-    
-    fullPayload.append("targetQ1", String(tQ1));
-    fullPayload.append("targetQ2", String(tQ2));
-    fullPayload.append("targetQ3", String(tQ3));
-    fullPayload.append("targetQ4", String(tQ4));
-    
-    fullPayload.append("status", mode === "edit" && selectedIndicator ? selectedIndicator.status || "DRAFT" : "DRAFT");
-    
-    if (data.budget) {
-      fullPayload.append("budget", data.budget.replace(/[^0-9]/g, ""));
-    }
-    
-    if (data.picIds && data.picIds.length > 0) {
-      data.picIds.forEach((id) => fullPayload.append("picIds[]", id));
-    }
-    
-    if (data.propsal) {
-      fullPayload.append("propsal", data.propsal);
-    }
-    
-    if (data.rab) {
-      fullPayload.append("rab", data.rab);
-    }
-
+    const fullPayload: import("@/api/proker/manajemenProgram/type").TDefaultProgramIndicatorPayload = {
+      name: data.name,
+      unit: data.masterUnitTypeId,
+      masterUnitTypeId: data.masterUnitTypeId,
+      order: Number(data.order || 1),
+      unitId: mode === "edit" && selectedIndicator ? data.unitId || selectedIndicator.unitId || "" : data.unitId,
+      targetQ1: data.targetQ1 !== undefined && data.targetQ1 !== null ? Number(data.targetQ1) : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ1 || 0) : 0),
+      targetQ2: data.targetQ2 !== undefined && data.targetQ2 !== null ? Number(data.targetQ2) : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ2 || 0) : 0),
+      targetQ3: data.targetQ3 !== undefined && data.targetQ3 !== null ? Number(data.targetQ3) : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ3 || 0) : 0),
+      targetQ4: data.targetQ4 !== undefined && data.targetQ4 !== null ? Number(data.targetQ4) : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ4 || 0) : 0),
+      status: mode === "edit" && selectedIndicator ? selectedIndicator.status || "DRAFT" : "DRAFT",
+      budget: data.budget ? Number(data.budget.replace(/[^0-9]/g, "")) : 0,
+      picIds: data.picIds || [],
+      propsal: data.propsal,
+      rab: data.rab,
+    };
 
     if (mode === "add") {
       createMutation.mutate(

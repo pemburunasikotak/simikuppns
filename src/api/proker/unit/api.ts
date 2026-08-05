@@ -25,3 +25,22 @@ export const updateProkerUnit = async ({ id, payload }: { id: string; payload: T
 export const deleteProkerUnit = async (id: string): Promise<void> => {
   await prokerAxiosInstance.delete(`/api/v1/units/${id}`);
 };
+
+export type TMyUnitItem = {
+  id?: string;
+  name?: string;
+  unit?: {
+    id?: string;
+    name?: string;
+  };
+};
+
+export const getMyUnits = async (params?: Record<string, unknown>): Promise<TMyUnitItem[]> => {
+  const { data } = await prokerAxiosInstance.get("/api/v1/units/my-units", { params });
+  return data?.data || data;
+};
+
+export const getUnitUsers = async (unitId: string, params?: Record<string, unknown>): Promise<{ data: { items: { id: string; name: string; [key: string]: unknown }[] } }> => {
+  const { data } = await prokerAxiosInstance.get(`/api/v1/units/${unitId}/users`, { params });
+  return data;
+};

@@ -15,8 +15,9 @@ import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
 import useDeleteProgramIndicator from "./_hooks/use-delete-program-indicator";
 import useAssignProgramIndicator from "./_hooks/use-assign-program-indicator";
 // import { useGetProkerUnits } from "@/app/proker/unit/_hooks/use-get-units";
-import useGetIkuUnits from "./_hooks/use-get-iku-units";
+
 import ModalAddIndicator from "./_components/modal-add-indicator";
+import { useGetProkerUnits } from "@/app/proker/unit/_hooks/use-get-units";
 
 const DetailProgramPage = () => {
   const { id, programId } = useParams<{ id: string; programId: string }>();
@@ -31,9 +32,10 @@ const DetailProgramPage = () => {
   const [openAssignModal, setOpenAssignModal] = useState(false);
   const [assignPayload, setAssignPayload] = useState<{ unitId: string; defaultProgramIndicatorId: string; period: number } | null>(null);
 
-  const { data: unitsDataResponse } = useGetIkuUnits(id as string);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const unitsData = { items: unitsDataResponse?.data?.map((item: any) => item.unit) || [] };
+  const { data: unitsDataResponse } = useGetProkerUnits();
+  const unitsData = { items: unitsDataResponse?.items || [] };
+
+  console.log('CEK CEK12', unitsData)
   const assignMutation = useAssignProgramIndicator();
 
   const { data: response, isLoading } = useGetDefaultProgram(programId as string, !!programId);
@@ -48,9 +50,9 @@ const DetailProgramPage = () => {
       field: "unit",
       headerName: "Satuan",
       width: 150,
-      renderCell: (params) => 
-        typeof params.row.masterUnitType === "string" 
-          ? params.row.masterUnitType 
+      renderCell: (params) =>
+        typeof params.row.masterUnitType === "string"
+          ? params.row.masterUnitType
           : params.row.masterUnitType?.name?.toString() || "-",
     },
     // { field: "status", headerName: "Status", width: 150 },

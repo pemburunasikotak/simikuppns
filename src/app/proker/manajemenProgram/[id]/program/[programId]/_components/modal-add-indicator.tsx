@@ -102,15 +102,17 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
       );
     } else {
       if (!selectedIndicator) return;
-      const updatePayload = {
-        ...basePayload,
-        unitId: selectedIndicator.unitId || "",
-        targetQ1: selectedIndicator.targetQ1 || 0,
-        targetQ2: selectedIndicator.targetQ2 || 0,
-        targetQ3: selectedIndicator.targetQ3 || 0,
-        targetQ4: selectedIndicator.targetQ4 || 0,
-        status: selectedIndicator.status || "DRAFT",
-      };
+      const updatePayload = new window.FormData();
+      updatePayload.append("name", basePayload.name);
+      updatePayload.append("unit", basePayload.unit);
+      updatePayload.append("masterUnitTypeId", basePayload.unit);
+      updatePayload.append("order", String(basePayload.order));
+      updatePayload.append("unitId", selectedIndicator.unitId || "");
+      updatePayload.append("targetQ1", String(selectedIndicator.targetQ1 || 0));
+      updatePayload.append("targetQ2", String(selectedIndicator.targetQ2 || 0));
+      updatePayload.append("targetQ3", String(selectedIndicator.targetQ3 || 0));
+      updatePayload.append("targetQ4", String(selectedIndicator.targetQ4 || 0));
+      updatePayload.append("status", selectedIndicator.status || "DRAFT");
       updateMutation.mutate(
         { programId, id: selectedIndicator.id, payload: updatePayload },
         {

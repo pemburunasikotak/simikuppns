@@ -62,7 +62,7 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
   // },
   {
     key: "proker-master-unit",
-    label: "Master Unit",
+    label: "Master Satuan",
     path: paths.proker.masterUnit,
     icon: <CorporateFareOutlined />,
     roles: ["admin_sim_proker"],

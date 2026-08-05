@@ -61,12 +61,12 @@ const IndicatorTab: FC = (): ReactElement => {
     { field: "targetQ2", headerName: "Target Q2", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
     { field: "targetQ3", headerName: "Target Q3", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
     { field: "targetQ4", headerName: "Target Q4", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
-    { field: "status", headerName: "Status", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
+    // { field: "status", headerName: "Status", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
     // { field: "order", headerName: "Urutan", width: 100, align: "center", headerAlign: "center" },
     {
       field: "action",
       headerName: "Aksi",
-      width: 80,
+      width: 150,
       align: "center",
       headerAlign: "center",
       renderCell: (params) => {
@@ -80,20 +80,20 @@ const IndicatorTab: FC = (): ReactElement => {
             setOpenModalIndicator(true);
           },
         });
-        if (params.row.status === "ASSIGNED_TO_UNIT") {
-          actionItems.push({
-            key: "assign",
-            type: "assign" as const,
-            onClick: () => handleOpenTargetModal(params.row),
-          });
-        }
-        if (params.row.status === "IN_PROGRESS") {
-          actionItems.push({
-            key: "detail",
-            type: "detail" as const,
-            onClick: () => navigate(`/proker/program/${id}/indicator/${params.row.id}`),
-          });
-        }
+        // if (params.row.status === "ASSIGNED_TO_UNIT") {
+        actionItems.push({
+          key: "assign",
+          type: "assign" as const,
+          onClick: () => handleOpenTargetModal(params.row),
+        });
+        // }
+        // if (params.row.status === "IN_PROGRESS") {
+        actionItems.push({
+          key: "detail",
+          type: "detail" as const,
+          onClick: () => navigate(`/proker/program/${id}/indicator/${params.row.id}`),
+        });
+        // }
 
         if (actionItems.length > 0) {
           return <ActionButtonTable items={actionItems} />;

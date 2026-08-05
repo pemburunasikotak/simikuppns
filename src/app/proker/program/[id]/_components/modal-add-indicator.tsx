@@ -1,15 +1,21 @@
 import { useEffect } from "react";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, TextField } from "@mui/material";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useSnackbar } from "notistack";
 import FormTextField from "@/app/_components/ui/form-text-field";
+import FormUploadField from "@/app/_components/ui/form-upload-field";
 import FormDropdownField from "@/app/_components/ui/form-dropdown-field";
 import { useGetProkerMasterUnits } from "@/app/proker/master-unit/_hooks/use-get-master-units";
 import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
 import useCreateProgramIndicator from "../_hooks/use-create-program-indicator";
 import useUpdateProgramIndicator from "../_hooks/use-update-program-indicator";
+import FormDropdownCheckboxField from "@/app/_components/ui/form-dropdown-checkbox-field";
+
+
+import useGetMyUnits from "@/app/proker/unit/_hooks/use-get-my-units";
+import useGetUnitUsers from "@/app/proker/unit/_hooks/use-get-unit-users";
 
 type ModalAddIndicatorProps = {
   open: boolean;
@@ -20,9 +26,20 @@ type ModalAddIndicatorProps = {
 };
 
 const schema = z.object({
+
+
   name: z.string().min(1, "Nama Indikator wajib diisi"),
   masterUnitTypeId: z.string().min(1, "Satuan wajib dipilih"),
+  unitId: z.string().min(1, "UNIT wajib dipilih"),
+  picIds: z.array(z.string()).min(1, "PIC wajib dipilih"),
   order: z.coerce.number().min(1, "Urutan minimal 1"),
+  targetQ1: z.coerce.number().optional(),
+  targetQ2: z.coerce.number().optional(),
+  targetQ3: z.coerce.number().optional(),
+  targetQ4: z.coerce.number().optional(),
+  budget: z.string().optional(),
+  propsal: z.any().optional(),
+  rab: z.any().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -37,14 +54,38 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   const { data: unitTypesData } = useGetProkerMasterUnits({ limit: 50 });
   const unitOptions = unitTypesData?.items?.map(unit => ({ value: unit.id, label: unit.name })) || [];
 
-  const { control, handleSubmit, reset } = useForm<FormData>({
+  const { data: myUnitsData } = useGetMyUnits({ limit: 50 });
+
+  console.log('CEK DATA', myUnitsData)
+  const myUnitOptions = myUnitsData?.map(item => ({
+    value: item?.unit?.id || item?.id || "",
+    label: item?.unit?.name || item?.name || "",
+  })) || [];
+
+  const { control, handleSubmit, reset, watch } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
       masterUnitTypeId: "",
+      unitId: "",
+      picIds: [],
       order: 1,
+      targetQ1: 0,
+      targetQ2: 0,
+      targetQ3: 0,
+      targetQ4: 0,
+      budget: "",
+      propsal: "",
+      rab: "",
     },
   });
+
+  const selectedUnitId = watch("unitId");
+  const { data: usersData } = useGetUnitUsers(selectedUnitId, { limit: 50 });
+  const picOptions = usersData?.data?.items?.map((user: { id: string; name: string }) => ({
+    value: user.id,
+    label: user.name,
+  })) || [];
 
   useEffect(() => {
     if (open) {
@@ -63,13 +104,29 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
         reset({
           name: selectedIndicator.name,
           masterUnitTypeId,
+          unitId: selectedIndicator.unitId || "",
+          picIds: [],
           order: selectedIndicator.order,
+          targetQ1: selectedIndicator.targetQ1 || 0,
+          targetQ2: selectedIndicator.targetQ2 || 0,
+          targetQ3: selectedIndicator.targetQ3 || 0,
+          targetQ4: selectedIndicator.targetQ4 || 0,
+          budget: ((selectedIndicator as unknown) as { budget?: string }).budget || "",
+          propsal: ((selectedIndicator as unknown) as { propsal?: string }).propsal || "",
+          rab: ((selectedIndicator as unknown) as { rab?: string }).rab || "",
         });
       } else {
         reset({
           name: "",
           masterUnitTypeId: "",
           order: 1,
+          targetQ1: 0,
+          targetQ2: 0,
+          targetQ3: 0,
+          targetQ4: 0,
+          budget: "",
+          propsal: "",
+          rab: "",
         });
       }
     }
@@ -80,18 +137,57 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
     onClose();
   };
 
+  const formatRupiah = (value: string) => {
+    const numberString = value.replace(/[^,\d]/g, "").toString();
+    const split = numberString.split(",");
+    const sisa = split[0].length % 3;
+    let rupiah = split[0].substr(0, sisa);
+    const ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+    if (ribuan) {
+      const separator = sisa ? "." : "";
+      rupiah += separator + ribuan.join(".");
+    }
+
+    return split[1] !== undefined ? rupiah + "," + split[1] : rupiah;
+  };
+
   const onSubmit = (data: FormData) => {
-    const fullPayload: import("@/api/proker/manajemenProgram/type").TDefaultProgramIndicatorPayload = {
-      name: data.name,
-      unit: data.masterUnitTypeId,
-      order: data.order,
-      unitId: mode === "edit" && selectedIndicator ? selectedIndicator.unitId || data.masterUnitTypeId || "" : data.masterUnitTypeId,
-      targetQ1: mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ1 || 0) : 0,
-      targetQ2: mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ2 || 0) : 0,
-      targetQ3: mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ3 || 0) : 0,
-      targetQ4: mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ4 || 0) : 0,
-      status: mode === "edit" && selectedIndicator ? selectedIndicator.status || "DRAFT" : "DRAFT",
-    };
+    const fullPayload = new window.FormData();
+    
+    fullPayload.append("name", data.name);
+    fullPayload.append("masterUnitTypeId", data.masterUnitTypeId);
+    fullPayload.append("unitId", mode === "edit" && selectedIndicator ? data.unitId || selectedIndicator.unitId || "" : data.unitId);
+    fullPayload.append("order", String(data.order));
+    
+    const tQ1 = data.targetQ1 !== undefined && data.targetQ1 !== null ? data.targetQ1 : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ1 || 0) : 0);
+    const tQ2 = data.targetQ2 !== undefined && data.targetQ2 !== null ? data.targetQ2 : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ2 || 0) : 0);
+    const tQ3 = data.targetQ3 !== undefined && data.targetQ3 !== null ? data.targetQ3 : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ3 || 0) : 0);
+    const tQ4 = data.targetQ4 !== undefined && data.targetQ4 !== null ? data.targetQ4 : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ4 || 0) : 0);
+    
+    fullPayload.append("targetQ1", String(tQ1));
+    fullPayload.append("targetQ2", String(tQ2));
+    fullPayload.append("targetQ3", String(tQ3));
+    fullPayload.append("targetQ4", String(tQ4));
+    
+    fullPayload.append("status", mode === "edit" && selectedIndicator ? selectedIndicator.status || "DRAFT" : "DRAFT");
+    
+    if (data.budget) {
+      fullPayload.append("budget", data.budget.replace(/[^0-9]/g, ""));
+    }
+    
+    if (data.picIds && data.picIds.length > 0) {
+      data.picIds.forEach((id) => fullPayload.append("picIds[]", id));
+    }
+    
+    if (data.propsal) {
+      fullPayload.append("propsal", data.propsal);
+    }
+    
+    if (data.rab) {
+      fullPayload.append("rab", data.rab);
+    }
+
 
     if (mode === "add") {
       createMutation.mutate(
@@ -140,10 +236,112 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
             />
             <FormDropdownField
               control={control}
+              name="unitId"
+              label="UNIT"
+              options={myUnitOptions}
+              required
+            />
+            <FormDropdownField
+              control={control}
               name="masterUnitTypeId"
               label="Satuan"
               options={unitOptions}
               required
+            />
+            <FormDropdownCheckboxField
+              control={control}
+              name="picIds"
+              label="PIC"
+              options={picOptions}
+              required
+            />
+            <FormTextField
+              control={control}
+              name="targetQ1"
+              label="Target Q1"
+              type="number"
+              required
+            />
+            <FormTextField
+              control={control}
+              name="targetQ2"
+              label="Target Q2"
+              type="number"
+              required
+            />
+            <FormTextField
+              control={control}
+              name="targetQ3"
+              label="Target Q3"
+              type="number"
+              required
+            />
+            <FormTextField
+              control={control}
+              name="targetQ4"
+              label="Target Q4"
+              type="number"
+              required
+            />
+            <Controller
+              name="budget"
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="Budget"
+                  variant="outlined"
+                  fullWidth
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  required
+                  onChange={(e) => {
+                    const formatted = formatRupiah(e.target.value);
+                    field.onChange(formatted);
+                  }}
+                  InputProps={{
+                    startAdornment: <div style={{ marginRight: 8, marginTop: 1 }}>Rp</div>,
+                  }}
+                />
+              )}
+            />
+            <Controller
+              name="propsal"
+              control={control}
+              render={({ field: { onChange, value }, fieldState: { error } }) => (
+                <FormUploadField
+                  label="Proposal"
+                  name="propsal"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) onChange(file);
+                  }}
+                  value={value && typeof value === 'object' ? (value as File).name : (value as string) || ""}
+                  error={!!error}
+                  helper={error?.message}
+                  acceptFormat=".pdf,.doc,.docx"
+                  uploadDesc="Format Dokumen PDF, DOCX"
+                />
+              )}
+            />
+            <Controller
+              name="rab"
+              control={control}
+              render={({ field: { onChange, value }, fieldState: { error } }) => (
+                <FormUploadField
+                  label="RAB"
+                  name="rab"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) onChange(file);
+                  }}
+                  value={value && typeof value === 'object' ? (value as File).name : (value as string) || ""}
+                  error={!!error}
+                  helper={error?.message}
+                  acceptFormat=".pdf,.xls,.xlsx"
+                  uploadDesc="Format Dokumen PDF, XLSX"
+                />
+              )}
             />
           </Stack>
         </DialogContent>

@@ -10,7 +10,7 @@ import FormTextField from "@/app/_components/ui/form-text-field";
 import FormDropdownCheckboxField from "@/app/_components/ui/form-dropdown-checkbox-field";
 import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
 import useSetProgramIndicatorTarget from "../../_hooks/use-set-program-indicator-target";
-import useGetIndicatorUsers from "../_hooks/use-get-indicator-users";
+import useGetUnitUsers from "@/app/proker/unit/_hooks/use-get-unit-users";
 
 type ModalSetTargetProps = {
   open: boolean;
@@ -37,7 +37,7 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
 
   const isPending = setTargetMutation.isPending;
 
-  const { data: usersData } = useGetIndicatorUsers(programId, selectedIndicator?.id || "", { limit: 10, page: 1 });
+  const { data: usersData } = useGetUnitUsers(selectedIndicator?.unitId || "", { limit: 50 });
   const picOptions = usersData?.data?.items?.map((user: { id: string; name: string }) => ({
     value: user.id,
     label: user.name,

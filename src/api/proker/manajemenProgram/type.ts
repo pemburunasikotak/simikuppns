@@ -115,6 +115,7 @@ export type TAssignDefaultProgramIndicatorPayload = {
 };
 
 export type TDefaultProgramIndicatorPayload = {
+  masterUnitTypeId: string;
   unitId: string;
   name: string;
   unit: string;

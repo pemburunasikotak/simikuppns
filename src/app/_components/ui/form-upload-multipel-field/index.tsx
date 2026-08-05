@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, FormControl, FormLabel, Typography, Stack, IconButton } from "@mui/material";
-import { styled } from "@mui/system";
+import { styled } from "@mui/material/styles";
 import { RestoreFromTrashOutlined, CloudUpload, Add } from "@mui/icons-material";
 import HelperText from "../helper-text";
 

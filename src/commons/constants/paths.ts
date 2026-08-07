@@ -24,7 +24,7 @@ export const paths = {
       create: "/master/formula/create",
       edit: "/master/formula/:id/edit",
     },
-
+    settingLock: "/master/period-lock",
   },
   master_data: {
     access_admin: {

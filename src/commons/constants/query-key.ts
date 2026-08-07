@@ -119,5 +119,8 @@ export const queryKeys = {
     users: "unit/users",
     ikus: "unit/ikus",
   },
+  settings: {
+    periodLocks: "settings/period-locks",
+  },
 } as const;
 

@@ -119,3 +119,34 @@ export const deleteUser = async (id: string): Promise<TResponse<null>> => {
   });
   return res;
 };
+
+export const resetUserPassword = async (payload: { id: string; password?: string; [key: string]: unknown }): Promise<TResponse<null>> => {
+  const { id, ...data } = payload;
+  try {
+    const { data: res } = await authApi({
+      url: `/api/users/${id}/reset-password`,
+      method: "POST",
+      data: {
+        password: data.password,
+        newPassword: data.password,
+        ...data,
+      },
+    });
+    return res;
+  } catch (error: unknown) {
+    const err = error as { response?: { status?: number } };
+    if (err.response && (err.response.status === 405 || err.response.status === 404)) {
+      const { data: res } = await authApi({
+        url: `/api/users/${id}/reset-password`,
+        method: "PUT",
+        data: {
+          password: data.password,
+          newPassword: data.password,
+          ...data,
+        },
+      });
+      return res;
+    }
+    throw error;
+  }
+};

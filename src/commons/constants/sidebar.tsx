@@ -86,6 +86,12 @@ export const SIDEBAR_ITEMS: TSidebarItem[] = [
     path: paths.pic.list,
     icon: <AssignmentIndOutlined />,
   },
+  {
+    icon: <SettingsOutlined />,
+    key: "master-data-setting-lock",
+    label: "Setting Lock",
+    path: paths.master.settingLock,
+  },
   // {
   //   key: "bidang",
   //   label: "Bidang",

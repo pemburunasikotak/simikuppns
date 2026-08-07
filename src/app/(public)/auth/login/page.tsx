@@ -37,9 +37,10 @@ const Component: React.FC = () => {
 
   const handleLogin = (data: TLoginFormData) => {
     setSearchParams({ error: "" });
+    const isEmail = data.nip.includes("@");
     session.signin({
-      // email: data.email,
-      nip: data.nip,
+      email: isEmail ? data.nip : "",
+      nip: isEmail ? "" : data.nip,
       password: data.password,
     });
   };
@@ -147,7 +148,7 @@ const Component: React.FC = () => {
                 style={{ marginBottom: "1rem" }}
               /> */}
               <TextField
-                label="nip"
+                label="NIP / Email"
                 variant="outlined"
                 fullWidth
                 {...register("nip")}

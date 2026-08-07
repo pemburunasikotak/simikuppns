@@ -29,9 +29,16 @@ import {
 import { EditOutlined, VisibilityOutlined, TagOutlined, AnalyticsOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Menu, MenuItem } from "@mui/material";
 import { useState } from "react";
+import { SessionUser } from "@/libs/localstorage";
 
 const ComponentRealizationPage: FC = (): ReactElement => {
   const navigate = useNavigate();
+  const sessionUser = SessionUser.get();
+  const user = sessionUser?.user;
+  const isAdmin = useMemo(
+    () => user?.roles?.some((r) => r.key === "admin_sim_iku"),
+    [user?.roles],
+  );
   const { filters } = useFilter<TGetMetricsParams & { search_value?: string }>();
   const { setFilter } = useFilter<TGetMetricsParams & { search_value?: string }>();
 
@@ -322,7 +329,7 @@ const ComponentRealizationPage: FC = (): ReactElement => {
       topPage={
         <Filter
           variants={["search"]}
-          labelSearch={"Cari Komponen..."}
+          labelSearch={"Komponen..."}
           defaultValue={{
             search_value: filters.search_value,
             tag: filters.tag,
@@ -374,20 +381,24 @@ const ComponentRealizationPage: FC = (): ReactElement => {
                 ))}
               </Menu>
             </Box>,
-            <Button
-              key="add"
-              variant="contained"
-              startIcon={<AddOutlined />}
-              onClick={() => navigate(paths.component.create)}
-              sx={{
-                borderRadius: "12px",
-                textTransform: "none",
-                px: 3,
-                boxShadow: "0 4px 14px 0 rgba(99, 102, 241, 0.39)",
-              }}
-            >
-              Tambah Komponen
-            </Button>,
+            ...(isAdmin
+              ? [
+                  <Button
+                    key="add"
+                    variant="contained"
+                    startIcon={<AddOutlined />}
+                    onClick={() => navigate(paths.component.create)}
+                    sx={{
+                      borderRadius: "12px",
+                      textTransform: "none",
+                      px: 3,
+                      boxShadow: "0 4px 14px 0 rgba(99, 102, 241, 0.39)",
+                    }}
+                  >
+                    Tambah Komponen
+                  </Button>,
+                ]
+              : []),
           ]}
         />
       }

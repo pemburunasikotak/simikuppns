@@ -173,7 +173,18 @@ const Component: FC = (): ReactElement => {
     { field: "nip", headerName: "NIP", width: 150 },
     { field: "name", headerName: "Nama User", minWidth: 200, flex: 1 },
     { field: "email", headerName: "Email", minWidth: 200, flex: 1 },
-    { field: "type", headerName: "Tipe", width: 130 },
+    {
+      field: "type", headerName: "Tipe", width: 130,
+      renderCell: (params) => {
+        if (params.row.type === "EMPLOYEE") {
+          return "Karyawan";
+        } else if (params.row.type === "LECTURER") {
+          return "Dosen";
+        } else {
+          return "-";
+        }
+      },
+    },
     {
       field: "isActive",
       headerName: "Status",
@@ -303,8 +314,8 @@ const Component: FC = (): ReactElement => {
                 name="type"
                 required
                 options={[
-                  { value: "EMPLOYEE", label: "EMPLOYEE" },
-                  { value: "STAFF", label: "STAFF" },
+                  { value: "EMPLOYEE", label: "Karyawan" },
+                  { value: "LECTURER", label: "Dosen" },
                 ]}
               />
               <FormTextField

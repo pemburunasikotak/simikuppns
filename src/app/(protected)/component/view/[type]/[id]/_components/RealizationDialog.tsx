@@ -13,6 +13,8 @@ import {
   CircularProgress,
   Divider,
   alpha,
+  Chip,
+  Tooltip,
 } from "@mui/material";
 import {
   CloudUploadOutlined,
@@ -22,6 +24,7 @@ import {
   DeleteOutline,
   AddOutlined,
   VisibilityOutlined,
+  LockOutlined,
 } from "@mui/icons-material";
 import { TMetricYearData } from "@/api/master/metrics/type";
 import { uploadDocuments } from "@/api/master/metrics";
@@ -55,7 +58,8 @@ interface RealizationDialogProps {
   prodiId?: string;
   dataType?: string;
   type?: string;
-  unit?: string
+  unit?: string;
+  isLocked?: boolean;
 }
 
 interface TFileItem {
@@ -78,9 +82,24 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
   prodiId,
   dataType,
   type,
-  unit
+  unit,
+  isLocked: isLockedProp,
 }) => {
   const isYearly = metricType.toLowerCase() === "tahunan" || metricType.toLowerCase() === "yearly" || metricType.toLowerCase() === "";
+
+  console.log('CEK CEK DISINI',
+    // open,
+    // onClose,
+    // yearData,
+    // idComponent,
+    // updateRealization,
+    // metricType,
+    // selectedMonth,
+    // prodiId,
+    // dataType,
+    // type,
+    // unit
+  )
 
   const { data: componentDetailData, isLoading: isFetchingComponentDetail } = useGetDetailComponentRealization({
     id: idComponent,
@@ -96,6 +115,16 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
   });
 
   const isFetchingDetail = type === "IKU" ? isFetchingIkuDetail : isFetchingComponentDetail;
+
+  const currentRealization = isYearly
+    ? yearData?.realizations?.[0]
+    : yearData?.realizations?.find((r) => r.month === selectedMonth);
+
+  const lockedFromData = currentRealization?.locked ||
+    (componentDetailData?.result?.realization as unknown as { locked?: boolean })?.locked ||
+    (ikuDetailData?.result as unknown as { locked?: boolean })?.locked;
+
+  const isLocked = isLockedProp !== undefined ? isLockedProp : Boolean(lockedFromData);
 
   const submitIkuResultMutation = useSubmitIKUResult();
 
@@ -486,9 +515,23 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
       >
         <DialogTitle sx={{ m: 0, p: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: "#1e293b" }}>
-              Realisasi {isYearly ? "Tahunan" : "Bulanan"}
-            </Typography>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Typography variant="h6" sx={{ fontWeight: 800, color: "#1e293b" }}>
+                Realisasi {isYearly ? "Tahunan" : "Bulanan"}
+              </Typography>
+              {isLocked && (
+                <Tooltip title="Hubungi admin untuk membuka" arrow placement="top">
+                  <Chip
+                    icon={<LockOutlined style={{ fontSize: 14 }} />}
+                    label="Terkunci"
+                    size="small"
+                    color="error"
+                    variant="outlined"
+                    sx={{ fontWeight: 700, borderRadius: "6px", cursor: "pointer" }}
+                  />
+                </Tooltip>
+              )}
+            </Stack>
             <Typography variant="caption" color="text.secondary">
               Tahun {yearData?.year} • {idComponent.split("_")[0]}
             </Typography>
@@ -997,26 +1040,30 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
           >
             Batal
           </Button>
-          <Button
-            variant="contained"
-            startIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : <SaveOutlined />}
-            onClick={type === "IKU" ? handelSubmitIku : handleSaveAll}
-            disabled={isSubmitting}
-            sx={{
-              borderRadius: "12px",
-              px: 5,
-              py: 1.2,
-              textTransform: "none",
-              fontWeight: 700,
-              background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
-              boxShadow: "0 8px 20px rgba(99, 102, 241, 0.3)",
-              "&:hover": {
-                boxShadow: "0 12px 25px rgba(99, 102, 241, 0.4)",
-              },
-            }}
-          >
-            {isSubmitting ? "Menyimpan..." : "Simpan Realisasi"}
-          </Button>
+          <Tooltip title={isLocked ? "Hubungi admin untuk membuka" : ""} arrow placement="top">
+            <span>
+              <Button
+                variant="contained"
+                startIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : (isLocked ? <LockOutlined /> : <SaveOutlined />)}
+                onClick={type === "IKU" ? handelSubmitIku : handleSaveAll}
+                disabled={isSubmitting || isLocked}
+                sx={{
+                  borderRadius: "12px",
+                  px: 5,
+                  py: 1.2,
+                  textTransform: "none",
+                  fontWeight: 700,
+                  background: isLocked ? "#cbd5e1" : "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
+                  boxShadow: isLocked ? "none" : "0 8px 20px rgba(99, 102, 241, 0.3)",
+                  "&:hover": {
+                    boxShadow: isLocked ? "none" : "0 12px 25px rgba(99, 102, 241, 0.4)",
+                  },
+                }}
+              >
+                {isSubmitting ? "Menyimpan..." : isLocked ? "Realisasi Terkunci" : "Simpan Realisasi"}
+              </Button>
+            </span>
+          </Tooltip>
         </DialogActions>
       </Dialog>
 

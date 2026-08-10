@@ -48,6 +48,7 @@ export type TMetricRealization = {
   month: number;
   value: string | number;
   description?: string;
+  locked?: boolean;
   createdAt: string;
   updatedAt: string;
 };

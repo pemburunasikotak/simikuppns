@@ -24,6 +24,7 @@ import {
   Collapse,
   InputAdornment,
   Divider,
+  Tooltip,
 } from "@mui/material";
 import {
   FolderOutlined,
@@ -39,6 +40,7 @@ import {
   CalendarTodayOutlined,
   TrendingUpOutlined,
   TagOutlined,
+  LockOutlined,
 } from "@mui/icons-material";
 import { Page } from "@/app/_components/ui";
 
@@ -664,7 +666,8 @@ const RealisasiBreakdownPage: React.FC = () => {
                                           const realization = yearData.realizations.find(r => r.month === monthNum);
                                           const idRealization = realization?.id || null;
                                           const val = realization ? Number(realization.value) : 0;
-                                          return (
+                                          const lock = realization?.locked;
+                                          const boxContent = (
                                             <Box
                                               key={monthNum}
                                               onClick={(e) => {
@@ -679,27 +682,39 @@ const RealisasiBreakdownPage: React.FC = () => {
                                                 width: 48,
                                                 height: 48,
                                                 borderRadius: "10px",
-                                                backgroundColor: val > 0 ? alpha("#6366f1", 0.1) : "#f8fafc",
+                                                backgroundColor: lock ? alpha("#ef4444", 0.08) : (val > 0 ? alpha("#6366f1", 0.1) : "#f8fafc"),
                                                 border: "1px solid",
-                                                borderColor: val > 0 ? alpha("#6366f1", 0.3) : "#e2e8f0",
+                                                borderColor: lock ? alpha("#ef4444", 0.4) : (val > 0 ? alpha("#6366f1", 0.3) : "#e2e8f0"),
                                                 cursor: "pointer",
+                                                position: "relative",
                                                 transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                                                 "&:hover": {
                                                   transform: "translateY(-2px)",
                                                   boxShadow: "0 4px 12px rgba(99, 102, 241, 0.15)",
-                                                  borderColor: "#6366f1",
-                                                  backgroundColor: alpha("#6366f1", 0.15),
+                                                  borderColor: lock ? "#ef4444" : "#6366f1",
+                                                  backgroundColor: lock ? alpha("#ef4444", 0.15) : alpha("#6366f1", 0.15),
                                                 },
                                                 "&:active": {
                                                   transform: "translateY(0)",
                                                 }
                                               }}
                                             >
+                                              {lock && (
+                                                <LockOutlined
+                                                  sx={{
+                                                    position: "absolute",
+                                                    top: 2,
+                                                    right: 2,
+                                                    fontSize: 12,
+                                                    color: "#ef4444",
+                                                  }}
+                                                />
+                                              )}
                                               <Typography
                                                 variant="caption"
                                                 sx={{
                                                   fontSize: "0.7rem",
-                                                  color: val > 0 ? "#6366f1" : "#94a3b8",
+                                                  color: lock ? "#ef4444" : (val > 0 ? "#6366f1" : "#94a3b8"),
                                                   fontWeight: 700,
                                                   lineHeight: 1
                                                 }}
@@ -711,7 +726,7 @@ const RealisasiBreakdownPage: React.FC = () => {
                                                 sx={{
                                                   fontSize: "0.9rem",
                                                   fontWeight: 800,
-                                                  color: val > 0 ? "#1e1b4b" : "#cbd5e1",
+                                                  color: lock ? "#991b1b" : (val > 0 ? "#1e1b4b" : "#cbd5e1"),
                                                   mt: 0.2
                                                 }}
                                               >
@@ -719,13 +734,26 @@ const RealisasiBreakdownPage: React.FC = () => {
                                               </Typography>
                                             </Box>
                                           );
+
+                                          return lock ? (
+                                            <Tooltip key={monthNum} title="Hubungi admin untuk membuka" arrow placement="top">
+                                              {boxContent}
+                                            </Tooltip>
+                                          ) : (
+                                            boxContent
+                                          );
                                         })}
                                       </Stack>
                                     ) : (
-                                      <Stack>
+                                      <Stack direction="row" alignItems="center" spacing={1}>
                                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                           {yearData.realizations.map(item => item.value).join(', ') || "-"}
                                         </Typography>
+                                        {yearData.realizations.some(item => item.locked) && (
+                                          <Tooltip title="Hubungi admin untuk membuka" arrow placement="top">
+                                            <LockOutlined sx={{ fontSize: 16, color: "#ef4444", cursor: "pointer" }} />
+                                          </Tooltip>
+                                        )}
                                       </Stack>
                                     )}
                                   </TableCell>
@@ -744,19 +772,29 @@ const RealisasiBreakdownPage: React.FC = () => {
                     </TableContainer>
 
                     {/* Dialog for updating */}
-                    <RealizationDialog
-                      open={isDialogOpen}
-                      onClose={() => setIsDialogOpen(false)}
-                      yearData={selectedYearData}
-                      idComponent={selectedRealizationId || compositeId || ""}
-                      updateRealization={updateMutation}
-                      metricType={metric?.periodType || ""}
-                      selectedMonth={selectedMonth}
-                      prodiId={selectedNode.id}
-                      dataType={metric?.dataType || ""}
-                      type={metric?.type}
-                      unit={metric?.unit}
-                    />
+                    {(() => {
+                      const selectedRealization = metric?.periodType?.toLowerCase() === "bulanan" || metric?.periodType?.toLowerCase() === "monthly"
+                        ? selectedYearData?.realizations.find(r => r.month === selectedMonth)
+                        : selectedYearData?.realizations[0];
+                      const isSelectedLocked = Boolean(selectedRealization?.locked);
+
+                      return (
+                        <RealizationDialog
+                          open={isDialogOpen}
+                          onClose={() => setIsDialogOpen(false)}
+                          yearData={selectedYearData}
+                          idComponent={selectedRealizationId || compositeId || ""}
+                          updateRealization={updateMutation}
+                          metricType={metric?.periodType || ""}
+                          selectedMonth={selectedMonth}
+                          prodiId={selectedNode.id}
+                          dataType={metric?.dataType || ""}
+                          type={metric?.type}
+                          unit={metric?.unit}
+                          isLocked={isSelectedLocked}
+                        />
+                      );
+                    })()}
                   </>
                 );
               })()}

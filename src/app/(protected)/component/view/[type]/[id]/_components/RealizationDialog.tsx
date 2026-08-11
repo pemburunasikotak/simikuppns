@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -25,13 +25,17 @@ import {
   AddOutlined,
   VisibilityOutlined,
   LockOutlined,
+  VerifiedOutlined,
+  HourglassEmptyOutlined,
 } from "@mui/icons-material";
 import { TMetricYearData } from "@/api/master/metrics/type";
 import { uploadDocuments } from "@/api/master/metrics";
 import { useSnackbar } from "notistack";
+import { SessionUser } from "@/libs/localstorage";
 import useGetDetailComponentRealization from "../../../../_hooks/use-get-detail-component-realization";
 import useGetDetailIKUResult from "../../../../_hooks/use-get-detail-iku-result";
 import useSubmitIKUResult from "../../../../_hooks/use-submit-iku-result";
+import useVerifyRealization from "../../../../_hooks/use-verify-realization";
 
 import { TRealizationDocument } from "@/api/master/component-realization/type";
 import { UseMutationResult } from "@tanstack/react-query";
@@ -101,14 +105,14 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
     // unit
   )
 
-  const { data: componentDetailData, isLoading: isFetchingComponentDetail } = useGetDetailComponentRealization({
+  const { data: componentDetailData, isLoading: isFetchingComponentDetail, refetch: refetchComponentDetail } = useGetDetailComponentRealization({
     id: idComponent,
     month: selectedMonth ?? undefined
   }, {
     enabled: type !== "IKU" && !!idComponent
   });
 
-  const { data: ikuDetailData, isLoading: isFetchingIkuDetail } = useGetDetailIKUResult({
+  const { data: ikuDetailData, isLoading: isFetchingIkuDetail, refetch: refetchIkuDetail } = useGetDetailIKUResult({
     id: idComponent,
   }, {
     enabled: type === "IKU" && !!idComponent
@@ -126,14 +130,91 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
 
   const isLocked = isLockedProp !== undefined ? isLockedProp : Boolean(lockedFromData);
 
+  // Extract realization detail data & isVerified status
+  const detailObj = (type === "IKU"
+    ? (ikuDetailData?.result || ikuDetailData?.data)
+    : (componentDetailData?.result || componentDetailData?.data)) as Record<string, unknown> | undefined;
+
+  const realizationObj = ((detailObj?.realization as Record<string, unknown>) || detailObj) as Record<string, unknown> | undefined;
+
+  const rawDetailResponse = (type === "IKU" ? ikuDetailData : componentDetailData) as Record<string, unknown> | undefined;
+  const rawDataField = rawDetailResponse?.data as Record<string, unknown> | undefined;
+  const rawResultField = rawDetailResponse?.result as Record<string, unknown> | undefined;
+
+  const isVerified = Boolean(
+    rawDataField?.isVerified ??
+    rawResultField?.isVerified ??
+    detailObj?.isVerified ??
+    realizationObj?.isVerified ??
+    (realizationObj?.verificationStatus === "TERVERIFIKASI" || realizationObj?.verificationStatus === "VERIFIED") ??
+    false
+  );
+
+  const targetEntityId = String(
+    realizationObj?.entityId ??
+    realizationObj?.idRealization ??
+    realizationObj?.id ??
+    detailObj?.entityId ??
+    detailObj?.idRealization ??
+    detailObj?.id ??
+    idComponent
+  );
+
+  // Check user session & permissions for verification
+  const sessionUser = SessionUser.get();
+  const currentUser = sessionUser?.user as unknown as {
+    id?: string;
+    roles?: { key: string }[];
+  } | undefined;
+
+  const currentUserRoles = useMemo(() => currentUser?.roles?.map((r) => r.key) || [], [currentUser?.roles]);
+  const canVerify = currentUserRoles.includes("verifikator_sim_iku") || currentUserRoles.includes("admin_sim_iku");
+
+  const verifiedByList = (
+    realizationObj?.verifiedBy ||
+    detailObj?.verifiedBy ||
+    rawDataField?.verifiedBy ||
+    rawResultField?.verifiedBy ||
+    []
+  ) as Array<{ userId?: string }>;
+
+  const hasVerifiedThisRecord = Boolean(
+    currentUser?.id &&
+    Array.isArray(verifiedByList) &&
+    verifiedByList.some((v) => v.userId === currentUser.id)
+  );
+
   const submitIkuResultMutation = useSubmitIKUResult();
+  const verifyMutation = useVerifyRealization();
 
   const [monthlyValues, setMonthlyValues] = useState<Record<number, string | number>>({});
   const [fileItems, setFileItems] = useState<TFileItem[]>([]);
   const [selectedFileForDetail, setSelectedFileForDetail] = useState<TFileItem | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [narrativeValue, setNarrativeValue] = useState<string>("");
+  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
+  const [verifyNote, setVerifyNote] = useState("");
   const { enqueueSnackbar } = useSnackbar();
+
+  const handleVerifySubmit = async () => {
+    try {
+      await verifyMutation.mutateAsync({
+        entityId: targetEntityId,
+        note: verifyNote || "Data sudah sesuai dengan dokumen pendukung",
+      });
+      enqueueSnackbar("Realisasi berhasil diverifikasi", { variant: "success" });
+      setVerifyDialogOpen(false);
+      if (type === "IKU") {
+        refetchIkuDetail();
+      } else {
+        refetchComponentDetail();
+      }
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } }; message?: string };
+      const errorMessage = err?.response?.data?.message || err?.message || "Gagal memverifikasi realisasi";
+      enqueueSnackbar(errorMessage, { variant: "error" });
+    }
+  };
 
   console.log('CEK DATA BARU', monthlyValues)
 
@@ -530,6 +611,26 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
                     sx={{ fontWeight: 700, borderRadius: "6px", cursor: "pointer" }}
                   />
                 </Tooltip>
+              )}
+              {!isFetchingDetail && (
+                isVerified ? (
+                  <Chip
+                    icon={<VerifiedOutlined style={{ fontSize: 14 }} />}
+                    label="Terverifikasi"
+                    size="small"
+                    color="success"
+                    sx={{ fontWeight: 700, borderRadius: "6px" }}
+                  />
+                ) : (
+                  <Chip
+                    icon={<HourglassEmptyOutlined style={{ fontSize: 14 }} />}
+                    label="Belum Verifikasi"
+                    size="small"
+                    color="warning"
+                    variant="outlined"
+                    sx={{ fontWeight: 700, borderRadius: "6px" }}
+                  />
+                )
               )}
             </Stack>
             <Typography variant="caption" color="text.secondary">
@@ -1027,43 +1128,151 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
         </DialogContent>
 
         <Divider />
-        <DialogActions sx={{ p: 3, backgroundColor: "#fff", justifyContent: 'flex-end', gap: 2 }}>
+        <DialogActions sx={{ p: 3, backgroundColor: "#fff", justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            {!isFetchingDetail && canVerify && (
+              hasVerifiedThisRecord ? (
+                <Tooltip title="Anda telah memverifikasi record ini" arrow placement="top">
+                  <span>
+                    <Button
+                      variant="outlined"
+                      color="success"
+                      startIcon={<VerifiedOutlined />}
+                      disabled
+                      sx={{
+                        borderRadius: "12px",
+                        px: 3,
+                        py: 1.2,
+                        textTransform: "none",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Sudah Diverifikasi
+                    </Button>
+                  </span>
+                </Tooltip>
+              ) : !isVerified ? (
+                <Button
+                  variant="contained"
+                  color="success"
+                  startIcon={verifyMutation.isPending ? <CircularProgress size={18} color="inherit" /> : <VerifiedOutlined />}
+                  onClick={() => setVerifyDialogOpen(true)}
+                  disabled={verifyMutation.isPending}
+                  sx={{
+                    borderRadius: "12px",
+                    px: 4,
+                    py: 1.2,
+                    textTransform: "none",
+                    fontWeight: 700,
+                    boxShadow: "0 8px 20px rgba(34, 197, 94, 0.3)",
+                    "&:hover": {
+                      boxShadow: "0 12px 25px rgba(34, 197, 94, 0.4)",
+                    },
+                  }}
+                >
+                  {verifyMutation.isPending ? "Memverifikasi..." : "Verifikasi Realisasi"}
+                </Button>
+              ) : null
+            )}
+          </Box>
+
+          <Stack direction="row" spacing={2}>
+            <Button
+              onClick={onClose}
+              sx={{
+                fontWeight: 700,
+                color: "#64748b",
+                textTransform: "none",
+                borderRadius: "10px",
+                backgroundColor: "#F5F7FA",
+                px: 4,
+              }}
+            >
+              Batal
+            </Button>
+
+            <Tooltip title={isLocked ? "Hubungi admin untuk membuka" : ""} arrow placement="top">
+              <span>
+                <Button
+                  variant="contained"
+                  startIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : (isLocked ? <LockOutlined /> : <SaveOutlined />)}
+                  onClick={type === "IKU" ? handelSubmitIku : handleSaveAll}
+                  disabled={isSubmitting || isLocked}
+                  sx={{
+                    borderRadius: "12px",
+                    px: 5,
+                    py: 1.2,
+                    textTransform: "none",
+                    fontWeight: 700,
+                    background: isLocked ? "#cbd5e1" : "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
+                    boxShadow: isLocked ? "none" : "0 8px 20px rgba(99, 102, 241, 0.3)",
+                    "&:hover": {
+                      boxShadow: isLocked ? "none" : "0 12px 25px rgba(99, 102, 241, 0.4)",
+                    },
+                  }}
+                >
+                  {isSubmitting ? "Menyimpan..." : isLocked ? "Realisasi Terkunci" : "Simpan Realisasi"}
+                </Button>
+              </span>
+            </Tooltip>
+          </Stack>
+        </DialogActions>
+      </Dialog>
+
+      {/* Verification Confirmation Dialog */}
+      <Dialog
+        open={verifyDialogOpen}
+        onClose={() => setVerifyDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: "16px" },
+        }}
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1, p: 2.5 }}>
+          <VerifiedOutlined color="success" />
+          <Typography variant="h6" fontWeight="bold">
+            Verifikasi Realisasi
+          </Typography>
+        </DialogTitle>
+        <Divider />
+        <DialogContent sx={{ p: 2.5 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Apakah Anda yakin ingin memverifikasi data realisasi ini?
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            label="Catatan Verifikasi"
+            value={verifyNote}
+            onChange={(e) => setVerifyNote(e.target.value)}
+            placeholder="Masukkan catatan..."
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1 }}>
           <Button
-            onClick={onClose}
-            sx={{
-              fontWeight: 700,
-              color: "#64748b",
-              textTransform: "none",
-              borderRadius: "10px",
-              px: 4,
-            }}
+            onClick={() => setVerifyDialogOpen(false)}
+            disabled={verifyMutation.isPending}
+            sx={{ textTransform: "none", fontWeight: 600 }}
           >
             Batal
           </Button>
-          <Tooltip title={isLocked ? "Hubungi admin untuk membuka" : ""} arrow placement="top">
-            <span>
-              <Button
-                variant="contained"
-                startIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : (isLocked ? <LockOutlined /> : <SaveOutlined />)}
-                onClick={type === "IKU" ? handelSubmitIku : handleSaveAll}
-                disabled={isSubmitting || isLocked}
-                sx={{
-                  borderRadius: "12px",
-                  px: 5,
-                  py: 1.2,
-                  textTransform: "none",
-                  fontWeight: 700,
-                  background: isLocked ? "#cbd5e1" : "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
-                  boxShadow: isLocked ? "none" : "0 8px 20px rgba(99, 102, 241, 0.3)",
-                  "&:hover": {
-                    boxShadow: isLocked ? "none" : "0 12px 25px rgba(99, 102, 241, 0.4)",
-                  },
-                }}
-              >
-                {isSubmitting ? "Menyimpan..." : isLocked ? "Realisasi Terkunci" : "Simpan Realisasi"}
-              </Button>
-            </span>
-          </Tooltip>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleVerifySubmit}
+            disabled={verifyMutation.isPending}
+            startIcon={verifyMutation.isPending ? <CircularProgress size={16} color="inherit" /> : <VerifiedOutlined />}
+            sx={{
+              borderRadius: "10px",
+              textTransform: "none",
+              fontWeight: 700,
+              px: 3,
+            }}
+          >
+            {verifyMutation.isPending ? "Memproses..." : "Konfirmasi Verifikasi"}
+          </Button>
         </DialogActions>
       </Dialog>
 

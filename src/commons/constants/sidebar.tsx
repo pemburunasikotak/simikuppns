@@ -5,6 +5,7 @@ import {
   PeopleOutlined,
   // CorporateFareOutlined,
   AssignmentIndOutlined,
+  FactCheckOutlined,
 } from "@mui/icons-material";
 
 import { paths } from "./paths";
@@ -73,6 +74,12 @@ export const SIDEBAR_ITEMS: TSidebarItem[] = [
     //     path: paths.component.realisasi,
     //   },
     // ],
+  },
+  {
+    key: "verifikator",
+    label: "Verifikator",
+    path: paths.verifikator,
+    icon: <FactCheckOutlined />,
   },
   {
     key: "user",

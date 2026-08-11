@@ -122,5 +122,8 @@ export const queryKeys = {
   settings: {
     periodLocks: "settings/period-locks",
   },
+  verification: {
+    dashboard: "verification/dashboard",
+  },
 } as const;
 

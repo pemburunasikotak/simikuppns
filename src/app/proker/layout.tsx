@@ -28,6 +28,7 @@ import {
   Settings,
   Menu as MenuIcon,
   ExpandMore,
+  FactCheckOutlined,
 } from "@mui/icons-material";
 
 import { useProkerSession } from "@/app/_components/providers/proker-session";
@@ -86,6 +87,13 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
     label: "Manajemen Program",
     path: paths.proker.manajemenProgram,
     icon: <CorporateFareOutlined />,
+    roles: ["admin_sim_proker"],
+  },
+  {
+    key: "proker-approval",
+    label: "Approval",
+    path: paths.proker.approval,
+    icon: <FactCheckOutlined />,
     roles: ["admin_sim_proker"],
   },
 ];

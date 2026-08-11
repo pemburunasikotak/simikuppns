@@ -1,4 +1,5 @@
 import { FC, ReactElement, useState } from "react";
+import { useNavigate } from "react-router";
 import { Page } from "@/app/_components/ui";
 import {
   Box,
@@ -37,6 +38,7 @@ import {
   EventOutlined,
   NotesOutlined,
   Close,
+  VisibilityOutlined,
 } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
@@ -99,9 +101,12 @@ const VerificationStatusChip: FC<{
 };
 
 const VerifikatorPage: FC = (): ReactElement => {
+  const navigate = useNavigate();
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedRealization, setSelectedRealization] = useState<{
+    metricId?: string;
+    metricType?: string;
     metricName: string;
     realization: TVerificationRealization;
   } | null>(null);
@@ -388,6 +393,8 @@ const VerifikatorPage: FC = (): ReactElement => {
                           realization={rz}
                           onClick={() =>
                             setSelectedRealization({
+                              metricId: metric.metricId,
+                              metricType: metric.metricType,
                               metricName: `${metric.metricCode} - ${metric.metricName}`,
                               realization: rz,
                             })
@@ -447,6 +454,8 @@ const VerifikatorPage: FC = (): ReactElement => {
                                   realization={crz}
                                   onClick={() =>
                                     setSelectedRealization({
+                                      metricId: comp.metricId,
+                                      metricType: comp.metricType,
                                       metricName: `${comp.metricCode} - ${comp.metricName}`,
                                       realization: crz,
                                     })
@@ -611,7 +620,25 @@ const VerifikatorPage: FC = (): ReactElement => {
           )}
         </DialogContent>
 
-        <DialogActions sx={{ p: 2 }}>
+        <DialogActions sx={{ p: 2, display: "flex", justifyContent: "space-between" }}>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<VisibilityOutlined />}
+            onClick={() => {
+              if (selectedRealization) {
+                const rawType = selectedRealization.metricType?.toUpperCase() || "";
+                const id = selectedRealization.metricId || "";
+                if (rawType === "COMPONENT") {
+                  navigate(`/component/realisasi/component/${id}`);
+                } else {
+                  navigate(`/component/view/iku/${id}`);
+                }
+              }
+            }}
+          >
+            Lihat Detail Realisasi
+          </Button>
           <Button onClick={() => setSelectedRealization(null)} variant="outlined">
             Tutup
           </Button>

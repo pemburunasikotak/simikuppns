@@ -247,9 +247,9 @@ const MetricDetailPage: FC = (): ReactElement => {
                                 const realization = yearData.realizations.find(r => r.month === monthNum);
                                 const id = realization?.id || null;
 
-                                const metrikUnit = metric.unit === "file" || metric.unit === "text"
-                                const val = metrikUnit && realization?.value ? 1 : realization ? Number(realization.value) : 0;
-
+                                const metrikUnit = metric.unit === "file" || metric.unit === "text";
+                                const isFilled = realization?.value !== null && realization?.value !== undefined && realization?.value !== "";
+                                const val = realization?.value !== null && realization?.value !== undefined ? realization.value : 0;
 
                                 return (
                                   <Box
@@ -263,12 +263,13 @@ const MetricDetailPage: FC = (): ReactElement => {
                                       flexDirection: "column",
                                       alignItems: "center",
                                       justifyContent: "center",
-                                      width: 48,
+                                      minWidth: 48,
+                                      px: 1.5,
                                       height: 48,
                                       borderRadius: "10px",
-                                      backgroundColor: val > 0 ? alpha("#6366f1", 0.1) : "#f8fafc",
+                                      backgroundColor: isFilled ? alpha("#6366f1", 0.1) : "#f8fafc",
                                       border: "1px solid",
-                                      borderColor: val > 0 ? alpha("#6366f1", 0.3) : "#e2e8f0",
+                                      borderColor: isFilled ? alpha("#6366f1", 0.3) : "#e2e8f0",
                                       cursor: "pointer",
                                       transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                                       "&:hover": {
@@ -286,7 +287,7 @@ const MetricDetailPage: FC = (): ReactElement => {
                                       variant="caption"
                                       sx={{
                                         fontSize: "0.7rem",
-                                        color: val > 0 ? "#6366f1" : "#94a3b8",
+                                        color: isFilled ? "#6366f1" : "#94a3b8",
                                         fontWeight: 700,
                                         lineHeight: 1
                                       }}
@@ -298,11 +299,11 @@ const MetricDetailPage: FC = (): ReactElement => {
                                       sx={{
                                         fontSize: "0.9rem",
                                         fontWeight: 800,
-                                        color: val > 0 ? "#1e1b4b" : "#cbd5e1",
+                                        color: isFilled ? "#1e1b4b" : "#cbd5e1",
                                         mt: 0.2
                                       }}
                                     >
-                                      {metrikUnit && realization?.value ? "Done" : val}
+                                      {metrikUnit && isFilled ? "Done" : val}
                                     </Typography>
                                   </Box>
                                 );

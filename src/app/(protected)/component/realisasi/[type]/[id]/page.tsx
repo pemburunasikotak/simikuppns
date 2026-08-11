@@ -665,8 +665,10 @@ const RealisasiBreakdownPage: React.FC = () => {
                                           const monthNum = i + 1;
                                           const realization = yearData.realizations.find(r => r.month === monthNum);
                                           const idRealization = realization?.id || null;
-                                          const val = realization ? Number(realization.value) : 0;
+                                          const isFilled = realization?.value !== null && realization?.value !== undefined && realization?.value !== "";
+                                          const val = realization?.value !== null && realization?.value !== undefined ? realization.value : 0;
                                           const lock = realization?.locked;
+                                          const metrikUnit = metric?.unit === "file" || metric?.unit === "text";
                                           const boxContent = (
                                             <Box
                                               key={monthNum}
@@ -679,12 +681,13 @@ const RealisasiBreakdownPage: React.FC = () => {
                                                 flexDirection: "column",
                                                 alignItems: "center",
                                                 justifyContent: "center",
-                                                width: 48,
+                                                minWidth: 48,
+                                                px: 1.5,
                                                 height: 48,
                                                 borderRadius: "10px",
-                                                backgroundColor: lock ? alpha("#ef4444", 0.08) : (val > 0 ? alpha("#6366f1", 0.1) : "#f8fafc"),
+                                                backgroundColor: lock ? alpha("#ef4444", 0.08) : (isFilled ? alpha("#6366f1", 0.1) : "#f8fafc"),
                                                 border: "1px solid",
-                                                borderColor: lock ? alpha("#ef4444", 0.4) : (val > 0 ? alpha("#6366f1", 0.3) : "#e2e8f0"),
+                                                borderColor: lock ? alpha("#ef4444", 0.4) : (isFilled ? alpha("#6366f1", 0.3) : "#e2e8f0"),
                                                 cursor: "pointer",
                                                 position: "relative",
                                                 transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -714,7 +717,7 @@ const RealisasiBreakdownPage: React.FC = () => {
                                                 variant="caption"
                                                 sx={{
                                                   fontSize: "0.7rem",
-                                                  color: lock ? "#ef4444" : (val > 0 ? "#6366f1" : "#94a3b8"),
+                                                  color: lock ? "#ef4444" : (isFilled ? "#6366f1" : "#94a3b8"),
                                                   fontWeight: 700,
                                                   lineHeight: 1
                                                 }}
@@ -726,11 +729,11 @@ const RealisasiBreakdownPage: React.FC = () => {
                                                 sx={{
                                                   fontSize: "0.9rem",
                                                   fontWeight: 800,
-                                                  color: lock ? "#991b1b" : (val > 0 ? "#1e1b4b" : "#cbd5e1"),
+                                                  color: lock ? "#991b1b" : (isFilled ? "#1e1b4b" : "#cbd5e1"),
                                                   mt: 0.2
                                                 }}
                                               >
-                                                {val}
+                                                {metrikUnit && isFilled ? "Done" : val}
                                               </Typography>
                                             </Box>
                                           );

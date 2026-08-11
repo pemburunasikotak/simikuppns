@@ -22,6 +22,7 @@ import {
   Skeleton,
   SxProps,
   Theme,
+  Tooltip,
 } from "@mui/material";
 // import { useSnackbar } from "notistack";
 import {
@@ -31,6 +32,7 @@ import {
   CalendarTodayOutlined,
   InfoOutlined,
   TrendingUpOutlined,
+  LockOutlined,
 } from "@mui/icons-material";
 
 import { Page } from "@/app/_components/ui";
@@ -250,8 +252,9 @@ const MetricDetailPage: FC = (): ReactElement => {
                                 const metrikUnit = metric.unit === "file" || metric.unit === "text";
                                 const isFilled = realization?.value !== null && realization?.value !== undefined && realization?.value !== "";
                                 const val = realization?.value !== null && realization?.value !== undefined ? realization.value : 0;
+                                const lock = realization?.locked;
 
-                                return (
+                                const boxContent = (
                                   <Box
                                     key={monthNum}
                                     onClick={(e) => {
@@ -267,27 +270,39 @@ const MetricDetailPage: FC = (): ReactElement => {
                                       px: 1.5,
                                       height: 48,
                                       borderRadius: "10px",
-                                      backgroundColor: isFilled ? alpha("#6366f1", 0.1) : "#f8fafc",
+                                      backgroundColor: lock ? alpha("#ef4444", 0.08) : (isFilled ? alpha("#6366f1", 0.1) : "#f8fafc"),
                                       border: "1px solid",
-                                      borderColor: isFilled ? alpha("#6366f1", 0.3) : "#e2e8f0",
+                                      borderColor: lock ? alpha("#ef4444", 0.4) : (isFilled ? alpha("#6366f1", 0.3) : "#e2e8f0"),
                                       cursor: "pointer",
+                                      position: "relative",
                                       transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                                       "&:hover": {
                                         transform: "translateY(-2px)",
                                         boxShadow: "0 4px 12px rgba(99, 102, 241, 0.15)",
-                                        borderColor: "#6366f1",
-                                        backgroundColor: alpha("#6366f1", 0.15),
+                                        borderColor: lock ? "#ef4444" : "#6366f1",
+                                        backgroundColor: lock ? alpha("#ef4444", 0.15) : alpha("#6366f1", 0.15),
                                       },
                                       "&:active": {
                                         transform: "translateY(0)",
                                       }
                                     }}
                                   >
+                                    {lock && (
+                                      <LockOutlined
+                                        sx={{
+                                          position: "absolute",
+                                          top: 2,
+                                          right: 2,
+                                          fontSize: 12,
+                                          color: "#ef4444",
+                                        }}
+                                      />
+                                    )}
                                     <Typography
                                       variant="caption"
                                       sx={{
                                         fontSize: "0.7rem",
-                                        color: isFilled ? "#6366f1" : "#94a3b8",
+                                        color: lock ? "#ef4444" : (isFilled ? "#6366f1" : "#94a3b8"),
                                         fontWeight: 700,
                                         lineHeight: 1
                                       }}
@@ -299,13 +314,21 @@ const MetricDetailPage: FC = (): ReactElement => {
                                       sx={{
                                         fontSize: "0.9rem",
                                         fontWeight: 800,
-                                        color: isFilled ? "#1e1b4b" : "#cbd5e1",
+                                        color: lock ? "#991b1b" : (isFilled ? "#1e1b4b" : "#cbd5e1"),
                                         mt: 0.2
                                       }}
                                     >
                                       {metrikUnit && isFilled ? "Done" : val}
                                     </Typography>
                                   </Box>
+                                );
+
+                                return lock ? (
+                                  <Tooltip key={monthNum} title="Hubungi admin untuk membuka" arrow placement="top">
+                                    {boxContent}
+                                  </Tooltip>
+                                ) : (
+                                  boxContent
                                 );
                               })}
                             </Stack>

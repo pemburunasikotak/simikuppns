@@ -44,7 +44,7 @@ import { TAuthUserItem } from "@/api/user/type";
 const LEVEL_OPTIONS = [
   { value: "INDICATOR_VERIFICATION", label: "Verifikasi Indikator" },
   { value: "PROGRAM_VERIFICATION", label: "Verifikasi Program" },
-  { value: "SUBMITTED", label: "Submitted" },
+  // { value: "SUBMITTED", label: "Submitted" },
 ];
 
 export default function ManajemenApprovalPage() {
@@ -273,8 +273,8 @@ export default function ManajemenApprovalPage() {
           params.row.level === "INDICATOR_VERIFICATION"
             ? "info"
             : params.row.level === "PROGRAM_VERIFICATION"
-            ? "secondary"
-            : "primary";
+              ? "secondary"
+              : "primary";
         return (
           <Box sx={{ py: 1, display: "flex", alignItems: "center" }}>
             <Chip

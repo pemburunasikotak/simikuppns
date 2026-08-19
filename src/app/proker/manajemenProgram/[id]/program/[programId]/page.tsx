@@ -4,12 +4,9 @@ import { Typography, Box, Paper, Grid, Button, Autocomplete, TextField, Dialog, 
 import { GridColDef } from "@mui/x-data-grid";
 import { ArrowBack, Add } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
-
 import { Page } from "@/app/_components/ui";
 import DataTable from "@/app/_components/ui/data-table";
 import ActionButtonTable from "@/app/_components/ui/action-button-table";
-import useModal from "@/app/_components/ui/modal";
-
 import useGetDefaultProgram from "../../../_hooks/use-get-default-program";
 import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
 import useDeleteProgramIndicator from "./_hooks/use-delete-program-indicator";
@@ -23,44 +20,55 @@ const DetailProgramPage = () => {
   const { id, programId } = useParams<{ id: string; programId: string }>();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const modal = useModal();
 
   const [openModalIndicator, setOpenModalIndicator] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [selectedIndicator, setSelectedIndicator] = useState<TDefaultProgramIndicator | null>(null);
-
   const [openAssignModal, setOpenAssignModal] = useState(false);
   const [assignPayload, setAssignPayload] = useState<{ unitId: string; defaultProgramIndicatorId: string; period: number } | null>(null);
-
   const { data: unitsDataResponse } = useGetProkerUnits();
   const unitsData = { items: unitsDataResponse?.items || [] };
-
-  console.log('CEK CEK12', unitsData)
   const assignMutation = useAssignProgramIndicator();
-
   const { data: response, isLoading } = useGetDefaultProgram(programId as string, !!programId);
   const program = response?.data;
-
   const indicators = program?.indicators || [];
   const deleteMutation = useDeleteProgramIndicator();
 
   const columns: GridColDef<TDefaultProgramIndicator>[] = [
     { field: "name", headerName: "Nama Indikator", minWidth: 250, flex: 1 },
     {
+      field: "category",
+      headerName: "Kategori",
+      width: 150,
+      renderCell: (params) => params.row.category || "-",
+    },
+    {
       field: "unit",
       headerName: "Satuan",
       width: 150,
-      renderCell: (params) =>
-        typeof params.row.masterUnitType === "string"
-          ? params.row.masterUnitType
-          : params.row.masterUnitType?.name?.toString() || "-",
+      renderCell: (params) => {
+        const masterUnit = params.row.masterUnitType;
+        if (typeof masterUnit === "string") return masterUnit;
+        if (masterUnit?.name) return masterUnit.name;
+
+        const unit = params.row.unit;
+        if (typeof unit === "string") return unit;
+        if (unit?.name) return unit.name;
+
+        return "-";
+      },
     },
-    // { field: "status", headerName: "Status", width: 150 },
-    // { field: "order", headerName: "Urutan", width: 100, align: "center", headerAlign: "center" },
+    // {
+    //   field: "order",
+    //   headerName: "Urutan",
+    //   width: 100,
+    //   align: "center",
+    //   headerAlign: "center",
+    // },
     {
       field: "actions",
       headerName: "Aksi",
-      width: 100,
+      width: 80,
       sortable: false,
       filterable: false,
       renderCell: (params) => {
@@ -73,38 +81,38 @@ const DetailProgramPage = () => {
               setOpenAssignModal(true);
             },
           },
-          {
-            key: "edit",
-            type: "edit" as const,
-            onClick: () => {
-              setSelectedIndicator(params.row);
-              setModalMode("edit");
-              setOpenModalIndicator(true);
-            },
-          },
-          {
-            key: "delete",
-            type: "delete" as const,
-            onClick: () => {
-              modal.confirm({
-                title: "Hapus Indikator",
-                description: "Apakah Anda yakin ingin menghapus indikator?",
-                onOk: () => {
-                  deleteMutation.mutate(
-                    { programId: programId as string, id: params.row.id },
-                    {
-                      onSuccess: () => {
-                        enqueueSnackbar("Berhasil menghapus indikator", { variant: "success" });
-                      },
-                      onError: () => {
-                        enqueueSnackbar("Gagal menghapus indikator", { variant: "error" });
-                      },
-                    }
-                  );
-                },
-              });
-            },
-          },
+          // {
+          //   key: "edit",
+          //   type: "edit" as const,
+          //   onClick: () => {
+          //     setSelectedIndicator(params.row);
+          //     setModalMode("edit");
+          //     setOpenModalIndicator(true);
+          //   },
+          // },
+          // {
+          //   key: "delete",
+          //   type: "delete" as const,
+          //   onClick: () => {
+          //     modal.confirm({
+          //       title: "Hapus Indikator",
+          //       description: "Apakah Anda yakin ingin menghapus indikator?",
+          //       onOk: () => {
+          //         deleteMutation.mutate(
+          //           { programId: programId as string, id: params.row.id },
+          //           {
+          //             onSuccess: () => {
+          //               enqueueSnackbar("Berhasil menghapus indikator", { variant: "success" });
+          //             },
+          //             onError: () => {
+          //               enqueueSnackbar("Gagal menghapus indikator", { variant: "error" });
+          //             },
+          //           }
+          //         );
+          //       },
+          //     });
+          //   },
+          // },
         ];
         return <ActionButtonTable items={actionItems} />;
       },

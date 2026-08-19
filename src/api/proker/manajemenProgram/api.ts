@@ -82,6 +82,16 @@ export const createDefaultProgramIndicator = async (id: string, payload: import(
   return data;
 };
 
+export const updateDefaultProgramIndicator = async (programId: string, id: string, payload: import("./type").TCreateDefaultProgramIndicatorPayload): Promise<unknown> => {
+  const { data } = await prokerAxiosInstance.put(`/api/v1/default-programs/${programId}/indicators/${id}`, payload);
+  return data;
+};
+
+export const deleteDefaultProgramIndicator = async (programId: string, id: string): Promise<unknown> => {
+  await prokerAxiosInstance.delete(`/api/v1/default-programs/${programId}/indicators/${id}`);
+  return;
+};
+
 export const updateProgramIndicator = async (programId: string, id: string, payload: TDefaultProgramIndicatorPayload): Promise<unknown> => {
   const { data } = await prokerAxiosInstance.put(`/api/v1/programs/${programId}/indicators/${id}`, payload);
   return data;

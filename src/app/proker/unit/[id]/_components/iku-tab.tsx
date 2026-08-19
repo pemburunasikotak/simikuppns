@@ -11,8 +11,17 @@ import {
   Divider,
   Autocomplete,
   TextField,
+  Typography,
+  Box,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Checkbox,
+  Paper,
+  InputAdornment,
 } from "@mui/material";
-// import { AssignmentOutlined, DeleteOutlined } from "@mui/icons-material";
+import { Add, Search } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
 
 import useGetUnitDetails from "../_hooks/use-get-unit-details";
@@ -46,6 +55,7 @@ const IKUTab: FC<IKUTabProps> = ({ unitId, value, index }) => {
 
   const [isAssignIKUOpen, setIsAssignIKUOpen] = useState(false);
   const [selectedIKUIds, setSelectedIKUIds] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [isUnassignIKUOpen, setIsUnassignIKUOpen] = useState(false);
   const [unassignIKUIds, setUnassignIKUIds] = useState<string[]>([]);
@@ -76,6 +86,13 @@ const IKUTab: FC<IKUTabProps> = ({ unitId, value, index }) => {
   const allIKUs = extractArray(allIKUsQuery.data);
   const assignedIKUIdSet = new Set(assignedIKUs.map((i) => i.id));
 
+  const availableIKUs = allIKUs.filter((iku) => !assignedIKUIdSet.has(iku.id));
+  const filteredAvailableIKUs = availableIKUs.filter(
+    (iku) =>
+      iku.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      iku.code?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const handleAssignIKU = async () => {
     if (selectedIKUIds.length === 0) return;
     try {
@@ -83,6 +100,7 @@ const IKUTab: FC<IKUTabProps> = ({ unitId, value, index }) => {
       enqueueSnackbar("IKU berhasil ditetapkan ke unit", { variant: "success" });
       setIsAssignIKUOpen(false);
       setSelectedIKUIds([]);
+      setSearchQuery("");
     } catch (err) {
       enqueueSnackbar(getErrorMessage(err, "Gagal menetapkan IKU"), { variant: "error" });
     }
@@ -136,8 +154,8 @@ const IKUTab: FC<IKUTabProps> = ({ unitId, value, index }) => {
 
   return (
     <TabPanel value={value} index={index}>
-      {/* <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mb: 2 }}>
-        {assignedIKUs.length > 0 && (
+      <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mb: 2 }}>
+        {/* {assignedIKUs.length > 0 && (
           <Button
             variant="outlined"
             color="error"
@@ -146,15 +164,15 @@ const IKUTab: FC<IKUTabProps> = ({ unitId, value, index }) => {
           >
             Hapus IKU
           </Button>
-        )}
+        )} */}
         <Button
           variant="contained"
-          startIcon={<AssignmentOutlined />}
+          startIcon={<Add />}
           onClick={() => setIsAssignIKUOpen(true)}
         >
-          Tetapkan IKU
+          Tambah IKU
         </Button>
-      </Stack> */}
+      </Stack>
 
       <DataTable
         loading={detailQuery.isLoading}
@@ -176,34 +194,110 @@ const IKUTab: FC<IKUTabProps> = ({ unitId, value, index }) => {
         fullWidth
         PaperProps={{ sx: { borderRadius: "16px", p: 1 } }}
       >
-        <DialogTitle sx={{ fontWeight: 800, pb: 1 }}>Tetapkan IKU ke Unit</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 800, pb: 1 }}>Tambah IKU ke Unit</DialogTitle>
         <Divider />
         <DialogContent>
-          <Stack spacing={2.5} sx={{ pt: 1 }}>
-            <Autocomplete
-              multiple
-              options={allIKUs.filter((iku) => !assignedIKUIdSet.has(iku.id))}
-              getOptionLabel={(opt) => `${opt.code} - ${opt.name}`}
-              loading={allIKUsQuery.isLoading}
-              onChange={(_, val) => setSelectedIKUIds(val.map((v) => v.id))}
-              renderInput={(params) => (
-                <TextField {...params} label="Pilih IKU" placeholder="Cari IKU..." />
-              )}
-              renderTags={(val, getTagProps) =>
-                val.map((option, idx) => (
-                  <Chip
-                    label={option.code}
-                    size="small"
-                    {...getTagProps({ index: idx })}
-                    sx={{
-                      backgroundColor: alpha("#1976d2", 0.08),
-                      color: "#1976d2",
-                      fontWeight: 600,
-                    }}
-                  />
-                ))
-              }
+          <Stack spacing={2} sx={{ pt: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Cari nama atau kode IKU..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
             />
+
+            <Box display="flex" justifyContent="space-between" alignItems="center" px={0.5}>
+              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                {selectedIKUIds.length} dari {availableIKUs.length} IKU dipilih
+              </Typography>
+              {availableIKUs.length > 0 && (
+                <Button
+                  size="small"
+                  onClick={() => {
+                    if (selectedIKUIds.length === availableIKUs.length) {
+                      setSelectedIKUIds([]);
+                    } else {
+                      setSelectedIKUIds(availableIKUs.map((i) => i.id));
+                    }
+                  }}
+                  sx={{ textTransform: "none", fontSize: "0.8rem" }}
+                >
+                  {selectedIKUIds.length === availableIKUs.length ? "Batal Pilih Semua" : "Pilih Semua"}
+                </Button>
+              )}
+            </Box>
+
+            <Paper variant="outlined" sx={{ maxHeight: 320, overflow: "auto", borderRadius: 2 }}>
+              {allIKUsQuery.isLoading ? (
+                <Box p={3} textAlign="center">
+                  <Typography variant="body2" color="text.secondary">
+                    Memuat data IKU...
+                  </Typography>
+                </Box>
+              ) : filteredAvailableIKUs.length === 0 ? (
+                <Box p={3} textAlign="center">
+                  <Typography variant="body2" color="text.secondary">
+                    {searchQuery ? "IKU tidak ditemukan." : "Semua IKU sudah ditambahkan ke unit ini."}
+                  </Typography>
+                </Box>
+              ) : (
+                <List disablePadding>
+                  {filteredAvailableIKUs.map((iku, idx) => {
+                    const isChecked = selectedIKUIds.includes(iku.id);
+                    return (
+                      <Box key={iku.id}>
+                        {idx > 0 && <Divider component="li" />}
+                        <ListItemButton
+                          onClick={() => {
+                            if (isChecked) {
+                              setSelectedIKUIds(selectedIKUIds.filter((id) => id !== iku.id));
+                            } else {
+                              setSelectedIKUIds([...selectedIKUIds, iku.id]);
+                            }
+                          }}
+                        >
+                          <ListItemIcon sx={{ minWidth: 40 }}>
+                            <Checkbox
+                              edge="start"
+                              checked={isChecked}
+                              tabIndex={-1}
+                              disableRipple
+                            />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={
+                              <Stack direction="row" spacing={1} alignItems="center">
+                                <Chip
+                                  label={iku.code}
+                                  size="small"
+                                  sx={{
+                                    backgroundColor: alpha("#1976d2", 0.08),
+                                    color: "#1976d2",
+                                    fontWeight: 700,
+                                    borderRadius: "6px",
+                                  }}
+                                />
+                                <Typography variant="body2" fontWeight={600}>
+                                  {iku.name}
+                                </Typography>
+                              </Stack>
+                            }
+                            secondary={iku.unit ? `Satuan: ${iku.unit}` : undefined}
+                          />
+                        </ListItemButton>
+                      </Box>
+                    );
+                  })}
+                </List>
+              )}
+            </Paper>
           </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -219,7 +313,7 @@ const IKUTab: FC<IKUTabProps> = ({ unitId, value, index }) => {
             onClick={handleAssignIKU}
             sx={{ fontWeight: 700, px: 3 }}
           >
-            {assignIKUMutation.isPending ? "Menyimpan..." : "Tetapkan"}
+            {assignIKUMutation.isPending ? "Menyimpan..." : "Simpan"}
           </Button>
         </DialogActions>
       </Dialog>

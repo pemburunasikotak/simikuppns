@@ -4,12 +4,10 @@ import { Add, DeleteOutlined } from "@mui/icons-material";
 import { useForm, useWatch, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "react-router";
-
 import FormTextField from "@/app/_components/ui/form-text-field";
 import FormAutoCompleteField from "@/app/_components/ui/form-auto-complete";
 import FormDropdownField from "@/app/_components/ui/form-dropdown-field";
 import { useGetProkerMasterUnits } from "@/app/proker/master-unit/_hooks/use-get-master-units";
-
 import { defaultProgramSchema, TDefaultProgramFormData } from "./schema";
 import useGetListIkuProker from "../../_hooks/use-get-list-iku-proker";
 
@@ -35,7 +33,7 @@ const DefaultProgramForm = ({ loading, handleSubmit, defaultValues, isEditMode }
   const queryIkuId = searchParams.get("ikuId");
 
   const { data: ikuData } = useGetListIkuProker({ limit: 50 });
-  
+
   const { data: unitTypesData } = useGetProkerMasterUnits({ limit: 50 });
   const unitOptions = unitTypesData?.items?.map(unit => ({ value: unit.id, label: unit.name })) || [];
 
@@ -154,7 +152,7 @@ const DefaultProgramForm = ({ loading, handleSubmit, defaultValues, isEditMode }
             <Button
               variant="outlined"
               startIcon={<Add />}
-              onClick={() => append({ name: "", masterUnitTypeId: "", order: fields.length + 1 })}
+              onClick={() => append({ name: "", masterUnitTypeId: "", category: "TUSI", order: fields.length + 1 })}
             >
               Tambah Indikator
             </Button>
@@ -164,7 +162,7 @@ const DefaultProgramForm = ({ loading, handleSubmit, defaultValues, isEditMode }
             {fields.map((field, index) => (
               <Box key={field.id} sx={{ p: 2, border: "1px solid #e0e0e0", borderRadius: 2 }}>
                 <Grid container spacing={2} alignItems="center">
-                  <Grid size={{ xs: 12, sm: 4 }}>
+                  <Grid size={{ xs: 12, sm: 3 }}>
                     <FormTextField
                       variant="filled"
                       label="Nama Indikator"
@@ -173,7 +171,7 @@ const DefaultProgramForm = ({ loading, handleSubmit, defaultValues, isEditMode }
                       required
                     />
                   </Grid>
-                  <Grid size={{ xs: 12, sm: 4 }}>
+                  <Grid size={{ xs: 12, sm: 3 }}>
                     <FormDropdownField
                       label="Satuan"
                       control={form.control}
@@ -182,7 +180,7 @@ const DefaultProgramForm = ({ loading, handleSubmit, defaultValues, isEditMode }
                       required
                     />
                   </Grid>
-                  <Grid size={{ xs: 10, sm: 3 }}>
+                  <Grid size={{ xs: 10, sm: 2 }}>
                     <FormTextField
                       variant="filled"
                       label="Urutan"
@@ -192,6 +190,20 @@ const DefaultProgramForm = ({ loading, handleSubmit, defaultValues, isEditMode }
                       required
                     />
                   </Grid>
+                  <Grid size={{ xs: 12, sm: 3 }}>
+                    <FormDropdownField
+                      label="Kategori"
+                      control={form.control}
+                      name={`indicators.${index}.category`}
+                      options={[
+                        { value: "TUSI", label: "TUSI" },
+                        { value: "RUTIN", label: "RUTIN" },
+                        { value: "PENGEMBANGAN", label: "PENGEMBANGAN" },
+                      ]}
+                      required
+                    />
+                  </Grid>
+
                   <Grid size={{ xs: 2, sm: 1 }} display="flex" justifyContent="center">
                     <IconButton color="error" onClick={() => remove(index)}>
                       <DeleteOutlined />

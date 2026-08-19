@@ -11,6 +11,7 @@ export const defaultProgramSchema = z.object({
   indicators: z.array(z.object({
     name: z.string().min(1, "Nama wajib diisi"),
     masterUnitTypeId: z.string().min(1, "Satuan wajib dipilih"),
+    category: z.string().optional(),
     order: z.coerce.number().min(1, "Minimal 1"),
   })).optional(),
 });

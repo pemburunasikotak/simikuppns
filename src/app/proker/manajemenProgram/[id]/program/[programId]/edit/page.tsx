@@ -27,7 +27,8 @@ const EditDefaultProgramPage = () => {
       description: data.description,
       indicators: data.indicators && data.indicators.length > 0 ? data.indicators.map(ind => ({
         name: ind.name,
-        unit: ind.masterUnitTypeId,
+        masterUnitTypeId: ind.masterUnitTypeId,
+        category: ind.category,
         order: ind.order,
         status: "DRAFT"
       })) : undefined,
@@ -60,6 +61,7 @@ const EditDefaultProgramPage = () => {
       indicators: programData.data.indicators?.map(indicator => ({
         name: indicator.name,
         masterUnitTypeId: typeof indicator.masterUnitType === 'string' ? indicator.masterUnitType : indicator.masterUnitType?.id || "",
+        category: indicator.category || "TUSI",
         order: indicator.order,
       })) || [],
     }

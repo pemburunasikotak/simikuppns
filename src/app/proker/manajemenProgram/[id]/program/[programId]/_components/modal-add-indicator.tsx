@@ -81,8 +81,9 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   };
 
   const onSubmit = (data: FormData) => {
-    const basePayload: { name: string; unit: string; order: number } = {
+    const basePayload: import("@/api/proker/manajemenProgram/type").TCreateDefaultProgramIndicatorPayload = {
       name: data.name,
+      masterUnitTypeId: data.masterUnitTypeId,
       unit: data.masterUnitTypeId,
       order: data.order,
     };
@@ -102,20 +103,8 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
       );
     } else {
       if (!selectedIndicator) return;
-      const updatePayload: import("@/api/proker/manajemenProgram/type").TDefaultProgramIndicatorPayload = {
-        name: basePayload.name,
-        unit: basePayload.unit,
-        masterUnitTypeId: basePayload.unit,
-        order: basePayload.order,
-        unitId: selectedIndicator.unitId || "",
-        targetQ1: Number(selectedIndicator.targetQ1 || 0),
-        targetQ2: Number(selectedIndicator.targetQ2 || 0),
-        targetQ3: Number(selectedIndicator.targetQ3 || 0),
-        targetQ4: Number(selectedIndicator.targetQ4 || 0),
-        status: selectedIndicator.status || "DRAFT",
-      };
       updateMutation.mutate(
-        { programId, id: selectedIndicator.id, payload: updatePayload },
+        { programId, id: selectedIndicator.id, payload: basePayload },
         {
           onSuccess: () => {
             enqueueSnackbar("Berhasil mengubah indikator", { variant: "success" });

@@ -1,9 +1,7 @@
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router";
-
 import { Page } from "@/app/_components/ui";
 import { TDefaultProgramPayload } from "@/api/proker/manajemenProgram/type";
-
 import DefaultProgramForm from "../_components/form";
 import useCreateDefaultProgram from "../_hooks/use-create-default-program";
 import { TDefaultProgramFormData } from "../_components/form/schema";
@@ -22,7 +20,8 @@ const CreateDefaultProgramPage = () => {
       description: data.description,
       indicators: data.indicators && data.indicators.length > 0 ? data.indicators.map(ind => ({
         name: ind.name,
-        unit: ind.masterUnitTypeId,
+        masterUnitTypeId: ind.masterUnitTypeId,
+        category: ind.category,
         order: ind.order,
         status: "DRAFT",
       })) : undefined,

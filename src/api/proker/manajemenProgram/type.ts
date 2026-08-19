@@ -4,6 +4,8 @@ export type TDefaultProgramIndicator = {
   programId?: string;
   unitId?: string;
   name: string;
+  category?: string;
+  masterUnitTypeId?: string;
   unit?: {
     id: string;
     name: string;
@@ -53,7 +55,8 @@ export type TDefaultProgramPayload = {
   description: string;
   indicators?: {
     name: string;
-    unit: string;
+    masterUnitTypeId: string;
+    category?: string;
     order: number;
     status?: string;
   }[];
@@ -145,7 +148,8 @@ export type TDefaultProgramIndicatorResponse = {
 
 export type TCreateDefaultProgramIndicatorPayload = {
   name: string;
-  unit: string;
+  masterUnitTypeId: string;
+  unit?: string;
   order: number;
 };
 

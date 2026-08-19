@@ -51,3 +51,11 @@ export const getIndicatorUsers = async (programId: string, id: string, params?: 
   const { data } = await prokerAxiosInstance.get(`/api/v1/programs/${programId}/indicators/${id}/users`, { params });
   return data;
 };
+
+export const exportProkerExcel = async (year: string | number): Promise<Blob> => {
+  const { data } = await prokerAxiosInstance.get("/api/v1/programs/export/proker", {
+    params: { year },
+    responseType: "blob",
+  });
+  return data;
+};

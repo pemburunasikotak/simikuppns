@@ -129,6 +129,7 @@ export const paths = {
     evidence: "/proker/evidence",
     manajemenProgram: "/proker/manajemenProgram",
     approval: "/proker/approval",
+    manajemenApproval: "/proker/manajemenApproval",
   },
   verifikator: "/verifikator",
 };

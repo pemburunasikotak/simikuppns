@@ -96,6 +96,13 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
     icon: <FactCheckOutlined />,
     roles: ["admin_sim_proker"],
   },
+  {
+    key: "proker-manajemen-approval",
+    label: "Manajemen Approval",
+    path: paths.proker.manajemenApproval,
+    icon: <FactCheckOutlined />,
+    roles: ["admin_sim_proker"],
+  },
 ];
 
 interface SidebarItemProps {

@@ -20,6 +20,7 @@ import {
   CircularProgress,
   Stack,
   Grid,
+  Autocomplete,
 } from "@mui/material";
 import { AddOutlined } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
@@ -43,7 +44,7 @@ import { TAuthUserItem } from "@/api/user/type";
 
 const LEVEL_OPTIONS = [
   { value: "INDICATOR_VERIFICATION", label: "Verifikasi Indikator" },
-  { value: "PROGRAM_VERIFICATION", label: "Verifikasi Program" },
+  { value: "BUDGET_VERIFICATION", label: "Verifikasi Anggaran" },
   // { value: "SUBMITTED", label: "Submitted" },
 ];
 
@@ -59,7 +60,7 @@ export default function ManajemenApprovalPage() {
 
   const reviewersQuery = useGetApprovalReviewers(queryParams);
   const ikuQuery = useGetListIkuProker();
-  const usersQuery = useGetListUser({});
+  const usersQuery = useGetListUser({ limit: 1000, page: 1, per_page: 1000 });
 
   const createMutation = useCreateApprovalReviewer();
   const updateMutation = useUpdateApprovalReviewer();
@@ -144,16 +145,21 @@ export default function ManajemenApprovalPage() {
       enqueueSnackbar("Level Wajib diisi", { variant: "error" });
       return;
     }
-    if (formData.ikuIds.length === 0) {
-      enqueueSnackbar("Minimal pilih 1 IKU", { variant: "error" });
+    if (formData.level === "INDICATOR_VERIFICATION" && formData.ikuIds.length === 0) {
+      enqueueSnackbar("Minimal pilih 1 IKU untuk Verifikasi Indikator", { variant: "error" });
       return;
     }
+
+    const payload = {
+      ...formData,
+      ikuIds: formData.level === "INDICATOR_VERIFICATION" ? formData.ikuIds : [],
+    };
 
     if (selectedReviewer) {
       updateMutation.mutate(
         {
           id: selectedReviewer.id,
-          payload: formData,
+          payload,
         },
         {
           onSuccess: () => {
@@ -170,7 +176,7 @@ export default function ManajemenApprovalPage() {
         }
       );
     } else {
-      createMutation.mutate(formData, {
+      createMutation.mutate(payload, {
         onSuccess: () => {
           enqueueSnackbar("Approval Reviewer berhasil ditambahkan", { variant: "success" });
           setOpenModal(false);
@@ -409,31 +415,40 @@ export default function ManajemenApprovalPage() {
             {selectedReviewer ? "Edit Approval Reviewer" : "Tambah Approval Reviewer"}
           </DialogTitle>
           <Divider />
-          <DialogContent dividers>
+          <DialogContent dividers sx={{ maxHeight: "70vh", overflowY: "auto" }}>
             <Stack spacing={2.5}>
-              {/* User Selection */}
-              <TextField
-                required
-                select
-                label="User Reviewer"
-                value={formData.userId}
-                onChange={(e) => setFormData((prev) => ({ ...prev, userId: e.target.value }))}
+              {/* User Selection (Searchable Autocomplete) */}
+              <Autocomplete
                 fullWidth
-                variant="outlined"
-                helperText="Pilih User yang ditugaskan sebagai reviewer approval"
-              >
-                {userItems.length > 0 ? (
-                  userItems.map((usr) => (
-                    <MenuItem key={usr.id} value={usr.id}>
-                      {usr.name} ({usr.email || usr.nip || usr.id})
-                    </MenuItem>
-                  ))
-                ) : (
-                  <MenuItem value="" disabled>
-                    Data User tidak tersedia / masukkan User ID secara manual
-                  </MenuItem>
+                options={userItems}
+                getOptionLabel={(opt) =>
+                  typeof opt === "string"
+                    ? opt
+                    : `${opt.name || opt.id}${opt.email || opt.nip ? ` (${opt.email || opt.nip})` : ""}`
+                }
+                isOptionEqualToValue={(option, val) => option.id === val.id}
+                value={
+                  userItems.find((u) => u.id === formData.userId) ||
+                  (selectedReviewer?.user
+                    ? ({
+                        id: selectedReviewer.userId,
+                        name: selectedReviewer.user.name || selectedReviewer.userId,
+                        email: selectedReviewer.user.email,
+                      } as TAuthUserItem)
+                    : null)
+                }
+                onChange={(_, val) => setFormData((prev) => ({ ...prev, userId: val?.id || "" }))}
+                loading={usersQuery.isLoading}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    label="User Reviewer"
+                    placeholder="Cari user (nama, email, NIP)..."
+                    helperText="Cari & pilih User yang ditugaskan sebagai reviewer approval"
+                  />
                 )}
-              </TextField>
+              />
 
               {/* Manual User ID if user list is empty or needed */}
               {userItems.length === 0 && (
@@ -457,6 +472,13 @@ export default function ManajemenApprovalPage() {
                 onChange={(e) => setFormData((prev) => ({ ...prev, level: e.target.value }))}
                 fullWidth
                 variant="outlined"
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      style: { maxHeight: 300 },
+                    },
+                  },
+                }}
               >
                 {LEVEL_OPTIONS.map((opt) => (
                   <MenuItem key={opt.value} value={opt.value}>
@@ -465,37 +487,44 @@ export default function ManajemenApprovalPage() {
                 ))}
               </TextField>
 
-              {/* IKU Multi-Select */}
-              <FormControl fullWidth required variant="outlined">
-                <InputLabel id="iku-select-label">Pilih IKU (Dapat lebih dari 1)</InputLabel>
-                <Select
-                  labelId="iku-select-label"
-                  multiple
-                  value={formData.ikuIds}
-                  onChange={handleIkuChange}
-                  input={<OutlinedInput label="Pilih IKU (Dapat lebih dari 1)" />}
-                  renderValue={(selected) => (
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                      {selected.map((val) => {
-                        const ikuObj = ikuItems.find((i) => i.id === val);
-                        return (
-                          <Chip
-                            key={val}
-                            label={ikuObj ? `${ikuObj.code} - ${ikuObj.name}` : val}
-                            size="small"
-                          />
-                        );
-                      })}
-                    </Box>
-                  )}
-                >
-                  {ikuItems.map((iku) => (
-                    <MenuItem key={iku.id} value={iku.id}>
-                      {iku.code} - {iku.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              {/* IKU Multi-Select (hanya untuk Verifikasi Indikator) */}
+              {formData.level === "INDICATOR_VERIFICATION" && (
+                <FormControl fullWidth required variant="outlined">
+                  <InputLabel id="iku-select-label">Pilih IKU (Dapat lebih dari 1)</InputLabel>
+                  <Select
+                    labelId="iku-select-label"
+                    multiple
+                    value={formData.ikuIds}
+                    onChange={handleIkuChange}
+                    input={<OutlinedInput label="Pilih IKU (Dapat lebih dari 1)" />}
+                    MenuProps={{
+                      PaperProps: {
+                        style: { maxHeight: 300 },
+                      },
+                    }}
+                    renderValue={(selected) => (
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                        {selected.map((val) => {
+                          const ikuObj = ikuItems.find((i) => i.id === val);
+                          return (
+                            <Chip
+                              key={val}
+                              label={ikuObj ? `${ikuObj.code} - ${ikuObj.name}` : val}
+                              size="small"
+                            />
+                          );
+                        })}
+                      </Box>
+                    )}
+                  >
+                    {ikuItems.map((iku) => (
+                      <MenuItem key={iku.id} value={iku.id}>
+                        {iku.code} - {iku.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
             </Stack>
           </DialogContent>
           <DialogActions sx={{ p: 2, bgcolor: "grey.50" }}>

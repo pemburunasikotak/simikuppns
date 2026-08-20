@@ -16,6 +16,7 @@ import {
   Select,
   MenuItem,
   IconButton,
+  Typography,
 } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 import { PersonAddOutlined, DeleteOutlined, AddOutlined } from "@mui/icons-material";
@@ -116,6 +117,31 @@ const UsersTab: FC<UsersTabProps> = ({ unitId, value, index }) => {
     }
   };
 
+  const [selectedUnassignUser, setSelectedUnassignUser] = useState<TUnitUserItem | null>(null);
+
+  const handleConfirmUnassignUser = async () => {
+    if (!selectedUnassignUser) return;
+    const currentUsers = detailQuery.data?.users || [];
+    const targetId = selectedUnassignUser.id;
+    const remainingUsers = currentUsers
+      .filter((u: { id?: string; userId?: string; user?: { id?: string } }) => {
+        const uId = u.id || u.userId || (u.user && u.user.id);
+        return uId !== targetId;
+      })
+      .map((u: { id?: string; userId?: string; user?: { id?: string }; memberType?: string; type?: string }) => ({
+        userId: u.id || u.userId || (u.user && u.user.id) || "",
+        type: (u.memberType || u.type || "PIC") as "PIC" | "MEMBER",
+      }));
+
+    try {
+      await assignUserMutation.mutateAsync({ users: remainingUsers });
+      enqueueSnackbar(`User "${selectedUnassignUser.name}" berhasil dihapus dari unit`, { variant: "success" });
+      setSelectedUnassignUser(null);
+    } catch (err) {
+      enqueueSnackbar(getErrorMessage(err, "Gagal menghapus user dari unit"), { variant: "error" });
+    }
+  };
+
   const userColumns: GridColDef<TUnitUserItem>[] = [
     { field: "nip", headerName: "NIP", width: 150 },
     { field: "name", headerName: "Nama", minWidth: 200, flex: 1 },
@@ -151,6 +177,22 @@ const UsersTab: FC<UsersTabProps> = ({ unitId, value, index }) => {
           color={params.row.isActive ? "success" : "default"}
           size="small"
         />
+      ),
+    },
+    {
+      field: "actions",
+      headerName: "Aksi",
+      width: 90,
+      sortable: false,
+      renderCell: (params) => (
+        <IconButton
+          size="small"
+          color="error"
+          title="Unassign User"
+          onClick={() => setSelectedUnassignUser(params.row)}
+        >
+          <DeleteOutlined fontSize="small" />
+        </IconButton>
       ),
     },
   ];
@@ -260,6 +302,40 @@ const UsersTab: FC<UsersTabProps> = ({ unitId, value, index }) => {
             sx={{ fontWeight: 700, px: 3 }}
           >
             {assignUserMutation.isPending ? "Menyimpan..." : "Tambahkan"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Confirm Unassign User Dialog */}
+      <Dialog
+        open={Boolean(selectedUnassignUser)}
+        onClose={() => setSelectedUnassignUser(null)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: "16px" } }}
+      >
+        <DialogTitle sx={{ fontWeight: 800 }}>Konfirmasi Hapus User</DialogTitle>
+        <Divider />
+        <DialogContent>
+          <Typography variant="body2" sx={{ my: 1 }}>
+            Apakah Anda yakin ingin menghapus user <strong>{selectedUnassignUser?.name}</strong> dari unit ini?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setSelectedUnassignUser(null)}
+            sx={{ fontWeight: 700, color: "text.secondary" }}
+          >
+            Batal
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            disabled={assignUserMutation.isPending}
+            onClick={handleConfirmUnassignUser}
+            sx={{ fontWeight: 700, px: 3 }}
+          >
+            {assignUserMutation.isPending ? "Menghapus..." : "Hapus / Unassign"}
           </Button>
         </DialogActions>
       </Dialog>

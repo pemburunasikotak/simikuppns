@@ -520,7 +520,7 @@ export default function ManajemenApprovalPage() {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    required
+                    required={!formData.userId}
                     label="User Reviewer"
                     placeholder="user (nama, email, NIP)..."
                     helperText={
@@ -557,84 +557,86 @@ export default function ManajemenApprovalPage() {
               )}
 
               {/* IKU Selection (Searchable Autocomplete Multi-Select with Infinite Scroll) */}
-              <Autocomplete
-                multiple
-                fullWidth
-                options={ikuItems}
-                filterOptions={(options) => options}
-                getOptionLabel={(opt) =>
-                  typeof opt === "string"
-                    ? opt
-                    : `${opt.code ? `${opt.code} - ` : ""}${opt.name || opt.id}`
-                }
-                isOptionEqualToValue={(option, val) => Boolean(option && val && option.id === val.id)}
-                value={ikuItems.filter((i) => formData.ikuIds.includes(i.id))}
-                onChange={(_, selectedOptions) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    ikuIds: selectedOptions.map((opt) => (typeof opt === "string" ? opt : opt.id)),
-                  }));
-                }}
-                onInputChange={(_, val, reason) => {
-                  if (reason === "input") {
-                    setIkuSearchInput(val);
-                  } else if (reason === "clear") {
-                    setIkuSearchInput("");
+              {formData.level === "INDICATOR_VERIFICATION" && (
+                <Autocomplete
+                  multiple
+                  fullWidth
+                  options={ikuItems}
+                  filterOptions={(options) => options}
+                  getOptionLabel={(opt) =>
+                    typeof opt === "string"
+                      ? opt
+                      : `${opt.code ? `${opt.code} - ` : ""}${opt.name || opt.id}`
                   }
-                }}
-                loading={ikuInfiniteQuery.isLoading || ikuInfiniteQuery.isFetchingNextPage}
-                ListboxProps={{
-                  onScroll: (event: React.SyntheticEvent) => {
-                    const listboxNode = event.currentTarget as HTMLElement;
-                    if (listboxNode) {
-                      const { scrollTop, clientHeight, scrollHeight } = listboxNode;
-                      if (scrollHeight - scrollTop - clientHeight <= 80) {
-                        if (ikuInfiniteQuery.hasNextPage && !ikuInfiniteQuery.isFetchingNextPage) {
-                          ikuInfiniteQuery.fetchNextPage();
+                  isOptionEqualToValue={(option, val) => Boolean(option && val && option.id === val.id)}
+                  value={ikuItems.filter((i) => formData.ikuIds.includes(i.id))}
+                  onChange={(_, selectedOptions) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      ikuIds: selectedOptions.map((opt) => (typeof opt === "string" ? opt : opt.id)),
+                    }));
+                  }}
+                  onInputChange={(_, val, reason) => {
+                    if (reason === "input") {
+                      setIkuSearchInput(val);
+                    } else if (reason === "clear") {
+                      setIkuSearchInput("");
+                    }
+                  }}
+                  loading={ikuInfiniteQuery.isLoading || ikuInfiniteQuery.isFetchingNextPage}
+                  ListboxProps={{
+                    onScroll: (event: React.SyntheticEvent) => {
+                      const listboxNode = event.currentTarget as HTMLElement;
+                      if (listboxNode) {
+                        const { scrollTop, clientHeight, scrollHeight } = listboxNode;
+                        if (scrollHeight - scrollTop - clientHeight <= 80) {
+                          if (ikuInfiniteQuery.hasNextPage && !ikuInfiniteQuery.isFetchingNextPage) {
+                            ikuInfiniteQuery.fetchNextPage();
+                          }
                         }
                       }
-                    }
-                  },
-                  style: { maxHeight: 250, overflow: "auto" },
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required={formData.level === "INDICATOR_VERIFICATION"}
-                    label="Pilih IKU (Dapat lebih dari 1)"
-                    placeholder="Cari & pilih IKU..."
-                    helperText={
-                      ikuInfiniteQuery.hasNextPage
-                        ? `Memuat ${ikuItems.length} IKU (Scroll kebawah untuk memuat lagi)`
-                        : `Total ${ikuItems.length} IKU`
-                    }
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (
-                        <>
-                          {ikuInfiniteQuery.isFetchingNextPage || ikuInfiniteQuery.isLoading ? (
-                            <CircularProgress color="inherit" size={20} />
-                          ) : null}
-                          {params.InputProps.endAdornment}
-                        </>
-                      ),
-                    }}
-                  />
-                )}
-                renderTags={(value, getTagProps) =>
-                  value.map((option, index) => {
-                    const { key, ...tagProps } = getTagProps({ index });
-                    return (
-                      <Chip
-                        key={key || option.id}
-                        size="small"
-                        label={option.code ? `${option.code} - ${option.name}` : option.name || option.id}
-                        {...tagProps}
-                      />
-                    );
-                  })
-                }
-              />
+                    },
+                    style: { maxHeight: 250, overflow: "auto" },
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required={formData.level === "INDICATOR_VERIFICATION" && formData.ikuIds.length === 0}
+                      label="Pilih IKU (Dapat lebih dari 1)"
+                      placeholder="Cari & pilih IKU..."
+                      helperText={
+                        ikuInfiniteQuery.hasNextPage
+                          ? `Memuat ${ikuItems.length} IKU (Scroll kebawah untuk memuat lagi)`
+                          : `Total ${ikuItems.length} IKU`
+                      }
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {ikuInfiniteQuery.isFetchingNextPage || ikuInfiniteQuery.isLoading ? (
+                              <CircularProgress color="inherit" size={20} />
+                            ) : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        ),
+                      }}
+                    />
+                  )}
+                  renderTags={(value, getTagProps) =>
+                    value.map((option, index) => {
+                      const { key, ...tagProps } = getTagProps({ index });
+                      return (
+                        <Chip
+                          key={key || option.id}
+                          size="small"
+                          label={option.code ? `${option.code} - ${option.name}` : option.name || option.id}
+                          {...tagProps}
+                        />
+                      );
+                    })
+                  }
+                />
+              )}
             </Stack>
           </DialogContent>
           <DialogActions sx={{ p: 2, bgcolor: "grey.50" }}>
@@ -763,10 +765,92 @@ export default function ManajemenApprovalPage() {
         <DialogTitle fontWeight="bold">Konfirmasi Hapus</DialogTitle>
         <Divider />
         <DialogContent dividers>
-          <Typography>
-            Apakah Anda yakin ingin menghapus approval reviewer untuk User ID{" "}
-            <strong>{selectedReviewer?.userId}</strong>?
-          </Typography>
+          <Stack spacing={1.5}>
+            <Typography variant="body2">
+              Apakah Anda yakin ingin menghapus approval reviewer berikut?
+            </Typography>
+
+            {selectedReviewer && (
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: "grey.50",
+                  borderRadius: 1,
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                <Typography variant="subtitle2" fontWeight="bold">
+                  {selectedReviewer.user?.name ||
+                    userItems.find((u) => u.id === selectedReviewer.userId)?.name ||
+                    "User Reviewer"}
+                </Typography>
+
+                <Grid container spacing={1} sx={{ mt: 0.5 }}>
+                  <Grid size={{ xs: 4 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      User ID
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 8 }}>
+                    <Typography variant="caption" fontWeight={600} sx={{ wordBreak: "break-all" }}>
+                      {selectedReviewer.userId}
+                    </Typography>
+                  </Grid>
+
+                  {(selectedReviewer.user?.email ||
+                    userItems.find((u) => u.id === selectedReviewer.userId)?.email) && (
+                    <>
+                      <Grid size={{ xs: 4 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Email
+                        </Typography>
+                      </Grid>
+                      <Grid size={{ xs: 8 }}>
+                        <Typography variant="caption" fontWeight={500}>
+                          {selectedReviewer.user?.email ||
+                            userItems.find((u) => u.id === selectedReviewer.userId)?.email}
+                        </Typography>
+                      </Grid>
+                    </>
+                  )}
+
+                  {((selectedReviewer.user as Record<string, unknown>)?.nip ||
+                    userItems.find((u) => u.id === selectedReviewer.userId)?.nip) && (
+                    <>
+                      <Grid size={{ xs: 4 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          NIP
+                        </Typography>
+                      </Grid>
+                      <Grid size={{ xs: 8 }}>
+                        <Typography variant="caption" fontWeight={500}>
+                          {String((selectedReviewer.user as Record<string, unknown>)?.nip ||
+                            userItems.find((u) => u.id === selectedReviewer.userId)?.nip)}
+                        </Typography>
+                      </Grid>
+                    </>
+                  )}
+
+                  {selectedReviewer.level && (
+                    <>
+                      <Grid size={{ xs: 4 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Level
+                        </Typography>
+                      </Grid>
+                      <Grid size={{ xs: 8 }}>
+                        <Typography variant="caption" fontWeight={500}>
+                          {LEVEL_OPTIONS.find((l) => l.value === selectedReviewer.level)?.label ||
+                            selectedReviewer.level}
+                        </Typography>
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
+              </Box>
+            )}
+          </Stack>
         </DialogContent>
         <DialogActions sx={{ p: 2, bgcolor: "grey.50" }}>
           <Button onClick={() => setOpenDelete(false)} color="inherit">

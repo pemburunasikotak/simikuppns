@@ -20,8 +20,9 @@ import {
   Checkbox,
   Paper,
   InputAdornment,
+  IconButton,
 } from "@mui/material";
-import { Add, Search } from "@mui/icons-material";
+import { Add, Search, DeleteOutlined } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
 
 import useGetUnitDetails from "../_hooks/use-get-unit-details";
@@ -59,6 +60,7 @@ const IKUTab: FC<IKUTabProps> = ({ unitId, value, index }) => {
 
   const [isUnassignIKUOpen, setIsUnassignIKUOpen] = useState(false);
   const [unassignIKUIds, setUnassignIKUIds] = useState<string[]>([]);
+  const [selectedUnassignIku, setSelectedUnassignIku] = useState<TIkuItem | null>(null);
 
   const detailQuery = useGetUnitDetails(unitId);
   const allIKUsQuery = useGetListIKU({ limit: 100, page: 1 });
@@ -118,6 +120,17 @@ const IKUTab: FC<IKUTabProps> = ({ unitId, value, index }) => {
     }
   };
 
+  const handleConfirmUnassignSingleIKU = async () => {
+    if (!selectedUnassignIku) return;
+    try {
+      await unassignIKUMutation.mutateAsync({ ikuIds: [selectedUnassignIku.id] });
+      enqueueSnackbar(`IKU "${selectedUnassignIku.code || selectedUnassignIku.name}" berhasil dihapus dari unit`, { variant: "success" });
+      setSelectedUnassignIku(null);
+    } catch (err) {
+      enqueueSnackbar(getErrorMessage(err, "Gagal menghapus IKU"), { variant: "error" });
+    }
+  };
+
   const ikuColumns: GridColDef<TIkuItem>[] = [
     {
       field: "code",
@@ -148,6 +161,22 @@ const IKUTab: FC<IKUTabProps> = ({ unitId, value, index }) => {
           color={params.value ? "primary" : "default"}
           size="small"
         />
+      ),
+    },
+    {
+      field: "actions",
+      headerName: "Aksi",
+      width: 90,
+      sortable: false,
+      renderCell: (params) => (
+        <IconButton
+          size="small"
+          color="error"
+          title="Unassign IKU"
+          onClick={() => setSelectedUnassignIku(params.row)}
+        >
+          <DeleteOutlined fontSize="small" />
+        </IconButton>
       ),
     },
   ];
@@ -372,6 +401,45 @@ const IKUTab: FC<IKUTabProps> = ({ unitId, value, index }) => {
             sx={{ fontWeight: 700, px: 3 }}
           >
             {unassignIKUMutation.isPending ? "Menghapus..." : "Hapus"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Single Unassign Confirmation Dialog */}
+      <Dialog
+        open={Boolean(selectedUnassignIku)}
+        onClose={() => setSelectedUnassignIku(null)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: "16px" } }}
+      >
+        <DialogTitle sx={{ fontWeight: 800 }}>Konfirmasi Unassign IKU</DialogTitle>
+        <Divider />
+        <DialogContent>
+          <Typography variant="body2" sx={{ my: 1 }}>
+            Apakah Anda yakin ingin menghapus IKU{" "}
+            <strong>
+              {selectedUnassignIku?.code ? `${selectedUnassignIku.code} - ` : ""}
+              {selectedUnassignIku?.name}
+            </strong>{" "}
+            dari unit ini?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setSelectedUnassignIku(null)}
+            sx={{ fontWeight: 700, color: "text.secondary" }}
+          >
+            Batal
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            disabled={unassignIKUMutation.isPending}
+            onClick={handleConfirmUnassignSingleIKU}
+            sx={{ fontWeight: 700, px: 3 }}
+          >
+            {unassignIKUMutation.isPending ? "Menghapus..." : "Hapus / Unassign"}
           </Button>
         </DialogActions>
       </Dialog>

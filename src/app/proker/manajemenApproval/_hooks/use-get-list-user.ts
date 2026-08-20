@@ -52,15 +52,23 @@ export function useGetInfiniteUser(params?: Record<string, unknown>) {
         itemsCount = rawData.items.length;
       }
 
-      const pagination = (lastPage?.pagination || (rawData && typeof rawData === "object" && "pagination" in rawData && rawData.pagination)) as { totalPages?: number; totalPage?: number } | undefined;
+      const pagination = (lastPage?.pagination ||
+        (rawData && typeof rawData === "object" && "pagination" in rawData ? rawData.pagination : undefined)) as
+        | { totalPages?: number; totalPage?: number; total?: number; totalItems?: number; limit?: number }
+        | undefined;
+
+      const limit = Number(pagination?.limit) || 10;
       const totalPages =
         Number(pagination?.totalPages || pagination?.totalPage) ||
-        (itemsCount >= 10 ? allPages.length + 1 : allPages.length);
+        (pagination?.total ? Math.ceil(Number(pagination.total) / limit) : 0) ||
+        (pagination?.totalItems ? Math.ceil(Number(pagination.totalItems) / limit) : 0);
 
       const currentPage = allPages.length;
-      if (itemsCount === 0 || currentPage >= totalPages) {
-        return undefined;
-      }
+
+      if (itemsCount === 0) return undefined;
+      if (totalPages > 0 && currentPage >= totalPages) return undefined;
+      if (itemsCount < limit) return undefined;
+
       return currentPage + 1;
     },
   });

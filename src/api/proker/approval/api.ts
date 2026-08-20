@@ -13,6 +13,15 @@ export const getSubmittedIndicators = async (
   return data;
 };
 
+export const getApprovedIndicators = async (
+  params?: Record<string, unknown>
+): Promise<TSubmittedIndicatorsResponse> => {
+  const { data } = await prokerAxiosInstance.get("/api/v1/indicators/indicator-approved", {
+    params,
+  });
+  return data;
+};
+
 export const approveIndicator = async (
   id: string,
   payload: TApprovalActionPayload

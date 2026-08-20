@@ -21,14 +21,18 @@ import {
 } from "@mui/material";
 import {
   DashboardOutlined,
+  StraightenOutlined,
   CorporateFareOutlined,
   ListAltOutlined,
+  AccountTreeOutlined,
   Logout,
   Person,
   Settings,
   Menu as MenuIcon,
   ExpandMore,
   FactCheckOutlined,
+  PriceCheckOutlined,
+  AdminPanelSettingsOutlined,
 } from "@mui/icons-material";
 
 import { useProkerSession } from "@/app/_components/providers/proker-session";
@@ -65,7 +69,7 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
     key: "proker-master-unit",
     label: "Master Satuan",
     path: paths.proker.masterUnit,
-    icon: <CorporateFareOutlined />,
+    icon: <StraightenOutlined />,
     roles: ["admin_sim_proker"],
   },
   {
@@ -86,7 +90,7 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
     key: "proker-manajemen-program",
     label: "Manajemen Program",
     path: paths.proker.manajemenProgram,
-    icon: <CorporateFareOutlined />,
+    icon: <AccountTreeOutlined />,
     roles: ["admin_sim_proker"],
   },
   {
@@ -94,13 +98,20 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
     label: "Approval",
     path: paths.proker.approval,
     icon: <FactCheckOutlined />,
-    roles: ["admin_sim_proker"],
+    roles: ["reviewer_indikator_proker", "admin_sim_proker"],
+  },
+  {
+    key: "proker-approval-anggaran",
+    label: "Approval Anggaran",
+    path: paths.proker.approvalAnggaran,
+    icon: <PriceCheckOutlined />,
+    roles: ["reviewer_anggaran_proker", "admin_sim_proker"],
   },
   {
     key: "proker-manajemen-approval",
     label: "Manajemen Approval",
     path: paths.proker.manajemenApproval,
-    icon: <FactCheckOutlined />,
+    icon: <AdminPanelSettingsOutlined />,
     roles: ["admin_sim_proker"],
   },
 ];
@@ -112,7 +123,8 @@ interface SidebarItemProps {
 
 const SidebarItem = ({ item, collapsed }: SidebarItemProps) => {
   const location = useLocation();
-  const isActive = location.pathname.startsWith(item.path);
+  const isActive =
+    location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
 
   const itemContent = (
     <ListItemButton
@@ -212,7 +224,10 @@ const ProkerLayout = () => {
     return item.roles.some((role) => userRoleKeys.includes(role));
   });
 
-  const activeMenu = filteredSidebarItems.find((menu) => location.pathname.startsWith(menu.path));
+  const activeMenu = filteredSidebarItems.find(
+    (menu) =>
+      location.pathname === menu.path || location.pathname.startsWith(`${menu.path}/`)
+  );
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);

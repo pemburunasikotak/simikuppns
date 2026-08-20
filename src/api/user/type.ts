@@ -24,6 +24,7 @@ export type TGetUsersParams = {
   order?: string;
   search?: string;
   search_value?: string;
+  roleKey?: string;
 };
 
 export type TUserPaginateResponse = TResponsePaginate<TUserItem>;

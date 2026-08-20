@@ -23,6 +23,8 @@ export type TSubmittedIndicatorItem = {
   id: string;
   name: string;
   status: string;
+  category?: string;
+  isDefaultProgramIndicator?: boolean;
   programId?: string;
   unitId?: string;
   masterUnitTypeId?: string;

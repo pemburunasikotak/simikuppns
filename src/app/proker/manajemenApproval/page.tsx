@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import dayjs from "dayjs";
 import {
   Typography,
@@ -12,11 +12,6 @@ import {
   MenuItem,
   Chip,
   Box,
-  OutlinedInput,
-  Select,
-  FormControl,
-  InputLabel,
-  SelectChangeEvent,
   CircularProgress,
   Stack,
   Grid,
@@ -38,8 +33,8 @@ import { useUpdateApprovalReviewer } from "./_hooks/use-update-approval-reviewer
 import { useDeleteApprovalReviewer } from "./_hooks/use-delete-approval-reviewer";
 import { TApprovalReviewerItem } from "@/api/proker/approvalReviewer/type";
 
-import useGetListIkuProker from "../manajemenProgram/_hooks/use-get-list-iku-proker";
-import useGetListUser from "./_hooks/use-get-list-user";
+import { useGetInfiniteIkuProker } from "../manajemenProgram/_hooks/use-get-list-iku-proker";
+import { useGetInfiniteUser } from "./_hooks/use-get-list-user";
 import { TAuthUserItem } from "@/api/user/type";
 
 const LEVEL_OPTIONS = [
@@ -59,12 +54,6 @@ export default function ManajemenApprovalPage() {
   };
 
   const reviewersQuery = useGetApprovalReviewers(queryParams);
-  const ikuQuery = useGetListIkuProker();
-  const usersQuery = useGetListUser({ limit: 1000, page: 1, per_page: 1000 });
-
-  const createMutation = useCreateApprovalReviewer();
-  const updateMutation = useUpdateApprovalReviewer();
-  const deleteMutation = useDeleteApprovalReviewer();
 
   const [openModal, setOpenModal] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -84,16 +73,58 @@ export default function ManajemenApprovalPage() {
     ikuIds: [],
   });
 
-  const ikuItems = ikuQuery.data?.data?.items || [];
-  const rawUserData = usersQuery.data?.data;
-  const userItems: TAuthUserItem[] = Array.isArray(rawUserData)
-    ? rawUserData
-    : rawUserData && typeof rawUserData === "object" && "items" in rawUserData && Array.isArray(rawUserData.items)
-      ? rawUserData.items
-      : [];
+  const [userSearchInput, setUserSearchInput] = useState("");
+  const [ikuSearchInput, setIkuSearchInput] = useState("");
+
+  const roleKey =
+    formData.level === "INDICATOR_VERIFICATION"
+      ? "reviewer_indikator_proker"
+      : formData.level === "BUDGET_VERIFICATION"
+        ? "reviewer_anggaran_proker"
+        : undefined;
+
+  const usersInfiniteQuery = useGetInfiniteUser({
+    ...(roleKey ? { roleKey } : {}),
+    ...(userSearchInput.trim() ? { search: userSearchInput.trim(), search_value: userSearchInput.trim() } : {}),
+  });
+
+  const ikuInfiniteQuery = useGetInfiniteIkuProker({
+    ...(ikuSearchInput.trim() ? { search: ikuSearchInput.trim(), search_value: ikuSearchInput.trim() } : {}),
+  });
+
+  const userItems: TAuthUserItem[] = useMemo(() => {
+    if (!usersInfiniteQuery.data?.pages) return [];
+    return usersInfiniteQuery.data.pages.flatMap((page) => {
+      const rawData = (page as Record<string, unknown>)?.data;
+      if (Array.isArray(rawData)) return rawData as TAuthUserItem[];
+      if (rawData && typeof rawData === "object" && "items" in rawData && Array.isArray((rawData as { items: unknown[] }).items)) {
+        return (rawData as { items: TAuthUserItem[] }).items;
+      }
+      return [];
+    });
+  }, [usersInfiniteQuery.data]);
+
+  type TIkuItem = { id: string; code?: string; name?: string };
+  const ikuItems: TIkuItem[] = useMemo(() => {
+    if (!ikuInfiniteQuery.data?.pages) return [];
+    return ikuInfiniteQuery.data.pages.flatMap((page) => {
+      const rawData = (page as Record<string, unknown>)?.data;
+      if (Array.isArray(rawData)) return rawData as TIkuItem[];
+      if (rawData && typeof rawData === "object" && "items" in rawData && Array.isArray((rawData as { items: unknown[] }).items)) {
+        return (rawData as { items: TIkuItem[] }).items;
+      }
+      return [];
+    });
+  }, [ikuInfiniteQuery.data]);
+
+  const createMutation = useCreateApprovalReviewer();
+  const updateMutation = useUpdateApprovalReviewer();
+  const deleteMutation = useDeleteApprovalReviewer();
 
   const handleOpenAdd = () => {
     setSelectedReviewer(null);
+    setUserSearchInput("");
+    setIkuSearchInput("");
     setFormData({
       userId: "",
       level: "INDICATOR_VERIFICATION",
@@ -104,6 +135,8 @@ export default function ManajemenApprovalPage() {
 
   const handleOpenEdit = (reviewer: TApprovalReviewerItem) => {
     setSelectedReviewer(reviewer);
+    setUserSearchInput("");
+    setIkuSearchInput("");
     setFormData({
       userId: reviewer.userId || "",
       level: reviewer.level || "INDICATOR_VERIFICATION",
@@ -124,15 +157,7 @@ export default function ManajemenApprovalPage() {
     setOpenDelete(true);
   };
 
-  const handleIkuChange = (event: SelectChangeEvent<string[]>) => {
-    const {
-      target: { value },
-    } = event;
-    setFormData((prev) => ({
-      ...prev,
-      ikuIds: typeof value === "string" ? value.split(",") : value,
-    }));
-  };
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,7 +177,7 @@ export default function ManajemenApprovalPage() {
 
     const payload = {
       ...formData,
-      ikuIds: formData.level === "INDICATOR_VERIFICATION" ? formData.ikuIds : [],
+      ikuIds: formData.ikuIds,
     };
 
     if (selectedReviewer) {
@@ -378,7 +403,7 @@ export default function ManajemenApprovalPage() {
       topPage={
         <Filter
           variants={["search"]}
-          labelSearch={"Cari User ID / IKU / Level..."}
+          labelSearch={"User ID / IKU / Level..."}
           defaultValue={{
             search_value: filter.search || filter.search_value,
           }}
@@ -417,59 +442,20 @@ export default function ManajemenApprovalPage() {
           <Divider />
           <DialogContent dividers sx={{ maxHeight: "70vh", overflowY: "auto" }}>
             <Stack spacing={2.5}>
-              {/* User Selection (Searchable Autocomplete) */}
-              <Autocomplete
-                fullWidth
-                options={userItems}
-                getOptionLabel={(opt) =>
-                  typeof opt === "string"
-                    ? opt
-                    : `${opt.name || opt.id}${opt.email || opt.nip ? ` (${opt.email || opt.nip})` : ""}`
-                }
-                isOptionEqualToValue={(option, val) => option.id === val.id}
-                value={
-                  userItems.find((u) => u.id === formData.userId) ||
-                  (selectedReviewer?.user
-                    ? ({
-                        id: selectedReviewer.userId,
-                        name: selectedReviewer.user.name || selectedReviewer.userId,
-                        email: selectedReviewer.user.email,
-                      } as TAuthUserItem)
-                    : null)
-                }
-                onChange={(_, val) => setFormData((prev) => ({ ...prev, userId: val?.id || "" }))}
-                loading={usersQuery.isLoading}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    label="User Reviewer"
-                    placeholder="Cari user (nama, email, NIP)..."
-                    helperText="Cari & pilih User yang ditugaskan sebagai reviewer approval"
-                  />
-                )}
-              />
-
-              {/* Manual User ID if user list is empty or needed */}
-              {userItems.length === 0 && (
-                <TextField
-                  required
-                  label="User ID (UUID)"
-                  value={formData.userId}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, userId: e.target.value }))}
-                  fullWidth
-                  variant="outlined"
-                  placeholder="e.g. 550e8400-e29b-41d4-a716-446655440001"
-                />
-              )}
-
               {/* Level Approval */}
               <TextField
                 required
                 select
                 label="Level Approval"
                 value={formData.level}
-                onChange={(e) => setFormData((prev) => ({ ...prev, level: e.target.value }))}
+                onChange={(e) => {
+                  const newLevel = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    level: newLevel,
+                    userId: prev.level !== newLevel ? "" : prev.userId,
+                  }));
+                }}
                 fullWidth
                 variant="outlined"
                 SelectProps={{
@@ -487,44 +473,168 @@ export default function ManajemenApprovalPage() {
                 ))}
               </TextField>
 
-              {/* IKU Multi-Select (hanya untuk Verifikasi Indikator) */}
-              {formData.level === "INDICATOR_VERIFICATION" && (
-                <FormControl fullWidth required variant="outlined">
-                  <InputLabel id="iku-select-label">Pilih IKU (Dapat lebih dari 1)</InputLabel>
-                  <Select
-                    labelId="iku-select-label"
-                    multiple
-                    value={formData.ikuIds}
-                    onChange={handleIkuChange}
-                    input={<OutlinedInput label="Pilih IKU (Dapat lebih dari 1)" />}
-                    MenuProps={{
-                      PaperProps: {
-                        style: { maxHeight: 300 },
-                      },
+              {/* User Selection (Searchable Autocomplete with Infinite Scroll) */}
+              <Autocomplete
+                fullWidth
+                options={userItems}
+                filterOptions={(options) => options}
+                getOptionLabel={(opt) =>
+                  typeof opt === "string"
+                    ? opt
+                    : `${opt.name || opt.id}${opt.email || opt.nip ? ` (${opt.email || opt.nip})` : ""}`
+                }
+                isOptionEqualToValue={(option, val) => Boolean(option && val && option.id === val.id)}
+                value={
+                  userItems.find((u) => u.id === formData.userId) ||
+                  (selectedReviewer?.user && selectedReviewer.userId === formData.userId
+                    ? ({
+                      id: selectedReviewer.userId,
+                      name: selectedReviewer.user.name || selectedReviewer.userId,
+                      email: selectedReviewer.user.email,
+                    } as TAuthUserItem)
+                    : null)
+                }
+                onChange={(_, val) => setFormData((prev) => ({ ...prev, userId: val?.id || "" }))}
+                onInputChange={(_, val, reason) => {
+                  if (reason === "input") {
+                    setUserSearchInput(val);
+                  } else if (reason === "clear") {
+                    setUserSearchInput("");
+                  }
+                }}
+                loading={usersInfiniteQuery.isLoading || usersInfiniteQuery.isFetchingNextPage}
+                ListboxProps={{
+                  onScroll: (event: React.SyntheticEvent) => {
+                    const listboxNode = event.currentTarget as HTMLElement;
+                    if (listboxNode) {
+                      const { scrollTop, clientHeight, scrollHeight } = listboxNode;
+                      if (scrollHeight - scrollTop - clientHeight <= 80) {
+                        if (usersInfiniteQuery.hasNextPage && !usersInfiniteQuery.isFetchingNextPage) {
+                          usersInfiniteQuery.fetchNextPage();
+                        }
+                      }
+                    }
+                  },
+                  style: { maxHeight: 250, overflow: "auto" },
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    label="User Reviewer"
+                    placeholder="user (nama, email, NIP)..."
+                    helperText={
+                      usersInfiniteQuery.hasNextPage
+                        ? `Memuat ${userItems.length} user (Scroll kebawah untuk memuat lagi)`
+                        : `Total ${userItems.length} user`
+                    }
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {usersInfiniteQuery.isFetchingNextPage || usersInfiniteQuery.isLoading ? (
+                            <CircularProgress color="inherit" size={20} />
+                          ) : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
                     }}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                        {selected.map((val) => {
-                          const ikuObj = ikuItems.find((i) => i.id === val);
-                          return (
-                            <Chip
-                              key={val}
-                              label={ikuObj ? `${ikuObj.code} - ${ikuObj.name}` : val}
-                              size="small"
-                            />
-                          );
-                        })}
-                      </Box>
-                    )}
-                  >
-                    {ikuItems.map((iku) => (
-                      <MenuItem key={iku.id} value={iku.id}>
-                        {iku.code} - {iku.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                  />
+                )}
+              />
+
+              {/* Manual User ID if user list is empty or needed */}
+              {userItems.length === 0 && !usersInfiniteQuery.isLoading && (
+                <TextField
+                  required
+                  label="User ID (UUID)"
+                  value={formData.userId}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, userId: e.target.value }))}
+                  fullWidth
+                  variant="outlined"
+                  placeholder="e.g. 550e8400-e29b-41d4-a716-446655440001"
+                />
               )}
+
+              {/* IKU Selection (Searchable Autocomplete Multi-Select with Infinite Scroll) */}
+              <Autocomplete
+                multiple
+                fullWidth
+                options={ikuItems}
+                filterOptions={(options) => options}
+                getOptionLabel={(opt) =>
+                  typeof opt === "string"
+                    ? opt
+                    : `${opt.code ? `${opt.code} - ` : ""}${opt.name || opt.id}`
+                }
+                isOptionEqualToValue={(option, val) => Boolean(option && val && option.id === val.id)}
+                value={ikuItems.filter((i) => formData.ikuIds.includes(i.id))}
+                onChange={(_, selectedOptions) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    ikuIds: selectedOptions.map((opt) => (typeof opt === "string" ? opt : opt.id)),
+                  }));
+                }}
+                onInputChange={(_, val, reason) => {
+                  if (reason === "input") {
+                    setIkuSearchInput(val);
+                  } else if (reason === "clear") {
+                    setIkuSearchInput("");
+                  }
+                }}
+                loading={ikuInfiniteQuery.isLoading || ikuInfiniteQuery.isFetchingNextPage}
+                ListboxProps={{
+                  onScroll: (event: React.SyntheticEvent) => {
+                    const listboxNode = event.currentTarget as HTMLElement;
+                    if (listboxNode) {
+                      const { scrollTop, clientHeight, scrollHeight } = listboxNode;
+                      if (scrollHeight - scrollTop - clientHeight <= 80) {
+                        if (ikuInfiniteQuery.hasNextPage && !ikuInfiniteQuery.isFetchingNextPage) {
+                          ikuInfiniteQuery.fetchNextPage();
+                        }
+                      }
+                    }
+                  },
+                  style: { maxHeight: 250, overflow: "auto" },
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required={formData.level === "INDICATOR_VERIFICATION"}
+                    label="Pilih IKU (Dapat lebih dari 1)"
+                    placeholder="Cari & pilih IKU..."
+                    helperText={
+                      ikuInfiniteQuery.hasNextPage
+                        ? `Memuat ${ikuItems.length} IKU (Scroll kebawah untuk memuat lagi)`
+                        : `Total ${ikuItems.length} IKU`
+                    }
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {ikuInfiniteQuery.isFetchingNextPage || ikuInfiniteQuery.isLoading ? (
+                            <CircularProgress color="inherit" size={20} />
+                          ) : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => {
+                    const { key, ...tagProps } = getTagProps({ index });
+                    return (
+                      <Chip
+                        key={key || option.id}
+                        size="small"
+                        label={option.code ? `${option.code} - ${option.name}` : option.name || option.id}
+                        {...tagProps}
+                      />
+                    );
+                  })
+                }
+              />
             </Stack>
           </DialogContent>
           <DialogActions sx={{ p: 2, bgcolor: "grey.50" }}>

@@ -206,7 +206,7 @@ const UsersTab: FC<UsersTabProps> = ({ unitId, value, index }) => {
                     <TextField
                       {...params}
                       label="Pilih User"
-                      placeholder="Cari user..."
+                      placeholder="user..."
                       size="small"
                     />
                   )}

@@ -26,12 +26,12 @@ import DataTable from "@/app/_components/ui/data-table";
 import { createPaginationInfo } from "@/utils/data-table";
 import { Page } from "@/app/_components/ui";
 import Filter from "@/app/_components/ui/filter";
-import { useGetSubmittedIndicators } from "./_hooks/use-get-submitted-indicators";
+import { useGetApprovedIndicators } from "./_hooks/use-get-approved-indicators";
 import {
-  useApproveIndicator,
-  useRejectIndicator,
-  useRevisionIndicator,
-} from "./_hooks/use-approval-actions";
+  useApproveAnggaranIndicator,
+  useRejectAnggaranIndicator,
+  useRevisionAnggaranIndicator,
+} from "./_hooks/use-approval-anggaran-actions";
 import { TSubmittedIndicatorItem } from "@/api/proker/approval/type";
 
 type ActionType = "approval" | "reject" | "revision";
@@ -53,7 +53,7 @@ const formatRupiah = (amount?: string | number) => {
   }).format(num);
 };
 
-export default function ApprovalPage() {
+export default function ApprovalAnggaranPage() {
   const { enqueueSnackbar } = useSnackbar();
 
   const [filter, setFilter] = useState<Record<string, unknown>>({ per_page: 10 });
@@ -70,10 +70,10 @@ export default function ApprovalPage() {
     limit: filter.per_page ? Number(filter.per_page) : 10,
   };
 
-  const query = useGetSubmittedIndicators(queryParams);
-  const approveMutation = useApproveIndicator();
-  const rejectMutation = useRejectIndicator();
-  const revisionMutation = useRevisionIndicator();
+  const query = useGetApprovedIndicators(queryParams);
+  const approveMutation = useApproveAnggaranIndicator();
+  const rejectMutation = useRejectAnggaranIndicator();
+  const revisionMutation = useRevisionAnggaranIndicator();
 
   const handleOpenDialog = (type: ActionType, item: TSubmittedIndicatorItem) => {
     setNote("");
@@ -101,7 +101,7 @@ export default function ApprovalPage() {
         { id, payload },
         {
           onSuccess: (res) => {
-            enqueueSnackbar(res?.message || "Indikator berhasil disetujui", {
+            enqueueSnackbar(res?.message || "Indikator anggaran berhasil disetujui", {
               variant: "success",
             });
             handleCloseDialog();
@@ -109,7 +109,7 @@ export default function ApprovalPage() {
           onError: (err: unknown) => {
             const error = err as { response?: { data?: { message?: string } } };
             enqueueSnackbar(
-              error?.response?.data?.message || "Gagal menyetujui indikator",
+              error?.response?.data?.message || "Gagal menyetujui indikator anggaran",
               { variant: "error" }
             );
           },
@@ -120,7 +120,7 @@ export default function ApprovalPage() {
         { id, payload },
         {
           onSuccess: (res) => {
-            enqueueSnackbar(res?.message || "Indikator berhasil ditolak", {
+            enqueueSnackbar(res?.message || "Indikator anggaran berhasil ditolak", {
               variant: "success",
             });
             handleCloseDialog();
@@ -128,7 +128,7 @@ export default function ApprovalPage() {
           onError: (err: unknown) => {
             const error = err as { response?: { data?: { message?: string } } };
             enqueueSnackbar(
-              error?.response?.data?.message || "Gagal menolak indikator",
+              error?.response?.data?.message || "Gagal menolak indikator anggaran",
               { variant: "error" }
             );
           },
@@ -139,7 +139,7 @@ export default function ApprovalPage() {
         { id, payload },
         {
           onSuccess: (res) => {
-            enqueueSnackbar(res?.message || "Permintaan revisi berhasil dikirim", {
+            enqueueSnackbar(res?.message || "Permintaan revisi anggaran berhasil dikirim", {
               variant: "success",
             });
             handleCloseDialog();
@@ -147,7 +147,7 @@ export default function ApprovalPage() {
           onError: (err: unknown) => {
             const error = err as { response?: { data?: { message?: string } } };
             enqueueSnackbar(
-              error?.response?.data?.message || "Gagal mengirim permintaan revisi",
+              error?.response?.data?.message || "Gagal mengirim permintaan revisi anggaran",
               { variant: "error" }
             );
           },
@@ -391,22 +391,22 @@ export default function ApprovalPage() {
 
   const dialogConfig = {
     approval: {
-      title: "Approval Indikator",
+      title: "Approval Anggaran Indikator",
       confirmLabel: "Setujui",
       color: "success" as const,
-      description: "Apakah Anda yakin ingin menyetujui indikator berikut?",
+      description: "Apakah Anda yakin ingin menyetujui anggaran indikator berikut?",
     },
     reject: {
-      title: "Tolak Indikator",
+      title: "Tolak Anggaran Indikator",
       confirmLabel: "Tolak",
       color: "error" as const,
-      description: "Apakah Anda yakin ingin menolak indikator berikut?",
+      description: "Apakah Anda yakin ingin menolak anggaran indikator berikut?",
     },
     revision: {
-      title: "Revisi Indikator",
+      title: "Revisi Anggaran Indikator",
       confirmLabel: "Kirim Revisi",
       color: "warning" as const,
-      description: "Masukkan catatan revisi untuk indikator berikut:",
+      description: "Masukkan catatan revisi untuk anggaran indikator berikut:",
     },
   }[dialogState.type];
 
@@ -418,8 +418,8 @@ export default function ApprovalPage() {
           path: "/proker/dashboard",
         },
         {
-          label: "Approval",
-          path: "/proker/approval",
+          label: "Approval Anggaran",
+          path: "/proker/approvalAnggaran",
         },
       ]}
       topPage={

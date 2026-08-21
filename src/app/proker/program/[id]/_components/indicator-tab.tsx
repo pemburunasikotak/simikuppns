@@ -104,14 +104,14 @@ const IndicatorTab: FC = (): ReactElement => {
         headerAlign: "center",
         renderCell: (params) => {
           const actionItems = [];
-          // if (params.row.status === "ASSIGNED_TO_UNIT") {
-          actionItems.push({
-            key: "assign",
-            type: "assign" as const,
-            label: "Set Target",
-            onClick: () => handleOpenTargetModal(params.row),
-          });
-          // }
+          if (params.row.status === "ASSIGNED_TO_UNIT") {
+            actionItems.push({
+              key: "assign",
+              type: "assign" as const,
+              label: "Set Target",
+              onClick: () => handleOpenTargetModal(params.row),
+            });
+          }
 
           if (actionItems.length > 0) {
             return <ActionButtonTable items={actionItems} />;

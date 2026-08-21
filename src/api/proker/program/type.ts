@@ -55,7 +55,9 @@ export type TSetProgramIndicatorTargetPayload = {
   targetQ2: number;
   targetQ3: number;
   targetQ4: number;
-  budget: string;
+  budget?: string;
+  propsal?: unknown;
+  rab?: unknown;
   picIds: string[];
   pics: unknown[];
 };

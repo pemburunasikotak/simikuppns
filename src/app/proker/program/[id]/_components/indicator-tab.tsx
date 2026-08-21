@@ -1,4 +1,4 @@
-import { FC, ReactElement, useState } from "react";
+import { FC, ReactElement, useState, useMemo } from "react";
 import { useParams } from "react-router";
 import { Box, Typography, Button } from "@mui/material";
 import { AddOutlined } from "@mui/icons-material";
@@ -53,69 +53,75 @@ const IndicatorTab: FC = (): ReactElement => {
     totalPages: Math.ceil(rawItems.length / params.per_page),
   };
 
-  const columns: GridColDef<TDefaultProgramIndicator>[] = [
-    { field: "name", headerName: "Nama Indikator", minWidth: 250, flex: 1 },
-    { field: "category", headerName: "Kategori", width: 140, renderCell: (params) => params.value || "-" },
-    {
-      field: "unit_measurement",
-      headerName: "Satuan",
-      width: 150,
-      renderCell: (params) => {
-        const masterUnitType = params.row.masterUnitType;
-        if (typeof masterUnitType === "object" && masterUnitType?.name) {
-          return masterUnitType.name;
-        }
-        if (typeof masterUnitType === "string") {
-          return masterUnitType;
-        }
-        return params.row.unit_measurement || "-";
-      }
-    },
-    { field: "category", headerName: "Kategori", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
-    { field: "targetQ1", headerName: "Target Q1", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
-    { field: "targetQ2", headerName: "Target Q2", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
-    { field: "targetQ3", headerName: "Target Q3", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
-    { field: "targetQ4", headerName: "Target Q4", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
-    // { field: "order", headerName: "Urutan", width: 100, align: "center", headerAlign: "center" },
-    {
-      field: "action",
-      headerName: "Aksi",
-      width: 100,
-      align: "center",
-      headerAlign: "center",
-      renderCell: (params) => {
-        const actionItems = [];
-        actionItems.push({
-          key: "edit",
-          type: "edit" as const,
-          onClick: () => {
-            setSelectedIndicator(params.row);
-            setModalMode("edit");
-            setOpenModalIndicator(true);
-          },
-        });
-        // if (params.row.status === "ASSIGNED_TO_UNIT") {
-        actionItems.push({
-          key: "assign",
-          type: "assign" as const,
-          onClick: () => handleOpenTargetModal(params.row),
-        });
-        // }
-        // if (params.row.status === "IN_PROGRESS") {
-        // actionItems.push({
-        //   key: "detail",
-        //   type: "detail" as const,
-        //   onClick: () => navigate(`/proker/program/${id}/indicator/${params.row.id}`),
-        // });
-        // }
-
-        if (actionItems.length > 0) {
-          return <ActionButtonTable items={actionItems} />;
-        }
-        return null;
+  const columns: GridColDef<TDefaultProgramIndicator>[] = useMemo(
+    () => [
+      { field: "name", headerName: "Nama Indikator", minWidth: 250, flex: 1 },
+      { field: "category", headerName: "Kategori", width: 140, renderCell: (params) => params.value || "-" },
+      {
+        field: "unit_measurement",
+        headerName: "Satuan",
+        width: 150,
+        renderCell: (params) => {
+          const masterUnitType = params.row.masterUnitType;
+          if (typeof masterUnitType === "object" && masterUnitType?.name) {
+            return masterUnitType.name;
+          }
+          if (typeof masterUnitType === "string") {
+            return masterUnitType;
+          }
+          return params.row.unit_measurement || "-";
+        },
       },
-    },
-  ];
+      {
+        field: "status",
+        headerName: "Status Penugasan",
+        width: 150,
+        align: "center",
+        headerAlign: "center",
+        renderCell: (params) => {
+          if (params.value === "ASSIGNED_TO_UNIT") return "Ditugaskan";
+          if (params.value === "DRAFT") return "Draft";
+          if (params.value === "SUBMITTED") return "Diajukan";
+          if (params.value === "REVISION") return "Revisi";
+          if (params.value === "INDICATOR_APPROVED") return "Indikator Disetujui";
+          if (params.value === "APPROVED") return "Disetujui";
+          if (params.value === "REJECTED") return "Ditolak";
+          if (params.value === "IN_PROGRESS") return "Dalam Pengerjaan";
+          if (params.value === "COMPLETED") return "Selesai";
+          if (params.value === "CANCELLED") return "Dibatalkan";
+          return params.value || "-";
+        },
+      },
+      { field: "targetQ1", headerName: "Target Q1", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
+      { field: "targetQ2", headerName: "Target Q2", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
+      { field: "targetQ3", headerName: "Target Q3", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
+      { field: "targetQ4", headerName: "Target Q4", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
+      {
+        field: "action",
+        headerName: "Aksi",
+        width: 100,
+        align: "center",
+        headerAlign: "center",
+        renderCell: (params) => {
+          const actionItems = [];
+          // if (params.row.status === "ASSIGNED_TO_UNIT") {
+          actionItems.push({
+            key: "assign",
+            type: "assign" as const,
+            label: "Set Target",
+            onClick: () => handleOpenTargetModal(params.row),
+          });
+          // }
+
+          if (actionItems.length > 0) {
+            return <ActionButtonTable items={actionItems} />;
+          }
+          return null;
+        },
+      },
+    ],
+    []
+  );
 
   return (
     <Box>

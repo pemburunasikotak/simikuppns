@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useState, useMemo } from "react";
 import {
   Stack,
   Button,
@@ -17,6 +17,7 @@ import {
   MenuItem,
   IconButton,
   Typography,
+  CircularProgress,
 } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 import { PersonAddOutlined, DeleteOutlined, AddOutlined } from "@mui/icons-material";
@@ -26,10 +27,9 @@ import DataTable from "@/app/_components/ui/data-table";
 import { createPaginationInfo } from "@/utils/data-table";
 import { useFilter } from "@/app/_hooks/use-filter";
 
-// import useGetUnitUsers from "../../../../(protected)/unit/[id]/_hooks/use-get-unit-users";
 import useGetUnitUsers from "../_hooks/use-get-unit-users";
 import useAssignUsers from "../_hooks/use-assign-users";
-import useGetListUser from "../_hooks/use-get-list-user";
+import { useGetInfiniteUser } from "../_hooks/use-get-list-user";
 import useGetUnitDetails from "../_hooks/use-get-unit-details";
 import { getErrorMessage } from "./utils";
 import { TUnitUserItem } from "../_hooks/use-get-unit-users";
@@ -53,6 +53,7 @@ const UsersTab: FC<UsersTabProps> = ({ unitId, value, index }) => {
   const { enqueueSnackbar } = useSnackbar();
   const { filters, setFilter } = useFilter<Record<string, unknown>>();
   const [isAssignUserOpen, setIsAssignUserOpen] = useState(false);
+  const [userSearchInput, setUserSearchInput] = useState("");
 
   type TAssignRow = { userId: string; type: "PIC" | "MEMBER" };
   const [assignRows, setAssignRows] = useState<TAssignRow[]>([{ userId: "", type: "PIC" }]);
@@ -62,27 +63,48 @@ const UsersTab: FC<UsersTabProps> = ({ unitId, value, index }) => {
     page: filters.page ? Number(filters.page) : 1,
   });
 
-  const allUsersQuery = useGetListUser({ limit: 100, page: 1 });
+  const usersInfiniteQuery = useGetInfiniteUser({
+    ...(userSearchInput.trim() ? { search: userSearchInput.trim(), search_value: userSearchInput.trim() } : {}),
+  });
 
-  const extractArray = (res: unknown): TUserItem[] => {
-    if (!res) return [];
-    if (Array.isArray(res)) return res as TUserItem[];
-    if (typeof res === "object") {
-      const r = res as Record<string, unknown>;
-      if (Array.isArray(r.data)) return r.data as TUserItem[];
-      if (r.data && typeof r.data === "object") {
-        const d = r.data as Record<string, unknown>;
-        if (Array.isArray(d.data)) return d.data as TUserItem[];
-        if (Array.isArray(d.items)) return d.items as TUserItem[];
+  const allUsers: TUserItem[] = useMemo(() => {
+    if (!usersInfiniteQuery.data?.pages) return [];
+    return usersInfiniteQuery.data.pages.flatMap((page) => {
+      const rawData = (page as Record<string, unknown>)?.data;
+      if (Array.isArray(rawData)) return rawData as TUserItem[];
+      if (rawData && typeof rawData === "object" && "items" in rawData && Array.isArray((rawData as { items: unknown[] }).items)) {
+        return (rawData as { items: TUserItem[] }).items;
       }
-      if (Array.isArray(r.items)) return r.items as TUserItem[];
-    }
-    return [];
-  };
+      return [];
+    });
+  }, [usersInfiniteQuery.data]);
 
-  const allUsers = extractArray(allUsersQuery.data);
-  const assignUserMutation = useAssignUsers(unitId);
   const detailQuery = useGetUnitDetails(unitId);
+
+  const userOptions = useMemo(() => {
+    const map = new Map<string, TUserItem>();
+    if (detailQuery.data?.users && Array.isArray(detailQuery.data.users)) {
+      detailQuery.data.users.forEach((u: { id?: string; userId?: string; name?: string; email?: string; nip?: string; user?: TUserItem }) => {
+        const id = u.id || u.userId || u.user?.id;
+        if (id) {
+          map.set(id, {
+            id,
+            name: u.name || u.user?.name || id,
+            nip: u.nip || u.user?.nip,
+            email: u.email || u.user?.email,
+          });
+        }
+      });
+    }
+    allUsers.forEach((u) => {
+      if (u.id) {
+        map.set(u.id, u);
+      }
+    });
+    return Array.from(map.values());
+  }, [detailQuery.data?.users, allUsers]);
+
+  const assignUserMutation = useAssignUsers(unitId);
 
   const handleOpenAssign = () => {
     if (detailQuery.data?.users && detailQuery.data.users.length > 0) {
@@ -239,17 +261,55 @@ const UsersTab: FC<UsersTabProps> = ({ unitId, value, index }) => {
               <Stack key={idx} direction="row" spacing={1.5} alignItems="center">
                 <Autocomplete
                   sx={{ flex: 1 }}
-                  options={allUsers}
-                  getOptionLabel={(opt) => `${opt.name} (${opt.nip || opt.email})`}
-                  loading={allUsersQuery.isLoading}
-                  value={allUsers.find((u) => u.id === row.userId) ?? null}
+                  options={userOptions}
+                  filterOptions={(options) => options}
+                  getOptionLabel={(opt) =>
+                    typeof opt === "string"
+                      ? opt
+                      : `${opt.name} (${opt.nip || opt.email || opt.id})`
+                  }
+                  isOptionEqualToValue={(option, val) => Boolean(option && val && option.id === val.id)}
+                  loading={usersInfiniteQuery.isLoading || usersInfiniteQuery.isFetchingNextPage}
+                  value={userOptions.find((u) => u.id === row.userId) ?? null}
                   onChange={(_, val) => handleRowChange(idx, "userId", val?.id || "")}
+                  onInputChange={(_, val, reason) => {
+                    if (reason === "input") {
+                      setUserSearchInput(val);
+                    } else if (reason === "clear") {
+                      setUserSearchInput("");
+                    }
+                  }}
+                  ListboxProps={{
+                    onScroll: (event: React.SyntheticEvent) => {
+                      const listboxNode = event.currentTarget as HTMLElement;
+                      if (listboxNode) {
+                        const { scrollTop, clientHeight, scrollHeight } = listboxNode;
+                        if (scrollHeight - scrollTop - clientHeight <= 80) {
+                          if (usersInfiniteQuery.hasNextPage && !usersInfiniteQuery.isFetchingNextPage) {
+                            usersInfiniteQuery.fetchNextPage();
+                          }
+                        }
+                      }
+                    },
+                    style: { maxHeight: 250, overflow: "auto" },
+                  }}
                   renderInput={(params) => (
                     <TextField
                       {...params}
                       label="Pilih User"
-                      placeholder="user..."
+                      placeholder="Cari user (nama, NIP, email)..."
                       size="small"
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {usersInfiniteQuery.isFetchingNextPage || usersInfiniteQuery.isLoading ? (
+                              <CircularProgress color="inherit" size={20} />
+                            ) : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        ),
+                      }}
                     />
                   )}
                 />

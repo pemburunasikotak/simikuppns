@@ -55,6 +55,7 @@ const IndicatorTab: FC = (): ReactElement => {
 
   const columns: GridColDef<TDefaultProgramIndicator>[] = [
     { field: "name", headerName: "Nama Indikator", minWidth: 250, flex: 1 },
+    { field: "category", headerName: "Kategori", width: 140, renderCell: (params) => params.value || "-" },
     {
       field: "unit_measurement",
       headerName: "Satuan",
@@ -70,11 +71,11 @@ const IndicatorTab: FC = (): ReactElement => {
         return params.row.unit_measurement || "-";
       }
     },
+    { field: "category", headerName: "Kategori", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
     { field: "targetQ1", headerName: "Target Q1", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
     { field: "targetQ2", headerName: "Target Q2", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
     { field: "targetQ3", headerName: "Target Q3", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
     { field: "targetQ4", headerName: "Target Q4", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
-    // { field: "status", headerName: "Status", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
     // { field: "order", headerName: "Urutan", width: 100, align: "center", headerAlign: "center" },
     {
       field: "action",

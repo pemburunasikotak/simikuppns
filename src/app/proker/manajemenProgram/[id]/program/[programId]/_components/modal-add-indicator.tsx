@@ -21,6 +21,7 @@ type ModalAddIndicatorProps = {
 
 const schema = z.object({
   name: z.string().min(1, "Nama Indikator wajib diisi"),
+  category: z.string().optional(),
   masterUnitTypeId: z.string().min(1, "Satuan wajib dipilih"),
   order: z.coerce.number().min(1, "Urutan minimal 1"),
 });
@@ -41,6 +42,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
+      category: "",
       masterUnitTypeId: "",
       order: 1,
     },
@@ -62,12 +64,14 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
 
         reset({
           name: selectedIndicator.name,
+          category: selectedIndicator.category || "",
           masterUnitTypeId,
           order: selectedIndicator.order,
         });
       } else {
         reset({
           name: "",
+          category: "",
           masterUnitTypeId: "",
           order: 1,
         });
@@ -83,6 +87,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   const onSubmit = (data: FormData) => {
     const basePayload: import("@/api/proker/manajemenProgram/type").TCreateDefaultProgramIndicatorPayload = {
       name: data.name,
+      category: data.category,
       masterUnitTypeId: data.masterUnitTypeId,
       unit: data.masterUnitTypeId,
       order: data.order,
@@ -132,6 +137,16 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
               label="Nama Indikator"
               placeholder="Contoh: Jumlah Publikasi"
               required
+            />
+            <FormDropdownField
+              label="Kategori"
+              control={control}
+              name="category"
+              options={[
+                { value: "TUSI", label: "TUSI" },
+                { value: "RUTIN", label: "RUTIN" },
+                { value: "PENGEMBANGAN", label: "PENGEMBANGAN" },
+              ]}
             />
             <FormDropdownField
               control={control}

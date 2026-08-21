@@ -1,5 +1,17 @@
 import { useEffect } from "react";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, TextField } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Grid,
+  FormControl,
+  FormGroup,
+  FormLabel,
+  InputAdornment,
+  Typography,
+} from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -7,6 +19,7 @@ import { useSnackbar } from "notistack";
 import FormTextField from "@/app/_components/ui/form-text-field";
 import FormUploadField from "@/app/_components/ui/form-upload-field";
 import FormDropdownField from "@/app/_components/ui/form-dropdown-field";
+import BaseInputText from "@/app/_components/ui/base-input-text";
 import { useGetProkerMasterUnits } from "@/app/proker/master-unit/_hooks/use-get-master-units";
 import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
 import useCreateProgramIndicator from "../_hooks/use-create-program-indicator";
@@ -26,9 +39,8 @@ type ModalAddIndicatorProps = {
 };
 
 const schema = z.object({
-
-
   name: z.string().min(1, "Nama Indikator wajib diisi"),
+  category: z.string().min(1, "Kategori wajib dipilih"),
   masterUnitTypeId: z.string().min(1, "Satuan wajib dipilih"),
   unitId: z.string().min(1, "UNIT wajib dipilih"),
   picIds: z.array(z.string()).min(1, "PIC wajib dipilih"),
@@ -66,6 +78,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
+      category: "",
       masterUnitTypeId: "",
       unitId: "",
       picIds: [],
@@ -107,6 +120,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
 
         reset({
           name: selectedIndicator.name,
+          category: selectedIndicator.category || "",
           masterUnitTypeId,
           unitId: selectedIndicator.unitId || "",
           picIds: initialPicIds,
@@ -122,7 +136,10 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
       } else {
         reset({
           name: "",
+          category: "",
           masterUnitTypeId: "",
+          unitId: "",
+          picIds: [],
           order: 1,
           targetQ1: 0,
           targetQ2: 0,
@@ -159,6 +176,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   const onSubmit = (data: FormData) => {
     const fullPayload: import("@/api/proker/manajemenProgram/type").TDefaultProgramIndicatorPayload = {
       name: data.name,
+      category: data.category,
       unit: data.masterUnitTypeId,
       masterUnitTypeId: data.masterUnitTypeId,
       order: Number(data.order || 1),
@@ -205,130 +223,181 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
       <DialogTitle sx={{ fontWeight: 800 }}>
         {mode === "add" ? "Tambah Indikator" : "Ubah Indikator"}
       </DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
-          <Stack spacing={3} sx={{ pt: 1 }}>
-            <FormTextField
-              control={control}
-              name="name"
-              label="Nama Indikator"
-              placeholder="Contoh: Jumlah Publikasi"
-              required
-            />
-            <FormDropdownField
-              control={control}
-              name="unitId"
-              label="UNIT"
-              options={myUnitOptions}
-              required
-            />
-            <FormDropdownField
-              control={control}
-              name="masterUnitTypeId"
-              label="Satuan"
-              options={unitOptions}
-              required
-            />
-            <FormDropdownCheckboxField
-              control={control}
-              name="picIds"
-              label="PIC"
-              options={picOptions}
-              required
-            />
-            <FormTextField
-              control={control}
-              name="targetQ1"
-              label="Target Q1"
-              type="number"
-              required
-            />
-            <FormTextField
-              control={control}
-              name="targetQ2"
-              label="Target Q2"
-              type="number"
-              required
-            />
-            <FormTextField
-              control={control}
-              name="targetQ3"
-              label="Target Q3"
-              type="number"
-              required
-            />
-            <FormTextField
-              control={control}
-              name="targetQ4"
-              label="Target Q4"
-              type="number"
-              required
-            />
-            <Controller
-              name="budget"
-              control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  label="Budget"
-                  variant="outlined"
-                  fullWidth
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                  required
-                  onChange={(e) => {
-                    const formatted = formatRupiah(e.target.value);
-                    field.onChange(formatted);
-                  }}
-                  InputProps={{
-                    startAdornment: <div style={{ marginRight: 8, marginTop: 1 }}>Rp</div>,
-                  }}
-                />
-              )}
-            />
-            <Controller
-              name="propsal"
-              control={control}
-              render={({ field: { onChange, value }, fieldState: { error } }) => (
-                <FormUploadField
-                  label="Proposal"
-                  name="propsal"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) onChange(file);
-                  }}
-                  value={value && typeof value === 'object' ? (value as File).name : (value as string) || ""}
-                  error={!!error}
-                  helper={error?.message}
-                  acceptFormat=".pdf,.doc,.docx"
-                  uploadDesc="Format Dokumen PDF, DOCX"
-                />
-              )}
-            />
-            <Controller
-              name="rab"
-              control={control}
-              render={({ field: { onChange, value }, fieldState: { error } }) => (
-                <FormUploadField
-                  label="RAB"
-                  name="rab"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) onChange(file);
-                  }}
-                  value={value && typeof value === 'object' ? (value as File).name : (value as string) || ""}
-                  error={!!error}
-                  helper={error?.message}
-                  acceptFormat=".pdf,.xls,.xlsx"
-                  uploadDesc="Format Dokumen PDF, XLSX"
-                />
-              )}
-            />
-          </Stack>
+          <Grid container spacing={2.5} sx={{ pt: 1 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormTextField
+                control={control}
+                name="name"
+                label="Nama Indikator"
+                placeholder="Contoh: Jumlah Publikasi"
+                required
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormDropdownField
+                label="Kategori"
+                control={control}
+                name="category"
+                options={[
+                  { value: "TUSI", label: "TUSI" },
+                  { value: "RUTIN", label: "RUTIN" },
+                  { value: "PENGEMBANGAN", label: "PENGEMBANGAN" },
+                ]}
+                required
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormDropdownField
+                control={control}
+                name="unitId"
+                label="UNIT"
+                options={myUnitOptions}
+                required
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormDropdownField
+                control={control}
+                name="masterUnitTypeId"
+                label="Satuan"
+                options={unitOptions}
+                required
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormDropdownCheckboxField
+                control={control}
+                name="picIds"
+                label="PIC"
+                options={picOptions}
+                required
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Controller
+                name="budget"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <FormControl variant="standard" sx={{ width: "100%" }}>
+                    <FormLabel htmlFor="budget" error={fieldState.invalid} required>
+                      Budget
+                    </FormLabel>
+                    <FormGroup>
+                      <BaseInputText
+                        id="budget"
+                        variant="outlined"
+                        value={field.value}
+                        placeholder="Contoh: 10.000.000"
+                        error={fieldState.invalid}
+                        helperText={fieldState.error?.message}
+                        onChange={(e) => {
+                          const formatted = formatRupiah(e.target.value);
+                          field.onChange(formatted);
+                        }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <Typography variant="body2" fontWeight={600} color="text.secondary">
+                                Rp
+                              </Typography>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </FormGroup>
+                  </FormControl>
+                )}
+              />
+            </Grid>
+
+            <Grid size={{ xs: 6, sm: 3 }}>
+              <FormTextField
+                control={control}
+                name="targetQ1"
+                label="Target Q1"
+                type="number"
+                required
+              />
+            </Grid>
+            <Grid size={{ xs: 6, sm: 3 }}>
+              <FormTextField
+                control={control}
+                name="targetQ2"
+                label="Target Q2"
+                type="number"
+                required
+              />
+            </Grid>
+            <Grid size={{ xs: 6, sm: 3 }}>
+              <FormTextField
+                control={control}
+                name="targetQ3"
+                label="Target Q3"
+                type="number"
+                required
+              />
+            </Grid>
+            <Grid size={{ xs: 6, sm: 3 }}>
+              <FormTextField
+                control={control}
+                name="targetQ4"
+                label="Target Q4"
+                type="number"
+                required
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Controller
+                name="propsal"
+                control={control}
+                render={({ field: { onChange, value }, fieldState: { error } }) => (
+                  <FormUploadField
+                    label="Proposal"
+                    name="propsal"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) onChange(file);
+                    }}
+                    value={value && typeof value === 'object' ? (value as File).name : (value as string) || ""}
+                    error={!!error}
+                    helper={error?.message}
+                    acceptFormat=".pdf,.doc,.docx"
+                    uploadDesc="Format Dokumen PDF, DOCX"
+                  />
+                )}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Controller
+                name="rab"
+                control={control}
+                render={({ field: { onChange, value }, fieldState: { error } }) => (
+                  <FormUploadField
+                    label="RAB"
+                    name="rab"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) onChange(file);
+                    }}
+                    value={value && typeof value === 'object' ? (value as File).name : (value as string) || ""}
+                    error={!!error}
+                    helper={error?.message}
+                    acceptFormat=".pdf,.xls,.xlsx"
+                    uploadDesc="Format Dokumen PDF, XLSX"
+                  />
+                )}
+              />
+            </Grid>
+          </Grid>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={handleClose} color="inherit" sx={{ fontWeight: 700 }}>

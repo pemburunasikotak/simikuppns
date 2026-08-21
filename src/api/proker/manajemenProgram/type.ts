@@ -127,6 +127,7 @@ export type TDefaultProgramIndicatorPayload = {
   masterUnitTypeId: string;
   unitId: string;
   name: string;
+  category?: string;
   unit?: string;
   targetQ1: number;
   targetQ2: number;
@@ -148,6 +149,7 @@ export type TDefaultProgramIndicatorResponse = {
 
 export type TCreateDefaultProgramIndicatorPayload = {
   name: string;
+  category?: string;
   masterUnitTypeId: string;
   unit?: string;
   order: number;

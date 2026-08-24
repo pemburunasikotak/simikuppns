@@ -35,10 +35,17 @@ import useGetAssignmentStructure from "../_hooks/use-get-assignment-structure";
 import ModalAssignUnit from "./modal-assign-unit";
 
 export default function StructureView() {
+  const currentYear = new Date().getFullYear();
+  const startYear = 2024;
+  const yearOptions = Array.from(
+    { length: currentYear + 1 - startYear + 1 },
+    (_, i) => (currentYear + 1 - i).toString()
+  );
+
   const [selectedIkuId, setSelectedIkuId] = useState<string | null>(null);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [assignIndicatorId, setAssignIndicatorId] = useState<string | null>(null);
-  const [filterYear, setFilterYear] = useState("2026");
+  const [filterYear, setFilterYear] = useState(currentYear.toString());
   const [filterIku, setFilterIku] = useState("SEMUA");
   const [filterProgram, setFilterProgram] = useState("SEMUA");
   const [filterUnit, setFilterUnit] = useState("SEMUA");
@@ -79,7 +86,7 @@ export default function StructureView() {
   };
 
   const handleResetFilter = () => {
-    setFilterYear("2026");
+    setFilterYear(currentYear.toString());
     setFilterIku("SEMUA");
     setFilterProgram("SEMUA");
     setFilterUnit("SEMUA");
@@ -102,9 +109,11 @@ export default function StructureView() {
               sx={{ bgcolor: 'white', borderRadius: 2, '.MuiOutlinedInput-notchedOutline': { borderColor: 'grey.300' } }}
               displayEmpty
             >
-              <MenuItem value="2026">2026</MenuItem>
-              <MenuItem value="2025">2025</MenuItem>
-              <MenuItem value="2024">2024</MenuItem>
+              {yearOptions.map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           <FormControl size="small" sx={{ minWidth: 140 }}>
@@ -351,7 +360,7 @@ export default function StructureView() {
         onClose={() => setAssignModalOpen(false)}
         indicatorId={assignIndicatorId}
         ikuId={selectedIkuId}
-        period={parseInt(filterYear, 10) || 2026}
+        period={parseInt(filterYear, 10) || currentYear}
       />
     </Box>
   );

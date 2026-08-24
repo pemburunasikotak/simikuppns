@@ -2,18 +2,21 @@ import React from "react";
 import { AssignmentOutlined, DeleteOutline, EditOutlined, Lock, VisibilityOutlined } from "@mui/icons-material";
 import { ButtonProps, Button as MuiButton, Stack, styled, Tooltip } from "@mui/material";
 
-type ItemType = "detail" | "delete" | "edit" | "lock" | "assign";
-interface Props {
-  items: {
-    key: React.Key;
-    type?: ItemType;
-    label?: string;
-    icon?: React.ReactNode;
-    color?: ButtonProps["color"];
-    onClick?: () => void;
-    disabled?: boolean;
-    render?: React.ReactNode;
-  }[];
+export type ItemType = "detail" | "delete" | "edit" | "lock" | "assign";
+
+export interface ActionButtonItem {
+  key: React.Key;
+  type?: ItemType;
+  label?: string;
+  icon?: React.ReactNode;
+  color?: ButtonProps["color"];
+  onClick?: () => void;
+  disabled?: boolean;
+  render?: React.ReactNode;
+}
+
+export interface Props {
+  items: ActionButtonItem[];
 }
 
 const Button = styled(MuiButton)(() => ({

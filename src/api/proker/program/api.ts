@@ -47,14 +47,14 @@ export const getIndicatorRealizations = async (programId: string, id: string): P
   return data;
 };
 
-export const getIndicatorUsers = async (programId: string, id: string, params?: Record<string, unknown>): Promise<{ data: { items: { id: string; name: string; [key: string]: unknown }[] } }> => {
+export const getIndicatorUsers = async (programId: string, id: string, params?: Record<string, unknown>): Promise<{ data: { items: { id: string; name: string;[key: string]: unknown }[] } }> => {
   const { data } = await prokerAxiosInstance.get(`/api/v1/programs/${programId}/indicators/${id}/users`, { params });
   return data;
 };
 
-export const exportProkerExcel = async (year: string | number): Promise<Blob> => {
+export const exportProkerExcel = async (year: string | number, type: string): Promise<Blob> => {
   const { data } = await prokerAxiosInstance.get("/api/v1/programs/export/proker", {
-    params: { year },
+    params: { year, type },
     responseType: "blob",
   });
   return data;

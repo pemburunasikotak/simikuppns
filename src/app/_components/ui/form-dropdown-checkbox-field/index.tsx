@@ -25,6 +25,7 @@ type Props<T extends FieldValues> = UseControllerProps<T> & {
   required?: boolean;
   options: DropdownOption[];
   multiple?: boolean;
+  disabled?: boolean;
 };
 
 const FormDropdownCheckboxField = <T extends FieldValues>({
@@ -36,6 +37,7 @@ const FormDropdownCheckboxField = <T extends FieldValues>({
   options,
   placeholder,
   multiple = true,
+  disabled = false,
 }: Props<T>) => {
   return (
     <Controller
@@ -47,6 +49,7 @@ const FormDropdownCheckboxField = <T extends FieldValues>({
           variant="outlined"
           fullWidth
           error={fieldState.invalid}
+          disabled={disabled}
           sx={{ backgroundColor: "white" }}
         >
           {label && (
@@ -61,6 +64,7 @@ const FormDropdownCheckboxField = <T extends FieldValues>({
             value={field.value || []}
             onChange={field.onChange}
             onBlur={field.onBlur}
+            disabled={disabled}
             input={<OutlinedInput />}
             displayEmpty
             renderValue={(selected) => {
@@ -89,11 +93,15 @@ const FormDropdownCheckboxField = <T extends FieldValues>({
                         onMouseDown={(e) => {
                           e.stopPropagation();
                         }}
-                        onDelete={(e) => {
-                          e.stopPropagation();
-                          const nextValue = (field.value as string[]).filter((v) => v !== val);
-                          field.onChange(nextValue);
-                        }}
+                        onDelete={
+                          disabled
+                            ? undefined
+                            : (e) => {
+                                e.stopPropagation();
+                                const nextValue = (field.value as string[]).filter((v) => v !== val);
+                                field.onChange(nextValue);
+                              }
+                        }
                       />
                     );
                   })}

@@ -16,6 +16,7 @@ type Props<T extends FieldValues> = Omit<UseControllerProps<T>, "control"> & {
   placeholder?: string;
   required?: boolean;
   options: DropdownOption[];
+  disabled?: boolean;
 };
 
 const FormDropdownField = <T extends FieldValues>({
@@ -26,6 +27,7 @@ const FormDropdownField = <T extends FieldValues>({
   required = false,
   options,
   placeholder,
+  disabled = false,
 }: Props<T>) => {
   return (
     <Controller
@@ -36,6 +38,7 @@ const FormDropdownField = <T extends FieldValues>({
           variant="outlined"
           fullWidth
           error={fieldState.invalid}
+          disabled={disabled}
           sx={{
             backgroundColor: "white",
           }}
@@ -54,6 +57,7 @@ const FormDropdownField = <T extends FieldValues>({
             onBlur={field.onBlur}
             displayEmpty
             fullWidth
+            disabled={disabled}
           >
             <MenuItem value="" disabled>
               {placeholder ? placeholder : `Pilih ${label}`}

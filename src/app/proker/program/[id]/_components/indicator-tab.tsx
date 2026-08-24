@@ -1,5 +1,5 @@
 import { FC, ReactElement, useState, useMemo } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { Box, Typography, Button } from "@mui/material";
 import { AddOutlined } from "@mui/icons-material";
 import { GridColDef } from "@mui/x-data-grid";
@@ -11,12 +11,13 @@ import useGetListProgramIndicator from "../_hooks/use-get-list-program-indicator
 import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
 
 import DataTable from "@/app/_components/ui/data-table";
-import ActionButtonTable from "@/app/_components/ui/action-button-table";
+import ActionButtonTable, { ActionButtonItem } from "@/app/_components/ui/action-button-table";
 import ModalSetTarget from "./modal-set-target";
 import ModalAddIndicator from "./modal-add-indicator";
 
 const IndicatorTab: FC = (): ReactElement => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const [params, setParams] = useState({
     page: 1,
@@ -30,7 +31,7 @@ const IndicatorTab: FC = (): ReactElement => {
   const [selectedIndicator, setSelectedIndicator] = useState<TDefaultProgramIndicator | null>(null);
 
   const [openModalIndicator, setOpenModalIndicator] = useState(false);
-  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+  const [modalMode, setModalMode] = useState<"add" | "edit" | "detail">("add");
 
   const handleOpenTargetModal = (indicator: TDefaultProgramIndicator) => {
     setSelectedIndicator(indicator);
@@ -99,11 +100,22 @@ const IndicatorTab: FC = (): ReactElement => {
       {
         field: "action",
         headerName: "Aksi",
-        width: 100,
+        width: 120,
         align: "center",
         headerAlign: "center",
         renderCell: (params) => {
-          const actionItems = [];
+          const actionItems: ActionButtonItem[] = [];
+
+          if (params.row.status === "IN_PROGRESS") {
+            actionItems.push({
+              key: "detail",
+              type: "detail",
+              onClick: () => {
+                navigate(`/proker/program/${id}/indicator/${params.row.id}`);
+              },
+            });
+          }
+
           if (params.row.status === "ASSIGNED_TO_UNIT") {
             actionItems.push({
               key: "assign",
@@ -120,7 +132,7 @@ const IndicatorTab: FC = (): ReactElement => {
         },
       },
     ],
-    []
+    [id, navigate]
   );
 
   return (

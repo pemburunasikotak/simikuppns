@@ -12,6 +12,7 @@ import {
   TextField,
   Typography,
   CircularProgress,
+  MenuItem,
 } from "@mui/material";
 import { AddOutlined, DeleteOutlined, FileDownloadOutlined } from "@mui/icons-material";
 import { GridColDef } from "@mui/x-data-grid";
@@ -46,6 +47,7 @@ const ProgramPage: FC = (): ReactElement => {
 
   const [openExportModal, setOpenExportModal] = useState(false);
   const [selectedYear, setSelectedYear] = useState<number | string>(new Date().getFullYear());
+  const [selectedType, setSelectedType] = useState<string>("USULAN");
   const [isExporting, setIsExporting] = useState(false);
 
   const user = ProkerSessionUser.get()?.user;
@@ -59,13 +61,17 @@ const ProgramPage: FC = (): ReactElement => {
       enqueueSnackbar("Pilih atau masukkan tahun terlebih dahulu", { variant: "warning" });
       return;
     }
+    if (!selectedType) {
+      enqueueSnackbar("Pilih tipe terlebih dahulu", { variant: "warning" });
+      return;
+    }
     try {
       setIsExporting(true);
-      const blob = await exportProkerExcel(selectedYear);
+      const blob = await exportProkerExcel(selectedYear, selectedType);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `proker-export-${selectedYear}.xlsx`;
+      a.download = `proker-export-${selectedYear}-${selectedType}.xlsx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -225,7 +231,7 @@ const ProgramPage: FC = (): ReactElement => {
         <DialogContent dividers>
           <Stack spacing={2}>
             <Typography variant="body2" color="text.secondary">
-              Pilih tahun program kerja yang ingin diunduh format Excel.
+              Pilih tahun dan tipe program kerja yang ingin diunduh format Excel.
             </Typography>
             <TextField
               label="Tahun"
@@ -235,6 +241,17 @@ const ProgramPage: FC = (): ReactElement => {
               fullWidth
               placeholder="Contoh: 2025"
             />
+            <TextField
+              select
+              label="Tipe"
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              fullWidth
+            >
+              <MenuItem value="USULAN">USULAN</MenuItem>
+              <MenuItem value="FINAL">FINAL</MenuItem>
+              <MenuItem value="BERITA_ACARA">BERITA ACARA</MenuItem>
+            </TextField>
           </Stack>
         </DialogContent>
         <DialogActions sx={{ p: 2, bgcolor: "grey.50" }}>

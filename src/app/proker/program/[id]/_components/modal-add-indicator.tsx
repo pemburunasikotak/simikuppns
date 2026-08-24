@@ -34,8 +34,22 @@ type ModalAddIndicatorProps = {
   open: boolean;
   onClose: () => void;
   programId: string;
-  mode: "add" | "edit";
+  mode: "add" | "edit" | "detail";
   selectedIndicator: TDefaultProgramIndicator | null;
+};
+
+const getStatusLabel = (status?: string) => {
+  if (status === "ASSIGNED_TO_UNIT") return "Ditugaskan";
+  if (status === "DRAFT") return "Draft";
+  if (status === "SUBMITTED") return "Diajukan";
+  if (status === "REVISION") return "Revisi";
+  if (status === "INDICATOR_APPROVED") return "Indikator Disetujui";
+  if (status === "APPROVED") return "Disetujui";
+  if (status === "REJECTED") return "Ditolak";
+  if (status === "IN_PROGRESS") return "Dalam Pengerjaan";
+  if (status === "COMPLETED") return "Selesai";
+  if (status === "CANCELLED") return "Dibatalkan";
+  return status || "-";
 };
 
 const schema = z.object({
@@ -62,13 +76,13 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   const updateMutation = useUpdateProgramIndicator();
 
   const isPending = createMutation.isPending || updateMutation.isPending;
+  const isDetail = mode === "detail";
 
   const { data: unitTypesData } = useGetProkerMasterUnits({ limit: 50 });
   const unitOptions = unitTypesData?.items?.map(unit => ({ value: unit.id, label: unit.name })) || [];
 
   const { data: myUnitsData } = useGetMyUnits({ limit: 50 });
 
-  console.log('CEK DATA', myUnitsData)
   const myUnitOptions = myUnitsData?.map(item => ({
     value: item?.unit?.id || item?.id || "",
     label: item?.unit?.name || item?.name || "",
@@ -105,7 +119,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
 
   useEffect(() => {
     if (open) {
-      if (mode === "edit" && selectedIndicator) {
+      if ((mode === "edit" || mode === "detail") && selectedIndicator) {
         let masterUnitTypeId = "";
         if (typeof selectedIndicator.masterUnitType === 'object' && selectedIndicator.masterUnitType !== null) {
           masterUnitTypeId = selectedIndicator.masterUnitType.id;
@@ -177,6 +191,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   };
 
   const onSubmit = (data: FormData) => {
+    if (isDetail) return;
     const isTusiOrPengembangan = data.category === "TUSI" || data.category === "PENGEMBANGAN";
 
     const fullPayload: import("@/api/proker/manajemenProgram/type").TDefaultProgramIndicatorPayload = {
@@ -229,11 +244,26 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
       <DialogTitle sx={{ fontWeight: 800 }}>
-        {mode === "add" ? "Tambah Indikator" : "Ubah Indikator"}
+        {mode === "add" ? "Tambah Indikator" : mode === "edit" ? "Ubah Indikator" : "Detail Indikator"}
       </DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <Grid container spacing={2.5} sx={{ pt: 1 }}>
+            {isDetail && (
+              <Grid size={{ xs: 12, md: 12 }}>
+                <FormControl variant="standard" sx={{ width: "100%" }}>
+                  <FormLabel>Status Penugasan</FormLabel>
+                  <FormGroup sx={{ mt: 1 }}>
+                    <BaseInputText
+                      variant="outlined"
+                      value={getStatusLabel(selectedIndicator?.status)}
+                      disabled
+                    />
+                  </FormGroup>
+                </FormControl>
+              </Grid>
+            )}
+
             <Grid size={{ xs: 12, md: 6 }}>
               <FormTextField
                 control={control}
@@ -241,6 +271,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                 label="Nama Indikator"
                 placeholder="Contoh: Jumlah Publikasi"
                 required
+                disabled={isDetail}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
@@ -254,6 +285,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                   { value: "PENGEMBANGAN", label: "PENGEMBANGAN" },
                 ]}
                 required
+                disabled={isDetail}
               />
             </Grid>
 
@@ -264,6 +296,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                 label="UNIT"
                 options={myUnitOptions}
                 required
+                disabled={isDetail}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
@@ -273,6 +306,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                 label="Satuan"
                 options={unitOptions}
                 required
+                disabled={isDetail}
               />
             </Grid>
 
@@ -283,6 +317,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                 label="PIC"
                 options={picOptions}
                 required
+                disabled={isDetail}
               />
             </Grid>
 
@@ -304,6 +339,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                           placeholder="Contoh: 10.000.000"
                           error={fieldState.invalid}
                           helperText={fieldState.error?.message}
+                          disabled={isDetail}
                           onChange={(e) => {
                             const formatted = formatRupiah(e.target.value);
                             field.onChange(formatted);
@@ -332,6 +368,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                 label="Target Q1"
                 type="number"
                 required
+                disabled={isDetail}
               />
             </Grid>
             <Grid size={{ xs: 6, sm: 3 }}>
@@ -341,6 +378,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                 label="Target Q2"
                 type="number"
                 required
+                disabled={isDetail}
               />
             </Grid>
             <Grid size={{ xs: 6, sm: 3 }}>
@@ -350,6 +388,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                 label="Target Q3"
                 type="number"
                 required
+                disabled={isDetail}
               />
             </Grid>
             <Grid size={{ xs: 6, sm: 3 }}>
@@ -359,6 +398,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                 label="Target Q4"
                 type="number"
                 required
+                disabled={isDetail}
               />
             </Grid>
 
@@ -372,6 +412,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                       <FormUploadField
                         label="Proposal"
                         name="propsal"
+                        disabled={isDetail}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) onChange(file);
@@ -394,6 +435,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                       <FormUploadField
                         label="RAB"
                         name="rab"
+                        disabled={isDetail}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) onChange(file);
@@ -412,18 +454,26 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
           </Grid>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleClose} color="inherit" sx={{ fontWeight: 700 }}>
-            Batal
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            disabled={isPending}
-            sx={{ fontWeight: 700 }}
-          >
-            {isPending ? "Menyimpan..." : "Simpan"}
-          </Button>
+          {isDetail ? (
+            <Button onClick={handleClose} variant="contained" color="primary" sx={{ fontWeight: 700 }}>
+              Tutup
+            </Button>
+          ) : (
+            <>
+              <Button onClick={handleClose} color="inherit" sx={{ fontWeight: 700 }}>
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={isPending}
+                sx={{ fontWeight: 700 }}
+              >
+                {isPending ? "Menyimpan..." : "Simpan"}
+              </Button>
+            </>
+          )}
         </DialogActions>
       </form>
     </Dialog>

@@ -79,6 +79,7 @@ interface Props {
   uploadDesc?: string;
   isV2?: boolean;
   onRemove?: () => void;
+  disabled?: boolean;
 }
 
 const FormUploadField = ({
@@ -93,16 +94,17 @@ const FormUploadField = ({
   value,
   isV2 = false,
   onRemove,
+  disabled = false,
 }: Props) => {
   return (
-    <FormControl required={required} fullWidth>
+    <FormControl required={required} fullWidth disabled={disabled}>
       <FormLabel htmlFor={name} error={!!error} required={required} sx={{ mb: 1 }}>
         {label}
       </FormLabel>
       {isV2 ? (
         <UploadContainer
           as="label"
-          sx={{ padding: value ? 2 : 4, textAlign: value ? "left" : "center" }}
+          sx={{ padding: value ? 2 : 4, textAlign: value ? "left" : "center", opacity: disabled ? 0.6 : 1, pointerEvents: disabled ? "none" : "auto" }}
         >
           {value ? (
             <ImageWrapper>
@@ -117,9 +119,11 @@ const FormUploadField = ({
                   borderRadius: 8,
                 }}
               />
-              <RemoveButton size="small" onClick={onRemove}>
-                <RestoreFromTrashOutlined fontSize="small" />
-              </RemoveButton>
+              {!disabled && (
+                <RemoveButton size="small" onClick={onRemove}>
+                  <RestoreFromTrashOutlined fontSize="small" />
+                </RemoveButton>
+              )}
             </ImageWrapper>
           ) : (
             <>
@@ -132,6 +136,7 @@ const FormUploadField = ({
                 type="file"
                 onChange={onChange}
                 accept={acceptFormat}
+                disabled={disabled}
               />
             </>
           )}
@@ -139,9 +144,9 @@ const FormUploadField = ({
       ) : (
         // )}
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Upload error={error} component="label" variant="contained">
+          <Upload error={error} component="label" variant="contained" disabled={disabled}>
             Browser
-            <VisuallyHiddenInput id={name} type="file" onChange={onChange} accept={acceptFormat} />
+            <VisuallyHiddenInput id={name} type="file" onChange={onChange} accept={acceptFormat} disabled={disabled} />
           </Upload>
 
           <HelperText>{value}</HelperText>

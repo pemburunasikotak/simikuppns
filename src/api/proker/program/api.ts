@@ -59,3 +59,8 @@ export const exportProkerExcel = async (year: string | number, type: string): Pr
   });
   return data;
 };
+
+export const finalisasiIndicators = async (year: string | number = 2025): Promise<{ isSuccess: boolean; message?: string; data?: unknown }> => {
+  const { data } = await prokerAxiosInstance.patch(`/api/v1/indicators/change-to-in-progress/${year}`);
+  return data;
+};

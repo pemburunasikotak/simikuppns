@@ -14,7 +14,7 @@ import {
   CircularProgress,
   MenuItem,
 } from "@mui/material";
-import { AddOutlined, DeleteOutlined, FileDownloadOutlined } from "@mui/icons-material";
+import { AddOutlined, CheckCircleOutlined, DeleteOutlined, FileDownloadOutlined } from "@mui/icons-material";
 import { GridColDef } from "@mui/x-data-grid";
 import { useNavigate } from "react-router";
 import { useSnackbar } from "notistack";
@@ -30,6 +30,7 @@ import { createPaginationInfo } from "@/utils/data-table";
 import ActionButtonTable from "@/app/_components/ui/action-button-table";
 import useModal from "@/app/_components/ui/modal";
 import useDeleteProgram from "./_hooks/use-delete-program";
+import useFinalisasiIndicators from "./_hooks/use-finalisasi-indicators";
 import { ProkerSessionUser } from "@/libs/localstorage/proker-session";
 
 
@@ -37,6 +38,7 @@ const ProgramPage: FC = (): ReactElement => {
   const navigate = useNavigate();
   const modal = useModal();
   const deleteProgram = useDeleteProgram();
+  const finalisasiMutation = useFinalisasiIndicators();
   const { enqueueSnackbar } = useSnackbar();
 
   const [filter, setFilter] = useState<Record<string, unknown>>({ per_page: 10 });
@@ -49,6 +51,9 @@ const ProgramPage: FC = (): ReactElement => {
   const [selectedYear, setSelectedYear] = useState<number | string>(new Date().getFullYear());
   const [selectedType, setSelectedType] = useState<string>("USULAN");
   const [isExporting, setIsExporting] = useState(false);
+
+  const [openFinalisasiModal, setOpenFinalisasiModal] = useState(false);
+  const [finalisasiYear, setFinalisasiYear] = useState<number | string>(new Date().getFullYear());
 
   const user = ProkerSessionUser.get()?.user;
   const userRoleKeys = user?.roles?.map((r: { key: string }) => r.key) || [];
@@ -84,6 +89,26 @@ const ProgramPage: FC = (): ReactElement => {
     } finally {
       setIsExporting(false);
     }
+  };
+
+  const handleFinalisasi = () => {
+    if (!finalisasiYear) {
+      enqueueSnackbar("Masukkan tahun terlebih dahulu", { variant: "warning" });
+      return;
+    }
+    finalisasiMutation.mutate(finalisasiYear, {
+      onSuccess: () => {
+        enqueueSnackbar(`Berhasil melakukan finalisasi indikator tahun ${finalisasiYear}`, { variant: "success" });
+        setOpenFinalisasiModal(false);
+      },
+      onError: (err: unknown) => {
+        const errorObj = err as { response?: { data?: { message?: string } } };
+        enqueueSnackbar(
+          errorObj?.response?.data?.message || "Gagal melakukan finalisasi indikator",
+          { variant: "error" }
+        );
+      },
+    });
   };
 
   const formatValue = (value?: unknown) =>
@@ -196,6 +221,16 @@ const ProgramPage: FC = (): ReactElement => {
                   Unduh Excel
                 </Button>,
                 <Button
+                  key="finalisasi"
+                  variant="outlined"
+                  color="success"
+                  startIcon={<CheckCircleOutlined />}
+                  onClick={() => setOpenFinalisasiModal(true)}
+                  disabled={finalisasiMutation.isPending}
+                >
+                  Finalisasi
+                </Button>,
+                <Button
                   key="add"
                   variant="contained"
                   startIcon={<AddOutlined />}
@@ -266,6 +301,41 @@ const ProgramPage: FC = (): ReactElement => {
             startIcon={isExporting ? <CircularProgress size={20} color="inherit" /> : <FileDownloadOutlined />}
           >
             {isExporting ? "Mengunduh..." : "Unduh Excel"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Dialog Finalisasi Indikator ── */}
+      <Dialog open={openFinalisasiModal} onClose={() => setOpenFinalisasiModal(false)} maxWidth="xs" fullWidth>
+        <DialogTitle fontWeight="bold">Finalisasi Indikator</DialogTitle>
+        <Divider />
+        <DialogContent dividers>
+          <Stack spacing={2}>
+            {/* <Typography variant="body2" color="text.secondary">
+              Apakah Anda yakin ingin melakukan finalisasi indikator untuk tahun {finalisasiYear || "..."}?
+            </Typography> */}
+            <TextField
+              label="Tahun"
+              type="number"
+              value={finalisasiYear}
+              onChange={(e) => setFinalisasiYear(e.target.value)}
+              fullWidth
+              placeholder="Contoh: 2025"
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, bgcolor: "grey.50" }}>
+          <Button onClick={() => setOpenFinalisasiModal(false)} color="inherit" disabled={finalisasiMutation.isPending}>
+            Batal
+          </Button>
+          <Button
+            onClick={handleFinalisasi}
+            variant="contained"
+            color="success"
+            disabled={finalisasiMutation.isPending}
+            startIcon={finalisasiMutation.isPending ? <CircularProgress size={20} color="inherit" /> : <CheckCircleOutlined />}
+          >
+            {finalisasiMutation.isPending ? "Memproses..." : "Finalisasi"}
           </Button>
         </DialogActions>
       </Dialog>

@@ -24,7 +24,7 @@ const Button = styled(MuiButton)(() => ({
   minWidth: "auto",
 }));
 
-const ActionButtonTable = ({ items }: Props) => {
+const ActionButtonTable = ({ items = [] }: Props) => {
   const itemColor: Record<ItemType, ButtonProps["color"]> = {
     detail: "info",
     delete: "error",

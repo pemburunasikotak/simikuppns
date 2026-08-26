@@ -31,13 +31,13 @@ export default function MasterUnitPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [filter, setFilter] = useState<Record<string, unknown>>({ per_page: 10 });
-  
+
   const queryParams = {
     ...filter,
     page: filter.page ? Number(filter.page) : 1,
     limit: filter.per_page ? Number(filter.per_page) : 10,
   };
-  
+
   const query = useGetProkerMasterUnits(queryParams);
   const createMutation = useCreateProkerMasterUnit();
   const updateMutation = useUpdateProkerMasterUnit();
@@ -81,23 +81,23 @@ export default function MasterUnitPage() {
     if (selectedUnit) {
       updateMutation.mutate({ id: selectedUnit.id, payload: formData }, {
         onSuccess: () => {
-          enqueueSnackbar("Master Unit berhasil diperbarui", { variant: "success" });
+          enqueueSnackbar("Master satuan berhasil diperbarui", { variant: "success" });
           setOpenModal(false);
         },
         onError: (err: unknown) => {
           const error = err as { response?: { data?: { message?: string } } };
-          enqueueSnackbar(error?.response?.data?.message || "Gagal memperbarui master unit", { variant: "error" });
+          enqueueSnackbar(error?.response?.data?.message || "Gagal memperbarui master satuan", { variant: "error" });
         }
       });
     } else {
       createMutation.mutate(formData, {
         onSuccess: () => {
-          enqueueSnackbar("Master Unit berhasil ditambahkan", { variant: "success" });
+          enqueueSnackbar("Master satuan berhasil ditambahkan", { variant: "success" });
           setOpenModal(false);
         },
         onError: (err: unknown) => {
           const error = err as { response?: { data?: { message?: string } } };
-          enqueueSnackbar(error?.response?.data?.message || "Gagal menambahkan master unit", { variant: "error" });
+          enqueueSnackbar(error?.response?.data?.message || "Gagal menambahkan master satuan", { variant: "error" });
         }
       });
     }
@@ -107,12 +107,12 @@ export default function MasterUnitPage() {
     if (selectedUnit) {
       deleteMutation.mutate(selectedUnit.id, {
         onSuccess: () => {
-          enqueueSnackbar("Master Unit berhasil dihapus", { variant: "success" });
+          enqueueSnackbar("Master satuan berhasil dihapus", { variant: "success" });
           setOpenDelete(false);
         },
         onError: (err: unknown) => {
           const error = err as { response?: { data?: { message?: string } } };
-          enqueueSnackbar(error?.response?.data?.message || "Gagal menghapus master unit", { variant: "error" });
+          enqueueSnackbar(error?.response?.data?.message || "Gagal menghapus master satuan", { variant: "error" });
         }
       });
     }
@@ -129,7 +129,7 @@ export default function MasterUnitPage() {
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
-        enqueueSnackbar("Master Unit berhasil diexport", { variant: "success" });
+        enqueueSnackbar("Master satuan berhasil diexport", { variant: "success" });
       },
       onError: () => {
         enqueueSnackbar("Gagal melakukan export", { variant: "error" });
@@ -143,7 +143,7 @@ export default function MasterUnitPage() {
 
     importMutation.mutate(file, {
       onSuccess: () => {
-        enqueueSnackbar("Master Unit berhasil diimport", { variant: "success" });
+        enqueueSnackbar("Master satuan berhasil diimport", { variant: "success" });
         if (fileInputRef.current) fileInputRef.current.value = "";
       },
       onError: (err: unknown) => {
@@ -155,12 +155,13 @@ export default function MasterUnitPage() {
   };
 
   const columns: GridColDef<TProkerMasterUnit>[] = [
-    { field: "name", headerName: "Nama Unit", minWidth: 200, flex: 1 },
+    { field: "name", headerName: "Nama Satuan", minWidth: 200, flex: 1 },
     { field: "type", headerName: "Tipe", minWidth: 200, flex: 1 },
-    { field: "createdAt", headerName: "Dibuat Pada", minWidth: 200, valueFormatter: (value?: string) => {
+    {
+      field: "createdAt", headerName: "Dibuat Pada", minWidth: 200, valueFormatter: (value?: string) => {
         if (!value) return "-";
         return new Date(value).toLocaleString();
-      } 
+      }
     },
     {
       field: "actions",
@@ -192,14 +193,14 @@ export default function MasterUnitPage() {
     <Page
       breadcrumbs={[
         {
-          label: "Master Unit",
+          label: "Master satuan",
           path: "/proker/master-unit",
         },
       ]}
       topPage={
         <Filter
           variants={["search"]}
-          labelSearch={"Cari Master Unit..."}
+          labelSearch={"Cari Master satuan..."}
           defaultValue={{
             search_value: filter.search || filter.search_value,
           }}
@@ -221,10 +222,10 @@ export default function MasterUnitPage() {
               disabled={importMutation.isPending}
             >
               Import
-              <input 
-                type="file" 
-                hidden 
-                ref={fileInputRef} 
+              <input
+                type="file"
+                hidden
+                ref={fileInputRef}
                 accept=".xlsx, .xls"
                 onChange={handleImport}
               />
@@ -256,7 +257,7 @@ export default function MasterUnitPage() {
       <Dialog open={openModal} onClose={() => setOpenModal(false)} maxWidth="sm" fullWidth>
         <form onSubmit={handleSubmit}>
           <DialogTitle fontWeight="bold">
-            {selectedUnit ? "Edit Master Unit" : "Tambah Master Unit"}
+            {selectedUnit ? "Edit Master satuan" : "Tambah Master satuan"}
           </DialogTitle>
           <Divider />
           <DialogContent dividers>
@@ -302,7 +303,7 @@ export default function MasterUnitPage() {
         <Divider />
         <DialogContent dividers>
           <Typography>
-            Apakah Anda yakin ingin menghapus master unit <strong>{selectedUnit?.name}</strong>?
+            Apakah Anda yakin ingin menghapus master satuan <strong>{selectedUnit?.name}</strong>?
           </Typography>
         </DialogContent>
         <DialogActions sx={{ p: 2, bgcolor: 'grey.50' }}>

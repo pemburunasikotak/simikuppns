@@ -11,7 +11,6 @@ import {
   DashboardOutlined,
   CheckCircleOutline,
   PlayCircleOutline,
-  WarningAmberOutlined,
   AccountBalanceWalletOutlined
 } from "@mui/icons-material";
 import { useGetProkerDashboard } from "./_hooks/use-get-dashboard";
@@ -41,14 +40,6 @@ export default function ProkerDashboardPage() {
       </Box>
     );
   }
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
-  };
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -104,6 +95,43 @@ export default function ProkerDashboardPage() {
             <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <Box>
                 <Typography color="textSecondary" gutterBottom variant="subtitle2" fontWeight="bold">
+                  REALISASI ANGGARAN
+                </Typography>
+                <Typography variant="h3" component="div" fontWeight="bold" color="primary.main">
+                  {data?.totalBudget || 0}
+                </Typography>
+                <Box sx={{ mt: 4 }}>
+                  <Typography variant="body2" color="textSecondary" mb={1}>
+                    Persentase Penyelesaian Keseluruhan
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Box sx={{ width: '100%', mr: 1, bgcolor: 'grey.200', borderRadius: 5, height: 10 }}>
+                      <Box
+                        sx={{
+                          width: `${data?.completionPercentage || 0}%`,
+                          bgcolor: 'secondary.main',
+                          height: '100%',
+                          borderRadius: 5
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ minWidth: 35 }}>
+                      <Typography variant="body2" color="text.secondary" fontWeight="bold">
+                        {data?.completionPercentage || 0}%
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+              <AccountBalanceWalletOutlined sx={{ color: 'primary.main', fontSize: 40, opacity: 0.2 }} />
+            </CardContent>
+          </Card>
+        </Grid>
+        {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Card sx={{ height: '100%', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
+            <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Box>
+                <Typography color="textSecondary" gutterBottom variant="subtitle2" fontWeight="bold">
                   TERTUNDA
                 </Typography>
                 <Typography variant="h3" component="div" fontWeight="bold" color="warning.main">
@@ -113,8 +141,8 @@ export default function ProkerDashboardPage() {
               <WarningAmberOutlined sx={{ color: 'warning.main', fontSize: 40, opacity: 0.2 }} />
             </CardContent>
           </Card>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
+        </Grid> */}
+        {/* <Grid size={{ xs: 12, md: 6 }}>
           <Card sx={{ height: '100%', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -122,30 +150,8 @@ export default function ProkerDashboardPage() {
                 <Typography variant="h6" fontWeight="bold">Total Anggaran</Typography>
               </Box>
               <Typography variant="h4" color="text.primary" fontWeight="bold">
-                {formatCurrency(data?.totalBudget || 0)}
+                {formatCurrency(data?.masterBudget || 0)}
               </Typography>
-              <Box sx={{ mt: 4 }}>
-                <Typography variant="body2" color="textSecondary" mb={1}>
-                  Persentase Penyelesaian Keseluruhan
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box sx={{ width: '100%', mr: 1, bgcolor: 'grey.200', borderRadius: 5, height: 10 }}>
-                    <Box
-                      sx={{
-                        width: `${data?.completionPercentage || 0}%`,
-                        bgcolor: 'secondary.main',
-                        height: '100%',
-                        borderRadius: 5
-                      }}
-                    />
-                  </Box>
-                  <Box sx={{ minWidth: 35 }}>
-                    <Typography variant="body2" color="text.secondary" fontWeight="bold">
-                      {data?.completionPercentage || 0}%
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
             </CardContent>
           </Card>
         </Grid>
@@ -164,7 +170,7 @@ export default function ProkerDashboardPage() {
               )}
             </CardContent>
           </Card>
-        </Grid>
+        </Grid> */}
       </Grid>
 
       {isAdmin && <StructureView />}

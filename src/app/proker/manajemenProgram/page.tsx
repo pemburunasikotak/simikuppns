@@ -63,7 +63,7 @@ const ManajemenProgramPage: FC = (): ReactElement => {
       topPage={
         <Filter
           variants={["search"]}
-          labelSearch={"Program..."}
+          labelSearch={"Cari Program..."}
           defaultValue={{
             search_value: filter.search || filter.search_value,
           }}

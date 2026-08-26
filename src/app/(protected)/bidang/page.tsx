@@ -187,7 +187,7 @@ const BidangListPage: FC = (): ReactElement => {
       topPage={
         <Filter
           variants={["search"]}
-          labelSearch={"Cari bidang..."}
+          labelSearch={"bidang..."}
           defaultValue={{
             search_value: filters.search || filters.search_value,
           }}

@@ -108,7 +108,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   });
 
   const selectedCategory = watch("category");
-  const showBudgetAndFiles = selectedCategory === "TUSI" || selectedCategory === "PENGEMBANGAN";
+  const showBudgetAndFiles = selectedCategory === "RUTIN" || selectedCategory === "PENGEMBANGAN";
 
   const selectedUnitId = watch("unitId");
   const { data: usersData } = useGetUnitUsers(selectedUnitId, { limit: 50 });
@@ -192,7 +192,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
 
   const onSubmit = (data: FormData) => {
     if (isDetail) return;
-    const isTusiOrPengembangan = data.category === "TUSI" || data.category === "PENGEMBANGAN";
+    const isRutinOrPengembangan = data.category === "RUTIN" || data.category === "PENGEMBANGAN";
 
     const fullPayload: import("@/api/proker/manajemenProgram/type").TDefaultProgramIndicatorPayload = {
       name: data.name,
@@ -206,9 +206,9 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
       targetQ3: data.targetQ3 !== undefined && data.targetQ3 !== null ? Number(data.targetQ3) : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ3 || 0) : 0),
       targetQ4: data.targetQ4 !== undefined && data.targetQ4 !== null ? Number(data.targetQ4) : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ4 || 0) : 0),
       status: mode === "edit" && selectedIndicator ? selectedIndicator.status || "DRAFT" : "DRAFT",
-      budget: isTusiOrPengembangan && data.budget ? Number(data.budget.replace(/[^0-9]/g, "")) : 0,
+      budget: isRutinOrPengembangan && data.budget ? Number(data.budget.replace(/[^0-9]/g, "")) : 0,
       picIds: data.picIds || [],
-      ...(isTusiOrPengembangan ? { propsal: data.propsal, rab: data.rab } : {}),
+      ...(isRutinOrPengembangan ? { propsal: data.propsal, rab: data.rab } : {}),
     };
 
     if (mode === "add") {
@@ -410,7 +410,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                     control={control}
                     render={({ field: { onChange, value }, fieldState: { error } }) => (
                       <FormUploadField
-                        label="Proposal"
+                        label="TOR"
                         name="propsal"
                         disabled={isDetail}
                         onChange={(e) => {

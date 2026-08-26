@@ -29,6 +29,7 @@ import { paths } from "@/commons/constants/paths";
 
 import UsersTab from "./_components/users-tab";
 import IKUTab from "./_components/iku-tab";
+import ProgramTab from "./_components/program-tab";
 import useGetUnitDetails from "./_hooks/use-get-unit-details";
 import { useUpdateProkerUnit } from "../_hooks/use-update-unit";
 import { useDeleteProkerUnit } from "../_hooks/use-delete-unit";
@@ -152,11 +153,13 @@ const UnitDetailPage: FC = (): ReactElement => {
         <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)}>
           <Tab label="Anggota Unit" />
           <Tab label="IKU Unit" />
+          <Tab label="Program" />
         </Tabs>
       </Box>
 
       <UsersTab unitId={unitId} value={tabValue} index={0} />
       <IKUTab unitId={unitId} value={tabValue} index={1} />
+      <ProgramTab unitId={unitId} value={tabValue} index={2} />
 
       {/* ─── Dialog Edit Unit ────────────────────────────────────────────── */}
       <Dialog

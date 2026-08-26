@@ -108,7 +108,7 @@ const Filter = ({
                 value={field.value || ""}
                 onChange={field.onChange}
                 variant="outlined"
-                placeholder={`Cari ${labelSearch}`}
+                placeholder={`${labelSearch}`}
                 fullWidth
                 slotProps={{
                   input: {

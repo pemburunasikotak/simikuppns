@@ -189,7 +189,7 @@ const MOCK_PRODI_REALIZATIONS: TProdiRealizationItem[] = [
 
 const IKPStructurePage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar();
-  
+
   // State
   const [selectedYear] = useState<number>(2026);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -223,7 +223,7 @@ const IKPStructurePage: React.FC = () => {
   // Construct hierarchy tree based on component code structure
   const treeData = useMemo(() => {
     const nodeMap: Record<string, TreeNode> = {};
-    
+
     // 1. Create component nodes
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     componentsList.forEach((comp: any) => {
@@ -237,16 +237,16 @@ const IKPStructurePage: React.FC = () => {
         children: []
       };
     });
-    
+
     const roots: TreeNode[] = [];
-    
+
     // 2. Link children to parents based on dot notation
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     componentsList.forEach((comp: any) => {
       const node = nodeMap[comp.code];
       const code = comp.code;
       const lastDotIndex = code.lastIndexOf('.');
-      
+
       if (lastDotIndex > 0) {
         const parentCode = code.substring(0, lastDotIndex);
         const parentNode = nodeMap[parentCode];
@@ -285,10 +285,10 @@ const IKPStructurePage: React.FC = () => {
         return nodes
           .map(node => {
             const filteredChildren = filterTree(node.children);
-            const matchesSearch = 
-              node.code.toLowerCase().includes(searchQuery.toLowerCase()) || 
+            const matchesSearch =
+              node.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
               node.name.toLowerCase().includes(searchQuery.toLowerCase());
-            
+
             if (matchesSearch || filteredChildren.length > 0) {
               return {
                 ...node,
@@ -299,10 +299,10 @@ const IKPStructurePage: React.FC = () => {
           })
           .filter((n): n is TreeNode => n !== null);
       };
-      
+
       return filterTree(roots);
     }
-    
+
     return roots;
   }, [componentsList, searchQuery]);
 
@@ -434,12 +434,12 @@ const IKPStructurePage: React.FC = () => {
             my: 0.2,
             transition: "all 0.2s ease",
             borderLeft: isSelected ? "4px solid #6366f1" : "4px solid transparent",
-            backgroundColor: isSelected 
-              ? alpha("#6366f1", 0.08) 
+            backgroundColor: isSelected
+              ? alpha("#6366f1", 0.08)
               : "transparent",
             "&:hover": {
-              backgroundColor: isSelected 
-                ? alpha("#6366f1", 0.12) 
+              backgroundColor: isSelected
+                ? alpha("#6366f1", 0.12)
                 : alpha("#000", 0.03),
             }
           }}
@@ -731,7 +731,7 @@ const IKPStructurePage: React.FC = () => {
                           Informasi Pengisian
                         </Typography>
                         <Typography variant="caption" sx={{ color: "#475569", display: "block", mt: 0.5 }}>
-                          Anda sedang mengedit nilai target dan realisasi program studi IKP tahun <strong>{selectedYear}</strong>. 
+                          Anda sedang mengedit nilai target dan realisasi program studi IKP tahun <strong>{selectedYear}</strong>.
                           Capaian dan total akan terhitung secara otomatis. Jangan lupa menekan tombol "Simpan Realisasi" untuk menyimpan perubahan.
                         </Typography>
                       </Box>

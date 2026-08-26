@@ -1,5 +1,5 @@
 import prokerAxiosInstance from "@/libs/axios/proker-config";
-import { TProkerUnit, TProkerUnitPayload, TProkerUnitResponse } from "./type";
+import { TProkerUnit, TProkerUnitPayload, TProkerUnitResponse, TUnitProgramItem } from "./type";
 
 export const getProkerUnits = async (params?: Record<string, unknown>): Promise<TProkerUnitResponse['data']> => {
   const { data } = await prokerAxiosInstance.get("/api/v1/units", { params });
@@ -44,3 +44,9 @@ export const getUnitUsers = async (unitId: string, params?: Record<string, unkno
   const { data } = await prokerAxiosInstance.get(`/api/v1/units/${unitId}/users`, { params });
   return data;
 };
+
+export const getUnitPrograms = async (unitId: string, params?: Record<string, unknown>): Promise<TUnitProgramItem[]> => {
+  const { data } = await prokerAxiosInstance.get(`/api/v1/units/${unitId}/programs`, { params });
+  return data?.data || data;
+};
+

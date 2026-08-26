@@ -29,13 +29,13 @@ export default function UnitPage() {
   const { enqueueSnackbar } = useSnackbar();
 
   const [filter, setFilter] = useState<Record<string, unknown>>({ per_page: 10 });
-  
+
   const queryParams = {
     ...filter,
     page: filter.page ? Number(filter.page) : 1,
     limit: filter.per_page ? Number(filter.per_page) : 10,
   };
-  
+
   const query = useGetProkerUnits(queryParams);
   const createMutation = useCreateProkerUnit();
   const updateMutation = useUpdateProkerUnit();
@@ -164,7 +164,7 @@ export default function UnitPage() {
       topPage={
         <Filter
           variants={["search"]}
-          labelSearch={"Unit..."}
+          labelSearch={"Cari Unit..."}
           defaultValue={{
             search_value: filter.search || filter.search_value,
           }}

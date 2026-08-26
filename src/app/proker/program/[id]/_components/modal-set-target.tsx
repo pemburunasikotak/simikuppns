@@ -73,7 +73,7 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
   });
 
   const categoryValue = watch("category") || selectedIndicator?.category || "";
-  const showBudgetAndFiles = categoryValue === "TUSI" || categoryValue === "PENGEMBANGAN";
+  const showBudgetAndFiles = categoryValue === "RUTIN" || categoryValue === "PENGEMBANGAN";
 
   useEffect(() => {
     if (open && selectedIndicator) {
@@ -115,8 +115,8 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
     if (!selectedIndicator) return;
 
     const currentCat = data.category || selectedIndicator.category || "";
-    const isTusiOrPengembangan = currentCat === "TUSI" || currentCat === "PENGEMBANGAN";
-    const numericBudget = isTusiOrPengembangan && data.budget ? data.budget.replace(/[^0-9]/g, "") : "0";
+    const isRutinOrPengembangan = currentCat === "RUTIN" || currentCat === "PENGEMBANGAN";
+    const numericBudget = isRutinOrPengembangan && data.budget ? data.budget.replace(/[^0-9]/g, "") : "0";
 
     const payload: import("@/api/proker/program/type").TSetProgramIndicatorTargetPayload = {
       targetQ1: Number(data.targetQ1),
@@ -126,7 +126,7 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
       budget: numericBudget,
       picIds: data.picIds || [],
       pics: usersData?.data?.items?.filter((u: { id: string }) => data.picIds.includes(u.id)) || [],
-      ...(isTusiOrPengembangan ? { propsal: data.propsal, rab: data.rab } : {}),
+      ...(isRutinOrPengembangan ? { propsal: data.propsal, rab: data.rab } : {}),
     };
 
     setTargetMutation.mutate(
@@ -251,7 +251,7 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
                     control={control}
                     render={({ field: { onChange, value }, fieldState: { error } }) => (
                       <FormUploadField
-                        label="Proposal"
+                        label="TOR"
                         name="propsal"
                         onChange={(e) => {
                           const file = e.target.files?.[0];

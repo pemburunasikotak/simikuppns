@@ -403,7 +403,7 @@ export default function ManajemenApprovalPage() {
       topPage={
         <Filter
           variants={["search"]}
-          labelSearch={"User ID / IKU / Level..."}
+          labelSearch={"Cari User ID / IKU / Level..."}
           defaultValue={{
             search_value: filter.search || filter.search_value,
           }}
@@ -800,37 +800,37 @@ export default function ManajemenApprovalPage() {
 
                   {(selectedReviewer.user?.email ||
                     userItems.find((u) => u.id === selectedReviewer.userId)?.email) && (
-                    <>
-                      <Grid size={{ xs: 4 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          Email
-                        </Typography>
-                      </Grid>
-                      <Grid size={{ xs: 8 }}>
-                        <Typography variant="caption" fontWeight={500}>
-                          {selectedReviewer.user?.email ||
-                            userItems.find((u) => u.id === selectedReviewer.userId)?.email}
-                        </Typography>
-                      </Grid>
-                    </>
-                  )}
+                      <>
+                        <Grid size={{ xs: 4 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            Email
+                          </Typography>
+                        </Grid>
+                        <Grid size={{ xs: 8 }}>
+                          <Typography variant="caption" fontWeight={500}>
+                            {selectedReviewer.user?.email ||
+                              userItems.find((u) => u.id === selectedReviewer.userId)?.email}
+                          </Typography>
+                        </Grid>
+                      </>
+                    )}
 
                   {((selectedReviewer.user as Record<string, unknown>)?.nip ||
                     userItems.find((u) => u.id === selectedReviewer.userId)?.nip) && (
-                    <>
-                      <Grid size={{ xs: 4 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          NIP
-                        </Typography>
-                      </Grid>
-                      <Grid size={{ xs: 8 }}>
-                        <Typography variant="caption" fontWeight={500}>
-                          {String((selectedReviewer.user as Record<string, unknown>)?.nip ||
-                            userItems.find((u) => u.id === selectedReviewer.userId)?.nip)}
-                        </Typography>
-                      </Grid>
-                    </>
-                  )}
+                      <>
+                        <Grid size={{ xs: 4 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            NIP
+                          </Typography>
+                        </Grid>
+                        <Grid size={{ xs: 8 }}>
+                          <Typography variant="caption" fontWeight={500}>
+                            {String((selectedReviewer.user as Record<string, unknown>)?.nip ||
+                              userItems.find((u) => u.id === selectedReviewer.userId)?.nip)}
+                          </Typography>
+                        </Grid>
+                      </>
+                    )}
 
                   {selectedReviewer.level && (
                     <>

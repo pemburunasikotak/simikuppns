@@ -40,7 +40,7 @@ export const getMyUnits = async (params?: Record<string, unknown>): Promise<TMyU
   return data?.data || data;
 };
 
-export const getUnitUsers = async (unitId: string, params?: Record<string, unknown>): Promise<{ data: { items: { id: string; name: string; [key: string]: unknown }[] } }> => {
+export const getUnitUsers = async (unitId: string, params?: Record<string, unknown>): Promise<{ data: { items: { id: string; name: string;[key: string]: unknown }[] } }> => {
   const { data } = await prokerAxiosInstance.get(`/api/v1/units/${unitId}/users`, { params });
   return data;
 };
@@ -49,4 +49,13 @@ export const getUnitPrograms = async (unitId: string, params?: Record<string, un
   const { data } = await prokerAxiosInstance.get(`/api/v1/units/${unitId}/programs`, { params });
   return data?.data || data;
 };
+
+export const exportProkerByUnit = async (unitId: string | number, year: string | number): Promise<Blob> => {
+  const { data } = await prokerAxiosInstance.get("/api/v1/programs/export/proker", {
+    params: { unitId, year },
+    responseType: "blob",
+  });
+  return data;
+};
+
 

@@ -13,7 +13,11 @@ export type TProkerDashboardResponse = {
   runningPrograms: number;
   completedPrograms: number;
   delayedPrograms: number;
-  masterBudget: number;
+  masterBudget: {
+    budget: number;
+    realization: number;
+    year: number;
+  };
   totalBudget: number;
   completionPercentage: number;
   programsByUnit: TProgramByUnit[];

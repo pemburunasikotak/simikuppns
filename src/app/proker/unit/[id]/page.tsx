@@ -16,8 +16,9 @@ import {
   Divider,
   TextField,
   Skeleton,
+  CircularProgress,
 } from "@mui/material";
-import { EditOutlined, DeleteOutlined } from "@mui/icons-material";
+import { EditOutlined, DeleteOutlined, FileDownloadOutlined } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,6 +34,7 @@ import ProgramTab from "./_components/program-tab";
 import useGetUnitDetails from "./_hooks/use-get-unit-details";
 import { useUpdateProkerUnit } from "../_hooks/use-update-unit";
 import { useDeleteProkerUnit } from "../_hooks/use-delete-unit";
+import { useExportProkerByUnit } from "../_hooks/use-export-unit";
 
 const unitSchema = z.object({
   name: z.string().min(1, "Nama unit wajib diisi"),
@@ -58,9 +60,14 @@ const UnitDetailPage: FC = (): ReactElement => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
+  const [openExportModal, setOpenExportModal] = useState(false);
+  const [selectedExportYear, setSelectedExportYear] = useState<number | string>(new Date().getFullYear());
+  const [isExporting, setIsExporting] = useState(false);
+
   const { data: detailData, isLoading } = useGetUnitDetails(unitId || "");
   const updateMutation = useUpdateProkerUnit();
   const deleteMutation = useDeleteProkerUnit();
+  const exportMutation = useExportProkerByUnit();
 
   const editForm = useForm<TUnitForm>({
     resolver: zodResolver(unitSchema),
@@ -96,6 +103,39 @@ const UnitDetailPage: FC = (): ReactElement => {
       navigate(paths.proker.unit);
     } catch (err) {
       enqueueSnackbar(getErrorMessage(err, "Gagal menghapus unit"), { variant: "error" });
+    }
+  };
+
+  const handleOpenExportModal = () => {
+    setSelectedExportYear(new Date().getFullYear());
+    setOpenExportModal(true);
+  };
+
+  const handleDownloadExcel = async () => {
+    if (!selectedExportYear) {
+      enqueueSnackbar("Masukkan tahun terlebih dahulu", { variant: "warning" });
+      return;
+    }
+    try {
+      setIsExporting(true);
+      const blob = await exportMutation.mutateAsync({
+        unitId,
+        year: selectedExportYear,
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `proker-export-${unitId}-${selectedExportYear}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      enqueueSnackbar("Berhasil mengunduh Excel Proker", { variant: "success" });
+      setOpenExportModal(false);
+    } catch (err) {
+      enqueueSnackbar(getErrorMessage(err, "Gagal mengunduh Excel Proker"), { variant: "error" });
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -143,6 +183,15 @@ const UnitDetailPage: FC = (): ReactElement => {
                 disabled={isLoading}
               >
                 Hapus Unit
+              </Button>
+              <Button
+                variant="outlined"
+                color="success"
+                startIcon={<FileDownloadOutlined />}
+                onClick={handleOpenExportModal}
+                disabled={isLoading}
+              >
+                Unduh
               </Button>
             </Stack>
           </Stack>
@@ -264,8 +313,44 @@ const UnitDetailPage: FC = (): ReactElement => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* ── Dialog Export Excel Proker ── */}
+      <Dialog open={openExportModal} onClose={() => setOpenExportModal(false)} maxWidth="xs" fullWidth>
+        <DialogTitle fontWeight="bold">Unduh Excel Proker</DialogTitle>
+        <Divider />
+        <DialogContent dividers>
+          <Stack spacing={2}>
+            <Typography variant="body2" color="text.secondary">
+              Masukkan tahun program kerja yang ingin diunduh format Excel.
+            </Typography>
+            <TextField
+              label="Tahun"
+              type="number"
+              value={selectedExportYear}
+              onChange={(e) => setSelectedExportYear(e.target.value)}
+              fullWidth
+              placeholder="Contoh: 2025"
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, bgcolor: "grey.50" }}>
+          <Button onClick={() => setOpenExportModal(false)} color="inherit" disabled={isExporting}>
+            Batal
+          </Button>
+          <Button
+            onClick={handleDownloadExcel}
+            variant="contained"
+            color="primary"
+            disabled={isExporting}
+            startIcon={isExporting ? <CircularProgress size={20} color="inherit" /> : <FileDownloadOutlined />}
+          >
+            {isExporting ? "Mengunduh..." : "Unduh Excel"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Page>
   );
 };
 
 export default UnitDetailPage;
+

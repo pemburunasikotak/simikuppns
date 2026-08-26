@@ -18,6 +18,17 @@ import StructureView from "./_components/structure-view";
 import { useMemo } from "react";
 import { ProkerSessionUser } from "@/libs/localstorage/proker-session";
 
+
+const formatCurrency = (amount?: number) => {
+  if (amount === undefined || amount === null) return "Rp 0";
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+
 export default function ProkerDashboardPage() {
   const { data, isLoading, isError, error } = useGetProkerDashboard();
 
@@ -98,7 +109,7 @@ export default function ProkerDashboardPage() {
                   REALISASI ANGGARAN
                 </Typography>
                 <Typography variant="h3" component="div" fontWeight="bold" color="primary.main">
-                  {data?.totalBudget || 0}
+                  {formatCurrency(data?.masterBudget?.realization || 0)}
                 </Typography>
                 <Box sx={{ mt: 4 }}>
                   <Typography variant="body2" color="textSecondary" mb={1}>
@@ -108,7 +119,7 @@ export default function ProkerDashboardPage() {
                     <Box sx={{ width: '100%', mr: 1, bgcolor: 'grey.200', borderRadius: 5, height: 10 }}>
                       <Box
                         sx={{
-                          width: `${data?.completionPercentage || 0}%`,
+                          width: `${data?.masterBudget ? ((data?.masterBudget?.realization || 0) / (data?.masterBudget?.budget || 0) * 100 || 0).toFixed(2) : 0}%`,
                           bgcolor: 'secondary.main',
                           height: '100%',
                           borderRadius: 5
@@ -117,7 +128,7 @@ export default function ProkerDashboardPage() {
                     </Box>
                     <Box sx={{ minWidth: 35 }}>
                       <Typography variant="body2" color="text.secondary" fontWeight="bold">
-                        {data?.completionPercentage || 0}%
+                        {((data?.masterBudget?.realization || 0) / (data?.masterBudget?.budget || 0) * 100 || 0).toFixed(2)}%
                       </Typography>
                     </Box>
                   </Box>

@@ -36,16 +36,17 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues, isEdit }: Props) 
     mode: "onChange",
   });
 
-  const params = useParams();
+  const routeParams = useParams();
+  const componentId = routeParams.id as string;
   const modal = useModal();
-  const targetQuery = useGetListComponentTarget({ componentId: params.id as string });
+  const targetQuery = useGetListComponentTarget({ componentId });
   const deleteTarget = useDeleteComponentTarget();
 
   const [openAddModalTarget, setOpenAddModalTarget] = useState(false);
   const [targetModalMode, setTargetModalMode] = useState<"add" | "edit" | "detail">("add");
   const [selectedTarget, setSelectedTarget] = useState<TComponentTargetItem | null>(null);
 
-  const picQuery = useGetListComponentPic(params.id as string);
+  const picQuery = useGetListComponentPic(componentId);
   const assignPic = useAssignComponentPic();
   const [openAddModalPic, setOpenAddModalPic] = useState(false);
 
@@ -54,27 +55,27 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues, isEdit }: Props) 
       field: "nip",
       headerName: "NIP",
       width: 150,
-      renderCell: (params) => params.row.user?.nip || "-",
+      renderCell: (cellParams) => cellParams.row.user?.nip || "-",
     },
     {
       field: "name",
       headerName: "Nama PIC",
       minWidth: 200,
       flex: 0.5,
-      renderCell: (params) => params.row.user?.name || "-",
+      renderCell: (cellParams) => cellParams.row.user?.name || "-",
     },
     {
       field: "email",
       headerName: "Email",
       minWidth: 250,
       flex: 1,
-      renderCell: (params) => params.row.user?.email || "-",
+      renderCell: (cellParams) => cellParams.row.user?.email || "-",
     },
     {
       field: "type",
       headerName: "Tipe",
       width: 150,
-      renderCell: (params) => params.row.user?.type || "-",
+      renderCell: (cellParams) => cellParams.row.user?.type || "-",
     },
     {
       field: "actions",
@@ -82,7 +83,7 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues, isEdit }: Props) 
       width: 100,
       sortable: false,
       filterable: false,
-      renderCell: (params) => (
+      renderCell: (cellParams) => (
         <ActionButtonTable
           items={[
             {
@@ -95,10 +96,10 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues, isEdit }: Props) 
                   onOk: () => {
                     const remainingUserIds = (picQuery.data?.data?.assignments || [])
                       .map((a) => a.userId)
-                      .filter((uid) => uid !== params.row.userId);
+                      .filter((uid) => uid !== cellParams.row.userId);
 
                     assignPic.mutate({
-                      componentId: params.id as string,
+                      componentId,
                       req: { userIds: remainingUserIds },
                     });
                   },
@@ -325,7 +326,7 @@ const ComponentForm = ({ loading, handleSubmit, defaultValues, isEdit }: Props) 
           <ModalAddPic
             open={openAddModalPic}
             onClose={() => setOpenAddModalPic(false)}
-            componentId={params.id as string}
+            componentId={componentId}
             currentPicUserIds={(picQuery.data?.data?.assignments || []).map((a) => a.userId)}
           />
         </>

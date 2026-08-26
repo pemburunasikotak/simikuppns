@@ -33,6 +33,7 @@ import {
   FactCheckOutlined,
   PriceCheckOutlined,
   AdminPanelSettingsOutlined,
+  AccountBalanceWalletOutlined,
 } from "@mui/icons-material";
 
 import { useProkerSession } from "@/app/_components/providers/proker-session";
@@ -70,6 +71,13 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
     label: "Master Satuan",
     path: paths.proker.masterUnit,
     icon: <StraightenOutlined />,
+    roles: ["admin_sim_proker"],
+  },
+  {
+    key: "proker-master-budget",
+    label: "Master Budget",
+    path: paths.proker.masterBudget,
+    icon: <AccountBalanceWalletOutlined />,
     roles: ["admin_sim_proker"],
   },
   {

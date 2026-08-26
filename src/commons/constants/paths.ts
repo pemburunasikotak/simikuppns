@@ -120,6 +120,7 @@ export const paths = {
     dashboard: "/proker/dashboard",
     unit: "/proker/unit",
     masterUnit: "/proker/master-unit",
+    masterBudget: "/proker/master-budget",
     integrasi: "/proker/integrasi",
     output: "/proker/output",
     program: "/proker/program",

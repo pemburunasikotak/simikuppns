@@ -5,7 +5,7 @@ import { GridColDef } from "@mui/x-data-grid";
 import dayjs from "dayjs";
 import { useState } from "react";
 
-import { Page } from "@/app/_components/ui";
+import { Page, DocumentCell } from "@/app/_components/ui";
 import DataTable from "@/app/_components/ui/data-table";
 import useGetIndicatorRealizations from "./_hooks/use-get-indicator-realizations";
 import ModalAddRealization from "./_components/modal-add-realization";
@@ -26,6 +26,20 @@ const IndicatorRealizationPage = () => {
     { field: "month", headerName: "Bulan", width: 100 },
     { field: "realization", headerName: "Realisasi", width: 150 },
     { field: "remark", headerName: "Catatan", minWidth: 200, flex: 1 },
+    {
+      field: "documents",
+      headerName: "Dokumen",
+      width: 150,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const row = params.row as any;
+        const docs = row.documentIds || row.documents || (row.documentUrl ? [row.documentUrl] : []);
+        if (!docs || docs.length === 0) return "-";
+        return <DocumentCell documents={Array.isArray(docs) ? docs : [docs]} title={`Dokumen Realisasi Bulan ${row.month}`} />;
+      },
+    },
     { 
       field: "createdAt", 
       headerName: "Dibuat Pada", 

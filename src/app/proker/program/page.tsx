@@ -23,7 +23,7 @@ import { useGetPrograms } from "./_hooks/use-get-list-program";
 import { TProkerProgram } from "@/api/proker/program/type";
 import { exportProkerExcel } from "@/api/proker/program/api";
 
-import { Page } from "@/app/_components/ui";
+import { Page, DocumentCell, DocumentPreviewModal } from "@/app/_components/ui";
 import Filter from "@/app/_components/ui/filter";
 import DataTable from "@/app/_components/ui/data-table";
 import { createPaginationInfo } from "@/utils/data-table";
@@ -54,6 +54,12 @@ const ProgramPage: FC = (): ReactElement => {
 
   const [openFinalisasiModal, setOpenFinalisasiModal] = useState(false);
   const [finalisasiYear, setFinalisasiYear] = useState<number | string>(new Date().getFullYear());
+
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [previewDocs, setPreviewDocs] = useState<unknown[]>([]);
+  const [previewTitle, setPreviewTitle] = useState("Pratinjau Dokumen");
+
+  console.log('setPreviewDocs', setPreviewDocs, setPreviewTitle)
 
   const user = ProkerSessionUser.get()?.user;
   const userRoleKeys = user?.roles?.map((r: { key: string }) => r.key) || [];
@@ -141,6 +147,28 @@ const ProgramPage: FC = (): ReactElement => {
             </Stack>
           </Tooltip>
         );
+      },
+    },
+    {
+      field: "documents",
+      headerName: "Dokumen",
+      width: 160,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => {
+        const indicators = params.row.indicators || [];
+        const allDocs: { label: string; doc: unknown }[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        indicators.forEach((ind: any) => {
+          const proposalDoc = ind.proposalURL || ind.proposalDocument || ind.propsal || ind.proposalDocumentId;
+          const rabDoc = ind.rabURL || ind.rabDocument || ind.rab || ind.rabDocumentId;
+          if (proposalDoc) allDocs.push({ label: "TOR", doc: proposalDoc });
+          if (rabDoc) allDocs.push({ label: "RAB", doc: rabDoc });
+        });
+
+        if (allDocs.length === 0) return "-";
+
+        return <DocumentCell documents={allDocs} title={`Dokumen Program: ${params.row.title}`} />;
       },
     },
     {
@@ -339,6 +367,13 @@ const ProgramPage: FC = (): ReactElement => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <DocumentPreviewModal
+        open={previewModalOpen}
+        onClose={() => setPreviewModalOpen(false)}
+        title={previewTitle}
+        documents={previewDocs}
+      />
     </Page>
   );
 };

@@ -66,6 +66,8 @@ const schema = z.object({
   budget: z.string().optional(),
   propsal: z.any().optional(),
   rab: z.any().optional(),
+  proposalDocumentId: z.string().optional(),
+  rabDocumentId: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -105,6 +107,8 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
       budget: "",
       propsal: "",
       rab: "",
+      proposalDocumentId: "",
+      rabDocumentId: "",
     },
   });
 
@@ -149,7 +153,9 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
           targetQ4: selectedIndicator.targetQ4 || 0,
           budget: ((selectedIndicator as unknown) as { budget?: string }).budget || "",
           propsal: ((selectedIndicator as unknown) as { propsal?: string }).propsal || "",
+          proposalDocumentId: ((selectedIndicator as unknown) as { proposalDocumentId?: string }).proposalDocumentId || "",
           rab: ((selectedIndicator as unknown) as { rab?: string }).rab || "",
+          rabDocumentId: ((selectedIndicator as unknown) as { rabDocumentId?: string }).rabDocumentId || "",
         });
       } else {
         reset({
@@ -166,6 +172,8 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
           budget: "",
           propsal: "",
           rab: "",
+          proposalDocumentId: "",
+          rabDocumentId: "",
         });
       }
     }
@@ -236,7 +244,12 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
       status: mode === "edit" && selectedIndicator ? selectedIndicator.status || "DRAFT" : "DRAFT",
       budget: isRutinOrPengembangan && data.budget ? Number(data.budget.replace(/[^0-9]/g, "")) : 0,
       picIds: data.picIds || [],
-      ...(isRutinOrPengembangan ? { propsal: proposalVal, rab: rabVal } : {}),
+      ...(isRutinOrPengembangan ? {
+        propsal: proposalVal,
+        rab: rabVal,
+        rabDocumentId: rabVal,
+        proposalDocumentId: proposalVal,
+      } : {}),
     };
 
     if (mode === "add") {

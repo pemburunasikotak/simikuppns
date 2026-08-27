@@ -12,6 +12,7 @@ import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
 
 import DataTable from "@/app/_components/ui/data-table";
 import ActionButtonTable, { ActionButtonItem } from "@/app/_components/ui/action-button-table";
+import { DocumentCell } from "@/app/_components/ui";
 import ModalSetTarget from "./modal-set-target";
 import ModalAddIndicator from "./modal-add-indicator";
 
@@ -97,6 +98,27 @@ const IndicatorTab: FC = (): ReactElement => {
       { field: "targetQ2", headerName: "Target Q2", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
       { field: "targetQ3", headerName: "Target Q3", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
       { field: "targetQ4", headerName: "Target Q4", width: 100, align: "center", headerAlign: "center", renderCell: (params) => params.value ?? 0 },
+      {
+        field: "documents",
+        headerName: "Dokumen",
+        width: 160,
+        align: "center",
+        headerAlign: "center",
+        renderCell: (params) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const row = params.row as any;
+          const proposalDoc = row.proposalURL || row.proposalDocument || row.propsal || row.proposalDocumentId;
+          const rabDoc = row.rabURL || row.rabDocument || row.rab || row.rabDocumentId;
+
+          const docs: { label: string; doc: unknown }[] = [];
+          if (proposalDoc) docs.push({ label: "TOR", doc: proposalDoc });
+          if (rabDoc) docs.push({ label: "RAB", doc: rabDoc });
+
+          if (docs.length === 0) return "-";
+
+          return <DocumentCell documents={docs} title={`Dokumen: ${row.name}`} />;
+        },
+      },
       {
         field: "action",
         headerName: "Aksi",

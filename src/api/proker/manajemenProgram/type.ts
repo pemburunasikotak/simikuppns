@@ -16,6 +16,7 @@ export type TDefaultProgramIndicator = {
   masterUnitType?: {
     id: string;
     name?: string;
+    type?: string;
     description?: string;
     createdAt?: string;
     updatedAt?: string;

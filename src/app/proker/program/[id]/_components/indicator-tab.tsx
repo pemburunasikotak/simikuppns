@@ -107,11 +107,14 @@ const IndicatorTab: FC = (): ReactElement => {
           const actionItems: ActionButtonItem[] = [];
 
           if (params.row.status === "IN_PROGRESS") {
+            const masterUnitType = params.row.masterUnitType;
+            const unitType = typeof masterUnitType === "object" ? masterUnitType?.type : undefined;
             actionItems.push({
               key: "detail",
               type: "detail",
               onClick: () => {
-                navigate(`/proker/program/${id}/indicator/${params.row.id}`);
+                const queryStr = unitType ? `?type=${encodeURIComponent(unitType)}` : "";
+                navigate(`/proker/program/${id}/indicator/${params.row.id}${queryStr}`);
               },
             });
           }

@@ -53,6 +53,7 @@ export default function UnitPage() {
   const [openExportModal, setOpenExportModal] = useState(false);
   const [selectedExportUnitId, setSelectedExportUnitId] = useState<string | number>("");
   const [selectedExportYear, setSelectedExportYear] = useState<number | string>(new Date().getFullYear());
+  const [selectedExportType, setSelectedExportType] = useState<string>("USULAN");
   const [isExporting, setIsExporting] = useState(false);
 
   const [selectedUnit, setSelectedUnit] = useState<TProkerUnit | null>(null);
@@ -134,16 +135,21 @@ export default function UnitPage() {
       enqueueSnackbar("Masukkan tahun terlebih dahulu", { variant: "warning" });
       return;
     }
+    if (!selectedExportType) {
+      enqueueSnackbar("Pilih tipe terlebih dahulu", { variant: "warning" });
+      return;
+    }
     try {
       setIsExporting(true);
       const blob = await exportMutation.mutateAsync({
         unitId: selectedExportUnitId,
         year: selectedExportYear,
+        type: selectedExportType,
       });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `proker-export-${selectedExportUnitId}-${selectedExportYear}.xlsx`;
+      a.download = `proker-export-${selectedExportUnitId}-${selectedExportYear}-${selectedExportType}.xlsx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -338,6 +344,17 @@ export default function UnitPage() {
               fullWidth
               placeholder="Contoh: 2025"
             />
+            <TextField
+              select
+              label="Tipe"
+              value={selectedExportType}
+              onChange={(e) => setSelectedExportType(e.target.value)}
+              fullWidth
+            >
+              <MenuItem value="USULAN">USULAN</MenuItem>
+              <MenuItem value="FINAL">FINAL</MenuItem>
+              <MenuItem value="BERITA_ACARA">BERITA ACARA</MenuItem>
+            </TextField>
           </Stack>
         </DialogContent>
         <DialogActions sx={{ p: 2, bgcolor: "grey.50" }}>

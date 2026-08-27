@@ -66,6 +66,7 @@ export type TAddIndicatorRealizationPayload = {
   month: number;
   realization: number;
   remark: string;
+  documentIds?: string[];
 };
 
 export type TIndicatorRealizationItem = {

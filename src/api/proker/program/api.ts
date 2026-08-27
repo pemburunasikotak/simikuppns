@@ -37,6 +37,37 @@ export const setProgramIndicatorTarget = async (programId: string, id: string, p
   return data;
 };
 
+export const uploadProkerDocuments = async (files: File[]): Promise<string[]> => {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append("files", file);
+  });
+
+  let responseData: Record<string, unknown> | undefined;
+  try {
+    const { data } = await prokerAxiosInstance.post<Record<string, unknown>>("/api/v1/documents/upload", formData);
+    responseData = data;
+  } catch {
+    const { data } = await prokerAxiosInstance.post<Record<string, unknown>>("/api/documents/upload", formData);
+    responseData = data;
+  }
+
+  const items = (responseData?.data || responseData?.result || responseData?.items || responseData) as unknown;
+  if (Array.isArray(items)) {
+    return items
+      .map((item: unknown) => {
+        if (typeof item === "string") return item;
+        if (typeof item === "object" && item !== null) {
+          const obj = item as Record<string, unknown>;
+          return String(obj.id || obj._id || "");
+        }
+        return "";
+      })
+      .filter(Boolean);
+  }
+  return [];
+};
+
 export const addIndicatorRealization = async (programId: string, id: string, payload: import('./type').TAddIndicatorRealizationPayload): Promise<{ isSuccess: boolean; data: unknown }> => {
   const { data } = await prokerAxiosInstance.post(`/api/v1/programs/${programId}/indicators/${id}/realizations`, payload);
   return data;

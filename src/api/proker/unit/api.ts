@@ -50,12 +50,13 @@ export const getUnitPrograms = async (unitId: string, params?: Record<string, un
   return data?.data || data;
 };
 
-export const exportProkerByUnit = async (unitId: string | number, year: string | number): Promise<Blob> => {
+export const exportProkerByUnit = async (unitId: string | number, year: string | number, type?: string): Promise<Blob> => {
   const { data } = await prokerAxiosInstance.get("/api/v1/programs/export/proker", {
-    params: { unitId, year },
+    params: { unitId, year, type },
     responseType: "blob",
   });
   return data;
 };
+
 
 

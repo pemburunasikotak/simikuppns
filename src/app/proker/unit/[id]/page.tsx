@@ -16,6 +16,7 @@ import {
   Divider,
   TextField,
   Skeleton,
+  MenuItem,
   CircularProgress,
 } from "@mui/material";
 import { EditOutlined, DeleteOutlined, FileDownloadOutlined } from "@mui/icons-material";
@@ -62,6 +63,7 @@ const UnitDetailPage: FC = (): ReactElement => {
 
   const [openExportModal, setOpenExportModal] = useState(false);
   const [selectedExportYear, setSelectedExportYear] = useState<number | string>(new Date().getFullYear());
+  const [selectedExportType, setSelectedExportType] = useState<string>("USULAN");
   const [isExporting, setIsExporting] = useState(false);
 
   const { data: detailData, isLoading } = useGetUnitDetails(unitId || "");
@@ -116,16 +118,21 @@ const UnitDetailPage: FC = (): ReactElement => {
       enqueueSnackbar("Masukkan tahun terlebih dahulu", { variant: "warning" });
       return;
     }
+    if (!selectedExportType) {
+      enqueueSnackbar("Pilih tipe terlebih dahulu", { variant: "warning" });
+      return;
+    }
     try {
       setIsExporting(true);
       const blob = await exportMutation.mutateAsync({
         unitId,
         year: selectedExportYear,
+        type: selectedExportType,
       });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `proker-export-${unitId}-${selectedExportYear}.xlsx`;
+      a.download = `proker-export-${unitId}-${selectedExportYear}-${selectedExportType}.xlsx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -331,6 +338,17 @@ const UnitDetailPage: FC = (): ReactElement => {
               fullWidth
               placeholder="Contoh: 2025"
             />
+            <TextField
+              select
+              label="Tipe"
+              value={selectedExportType}
+              onChange={(e) => setSelectedExportType(e.target.value)}
+              fullWidth
+            >
+              <MenuItem value="USULAN">USULAN</MenuItem>
+              <MenuItem value="FINAL">FINAL</MenuItem>
+              <MenuItem value="BERITA_ACARA">BERITA ACARA</MenuItem>
+            </TextField>
           </Stack>
         </DialogContent>
         <DialogActions sx={{ p: 2, bgcolor: "grey.50" }}>

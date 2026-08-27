@@ -1,4 +1,4 @@
-import { useParams } from "react-router";
+import { useParams, useSearchParams } from "react-router";
 import { Box, Button, Grid, Typography } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import { GridColDef } from "@mui/x-data-grid";
@@ -13,8 +13,10 @@ import { TIndicatorRealizationItem } from "@/api/proker/program/type";
 
 const IndicatorRealizationPage = () => {
   const params = useParams();
+  const [searchParams] = useSearchParams();
   const programId = params.id as string;
   const indicatorId = params.indicatorId as string;
+  const unitType = (searchParams.get("type") || "NUMBER").toUpperCase();
 
   const [openModal, setOpenModal] = useState(false);
 
@@ -84,6 +86,7 @@ const IndicatorRealizationPage = () => {
         onClose={() => setOpenModal(false)}
         programId={programId}
         indicatorId={indicatorId}
+        unitType={unitType}
       />
     </Page>
   );

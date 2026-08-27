@@ -84,7 +84,7 @@ const ProgramTab: FC<ProgramTabProps> = ({ unitId, value, index }) => {
     {
       field: "code",
       headerName: "Kode",
-      width: 120,
+      width: 180,
       renderCell: (params) => (
         <Chip
           label={params.row.program.code || "-"}

@@ -113,7 +113,7 @@ const ModalAddRealization = ({
     if (selectedFiles.length > 0) {
       setIsUploading(true);
       try {
-        documentIds = await uploadProkerDocuments(selectedFiles);
+        documentIds = await uploadProkerDocuments(selectedFiles, "EVIDENCE");
       } catch {
         enqueueSnackbar("Gagal mengunggah berkas", { variant: "error" });
         setIsUploading(false);

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -23,6 +23,7 @@ import BaseInputText from "@/app/_components/ui/base-input-text";
 import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
 import useSetProgramIndicatorTarget from "../../_hooks/use-set-program-indicator-target";
 import useGetUnitUsers from "@/app/proker/unit/_hooks/use-get-unit-users";
+import { uploadProkerDocument } from "@/api/proker/program/api";
 
 type ModalSetTargetProps = {
   open: boolean;
@@ -49,7 +50,8 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
   const { enqueueSnackbar } = useSnackbar();
   const setTargetMutation = useSetProgramIndicatorTarget(programId);
 
-  const isPending = setTargetMutation.isPending;
+  const [isUploading, setIsUploading] = useState(false);
+  const isPending = setTargetMutation.isPending || isUploading;
 
   const { data: usersData } = useGetUnitUsers(selectedIndicator?.unitId || "", { limit: 50 });
   const picOptions = usersData?.data?.items?.map((user: { id: string; name: string }) => ({
@@ -111,12 +113,39 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
     return split[1] !== undefined ? rupiah + "," + split[1] : rupiah;
   };
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     if (!selectedIndicator) return;
 
     const currentCat = data.category || selectedIndicator.category || "";
     const isRutinOrPengembangan = currentCat === "RUTIN" || currentCat === "PENGEMBANGAN";
     const numericBudget = isRutinOrPengembangan && data.budget ? data.budget.replace(/[^0-9]/g, "") : "0";
+
+    let proposalVal = data.propsal;
+    let rabVal = data.rab;
+
+    if (isRutinOrPengembangan) {
+      if (data.propsal instanceof File) {
+        setIsUploading(true);
+        try {
+          proposalVal = await uploadProkerDocument(data.propsal, "PROPOSAL");
+        } catch {
+          enqueueSnackbar("Gagal mengunggah berkas Proposal/TOR", { variant: "error" });
+          setIsUploading(false);
+          return;
+        }
+      }
+      if (data.rab instanceof File) {
+        setIsUploading(true);
+        try {
+          rabVal = await uploadProkerDocument(data.rab, "RAB");
+        } catch {
+          enqueueSnackbar("Gagal mengunggah berkas RAB", { variant: "error" });
+          setIsUploading(false);
+          return;
+        }
+      }
+    }
+    setIsUploading(false);
 
     const payload: import("@/api/proker/program/type").TSetProgramIndicatorTargetPayload = {
       targetQ1: Number(data.targetQ1),
@@ -126,7 +155,7 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
       budget: numericBudget,
       picIds: data.picIds || [],
       pics: usersData?.data?.items?.filter((u: { id: string }) => data.picIds.includes(u.id)) || [],
-      ...(isRutinOrPengembangan ? { propsal: data.propsal, rab: data.rab } : {}),
+      ...(isRutinOrPengembangan ? { propsal: proposalVal, rab: rabVal } : {}),
     };
 
     setTargetMutation.mutate(

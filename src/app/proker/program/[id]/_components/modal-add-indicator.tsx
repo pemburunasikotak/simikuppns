@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -25,7 +25,7 @@ import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
 import useCreateProgramIndicator from "../_hooks/use-create-program-indicator";
 import useUpdateProgramIndicator from "../_hooks/use-update-program-indicator";
 import FormDropdownCheckboxField from "@/app/_components/ui/form-dropdown-checkbox-field";
-
+import { uploadProkerDocument } from "@/api/proker/program/api";
 
 import useGetMyUnits from "@/app/proker/unit/_hooks/use-get-my-units";
 import useGetUnitUsers from "@/app/proker/unit/_hooks/use-get-unit-users";
@@ -75,7 +75,8 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   const createMutation = useCreateProgramIndicator();
   const updateMutation = useUpdateProgramIndicator();
 
-  const isPending = createMutation.isPending || updateMutation.isPending;
+  const [isUploading, setIsUploading] = useState(false);
+  const isPending = createMutation.isPending || updateMutation.isPending || isUploading;
   const isDetail = mode === "detail";
 
   const { data: unitTypesData } = useGetProkerMasterUnits({ limit: 50 });
@@ -190,9 +191,36 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
     return split[1] !== undefined ? rupiah + "," + split[1] : rupiah;
   };
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     if (isDetail) return;
     const isRutinOrPengembangan = data.category === "RUTIN" || data.category === "PENGEMBANGAN";
+
+    let proposalVal = data.propsal;
+    let rabVal = data.rab;
+
+    if (isRutinOrPengembangan) {
+      if (data.propsal instanceof File) {
+        setIsUploading(true);
+        try {
+          proposalVal = await uploadProkerDocument(data.propsal, "PROPOSAL");
+        } catch {
+          enqueueSnackbar("Gagal mengunggah berkas Proposal/TOR", { variant: "error" });
+          setIsUploading(false);
+          return;
+        }
+      }
+      if (data.rab instanceof File) {
+        setIsUploading(true);
+        try {
+          rabVal = await uploadProkerDocument(data.rab, "RAB");
+        } catch {
+          enqueueSnackbar("Gagal mengunggah berkas RAB", { variant: "error" });
+          setIsUploading(false);
+          return;
+        }
+      }
+    }
+    setIsUploading(false);
 
     const fullPayload: import("@/api/proker/manajemenProgram/type").TDefaultProgramIndicatorPayload = {
       name: data.name,
@@ -208,7 +236,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
       status: mode === "edit" && selectedIndicator ? selectedIndicator.status || "DRAFT" : "DRAFT",
       budget: isRutinOrPengembangan && data.budget ? Number(data.budget.replace(/[^0-9]/g, "")) : 0,
       picIds: data.picIds || [],
-      ...(isRutinOrPengembangan ? { propsal: data.propsal, rab: data.rab } : {}),
+      ...(isRutinOrPengembangan ? { propsal: proposalVal, rab: rabVal } : {}),
     };
 
     if (mode === "add") {

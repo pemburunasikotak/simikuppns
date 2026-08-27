@@ -37,35 +37,56 @@ export const setProgramIndicatorTarget = async (programId: string, id: string, p
   return data;
 };
 
-export const uploadProkerDocuments = async (files: File[]): Promise<string[]> => {
+export type TProkerDocumentType = "EVIDENCE" | "RAB" | "PROPOSAL" | "OTHER";
+
+export const uploadProkerDocument = async (
+  file: File,
+  type: TProkerDocumentType = "EVIDENCE"
+): Promise<string> => {
   const formData = new FormData();
-  files.forEach((file) => {
-    formData.append("files", file);
-  });
+  formData.append("file", file);
+  formData.append("type", type);
 
   let responseData: Record<string, unknown> | undefined;
   try {
-    const { data } = await prokerAxiosInstance.post<Record<string, unknown>>("/api/v1/documents/upload", formData);
+    const { data } = await prokerAxiosInstance.post<Record<string, unknown>>("/api/v1/documents/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     responseData = data;
   } catch {
-    const { data } = await prokerAxiosInstance.post<Record<string, unknown>>("/api/documents/upload", formData);
+    const { data } = await prokerAxiosInstance.post<Record<string, unknown>>("/api/documents/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     responseData = data;
   }
 
-  const items = (responseData?.data || responseData?.result || responseData?.items || responseData) as unknown;
-  if (Array.isArray(items)) {
-    return items
-      .map((item: unknown) => {
-        if (typeof item === "string") return item;
-        if (typeof item === "object" && item !== null) {
-          const obj = item as Record<string, unknown>;
-          return String(obj.id || obj._id || "");
-        }
-        return "";
-      })
-      .filter(Boolean);
+  let target = responseData?.data || responseData?.result || responseData;
+  if (Array.isArray(target) && target.length > 0) {
+    target = target[0];
   }
-  return [];
+
+  if (typeof target === "string") return target;
+  if (typeof target === "object" && target !== null) {
+    const obj = target as Record<string, unknown>;
+    if (obj.id) return String(obj.id);
+    if (obj._id) return String(obj._id);
+    if (obj.url) return String(obj.url);
+    if (obj.path) return String(obj.path);
+  }
+  return "";
+};
+
+export const uploadProkerDocuments = async (
+  files: File[],
+  type: TProkerDocumentType = "EVIDENCE"
+): Promise<string[]> => {
+  const uploadPromises = files.map((file) => uploadProkerDocument(file, type));
+  const results = await Promise.all(uploadPromises);
+  return results.filter(Boolean);
 };
 
 export const addIndicatorRealization = async (programId: string, id: string, payload: import('./type').TAddIndicatorRealizationPayload): Promise<{ isSuccess: boolean; data: unknown }> => {

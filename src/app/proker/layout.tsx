@@ -34,6 +34,8 @@ import {
   PriceCheckOutlined,
   AdminPanelSettingsOutlined,
   AccountBalanceWalletOutlined,
+  RateReviewOutlined,
+  CancelOutlined,
 } from "@mui/icons-material";
 
 import { useProkerSession } from "@/app/_components/providers/proker-session";
@@ -92,6 +94,20 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
     label: "Program",
     path: paths.proker.program,
     icon: <ListAltOutlined />,
+    roles: ["admin_sim_proker", "user_sim_proker"],
+  },
+  {
+    key: "proker-revision",
+    label: "Revision",
+    path: paths.proker.revision,
+    icon: <RateReviewOutlined />,
+    roles: ["admin_sim_proker", "user_sim_proker"],
+  },
+  {
+    key: "proker-rejected",
+    label: "Rejected",
+    path: paths.proker.rejected,
+    icon: <CancelOutlined />,
     roles: ["admin_sim_proker", "user_sim_proker"],
   },
   {

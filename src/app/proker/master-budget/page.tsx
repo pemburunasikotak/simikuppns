@@ -221,7 +221,7 @@ export default function MasterBudgetPage() {
     },
     {
       field: "budget",
-      headerName: "Total Anggaran",
+      headerName: "Pagu Anggaran",
       minWidth: 200,
       flex: 1,
       renderCell: (params) => (
@@ -375,7 +375,7 @@ export default function MasterBudgetPage() {
 
               <FormControl variant="standard" sx={{ width: "100%" }}>
                 <FormLabel htmlFor="budget-total" required>
-                  Total Anggaran
+                  Pagu Anggaran
                 </FormLabel>
                 <FormGroup>
                   <BaseInputText

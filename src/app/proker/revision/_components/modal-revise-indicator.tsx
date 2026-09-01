@@ -323,6 +323,16 @@ export default function ModalReviseIndicator({
                 )}
               />
             </Grid>
+
+            <Grid size={{ xs: 12 }}>
+              <Typography
+                variant="caption"
+                color="error"
+                sx={{ fontStyle: "italic", display: "block", mt: 0.5 }}
+              >
+                * Lampirkan pengusulan terkait bahan habis pakai, peralatan, mebel, dan perawatan-perbaikan.
+              </Typography>
+            </Grid>
           </Grid>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>

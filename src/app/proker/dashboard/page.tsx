@@ -15,6 +15,8 @@ import {
 } from "@mui/icons-material";
 import { useGetProkerDashboard } from "./_hooks/use-get-dashboard";
 import StructureView from "./_components/structure-view";
+import { useNavigate } from "react-router";
+import { paths } from "@/commons/constants/paths";
 import { useMemo } from "react";
 import { ProkerSessionUser } from "@/libs/localstorage/proker-session";
 
@@ -30,12 +32,14 @@ const formatCurrency = (amount?: number) => {
 
 
 export default function ProkerDashboardPage() {
+  const navigate = useNavigate();
   const { data, isLoading, isError, error } = useGetProkerDashboard();
 
   const sessionUser = ProkerSessionUser.get();
   const user = (sessionUser?.user as { roles?: { key: string }[] }) ?? {};
   const userRoleKeys = useMemo(() => user?.roles?.map((r: { key: string }) => r.key) || [], [user?.roles]);
   const isAdmin = userRoleKeys.includes("admin_sim_iku");
+  const isProkerAdmin = userRoleKeys.includes("admin_sim_proker");
 
   if (isLoading) {
     return (
@@ -59,8 +63,21 @@ export default function ProkerDashboardPage() {
       </Box>
 
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card sx={{ height: '100%', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Card
+            onClick={() => navigate(paths.proker.program)}
+            sx={{
+              height: '100%',
+              boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)',
+              borderRadius: 3,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0px 8px 25px rgba(0, 0, 0, 0.1)',
+              },
+            }}
+          >
             <CardContent>
               <Typography color="textSecondary" gutterBottom variant="subtitle2" fontWeight="bold">
                 TOTAL PROGRAM
@@ -71,8 +88,21 @@ export default function ProkerDashboardPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card sx={{ height: '100%', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Card
+            onClick={() => navigate(`${paths.proker.program}?status=IN_PROGRESS`)}
+            sx={{
+              height: '100%',
+              boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)',
+              borderRadius: 3,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0px 8px 25px rgba(0, 0, 0, 0.1)',
+              },
+            }}
+          >
             <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <Box>
                 <Typography color="textSecondary" gutterBottom variant="subtitle2" fontWeight="bold">
@@ -86,8 +116,21 @@ export default function ProkerDashboardPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card sx={{ height: '100%', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Card
+            onClick={() => navigate(`${paths.proker.program}?status=COMPLETED`)}
+            sx={{
+              height: '100%',
+              boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)',
+              borderRadius: 3,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0px 8px 25px rgba(0, 0, 0, 0.1)',
+              },
+            }}
+          >
             <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <Box>
                 <Typography color="textSecondary" gutterBottom variant="subtitle2" fontWeight="bold">
@@ -101,8 +144,21 @@ export default function ProkerDashboardPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card sx={{ height: '100%', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
+        <Grid size={{ xs: 12, sm: 12, md: 12 }}>
+          <Card
+            onClick={() => navigate(isProkerAdmin ? paths.proker.masterBudget : paths.proker.program)}
+            sx={{
+              height: '100%',
+              boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)',
+              borderRadius: 3,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0px 8px 25px rgba(0, 0, 0, 0.1)',
+              },
+            }}
+          >
             <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <Box>
                 <Typography color="textSecondary" gutterBottom variant="subtitle2" fontWeight="bold">

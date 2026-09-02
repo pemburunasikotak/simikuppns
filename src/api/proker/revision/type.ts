@@ -21,6 +21,8 @@ export type TRevisionIndicatorItem = {
   budget?: number | string;
   proposalURL?: string;
   rabURL?: string;
+  proposalDocumentId?: string;
+  rabDocumentId?: string;
   program?: TRevisionIndicatorProgram;
   unit?: TRevisionIndicatorUnit;
   revisionLevel?: string;

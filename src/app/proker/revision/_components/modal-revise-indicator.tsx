@@ -91,8 +91,8 @@ export default function ModalReviseIndicator({
         targetQ3: indicator.targetQ3 || 0,
         targetQ4: indicator.targetQ4 || 0,
         budget: indicator.budget ? formatRupiah(indicator.budget) : "",
-        propsal: indicator.proposalURL || "",
-        rab: indicator.rabURL || "",
+        propsal: indicator.proposalDocumentId || indicator.proposalURL || "",
+        rab: indicator.rabDocumentId || indicator.rabURL || "",
       });
     }
   }, [open, indicator, reset]);
@@ -107,8 +107,8 @@ export default function ModalReviseIndicator({
 
     const numericBudget = data.budget ? data.budget.replace(/[^0-9]/g, "") : "0";
 
-    let proposalVal = data.propsal;
-    let rabVal = data.rab;
+    let proposalVal = "";
+    let rabVal = "";
 
     if (data.propsal instanceof File) {
       setIsUploading(true);
@@ -119,6 +119,12 @@ export default function ModalReviseIndicator({
         setIsUploading(false);
         return;
       }
+    } else {
+      proposalVal =
+        indicator.proposalDocumentId ||
+        (typeof data.propsal === "string" && data.propsal ? data.propsal : "") ||
+        indicator.proposalURL ||
+        "";
     }
 
     if (data.rab instanceof File) {
@@ -130,6 +136,12 @@ export default function ModalReviseIndicator({
         setIsUploading(false);
         return;
       }
+    } else {
+      rabVal =
+        indicator.rabDocumentId ||
+        (typeof data.rab === "string" && data.rab ? data.rab : "") ||
+        indicator.rabURL ||
+        "";
     }
 
     setIsUploading(false);
@@ -142,6 +154,8 @@ export default function ModalReviseIndicator({
       budget: numericBudget,
       propsal: proposalVal || "",
       rab: rabVal || "",
+      proposalDocumentId: proposalVal || "",
+      rabDocumentId: rabVal || "",
     };
 
     reviseMutation.mutate(
@@ -317,8 +331,8 @@ export default function ModalReviseIndicator({
                     }
                     error={!!error}
                     helper={error?.message}
-                    acceptFormat=".pdf,.xls,.xlsx"
-                    uploadDesc="Format Dokumen PDF, XLSX"
+                    acceptFormat=".xls,.xlsx"
+                    uploadDesc="Format Dokumen XLS, XLSX"
                   />
                 )}
               />

@@ -13,7 +13,6 @@ import {
   Tabs,
   Tab,
   Stack,
-  CircularProgress,
 } from "@mui/material";
 import {
   CloseOutlined,
@@ -28,7 +27,6 @@ import {
   RestartAltOutlined,
 } from "@mui/icons-material";
 import { env } from "@/libs/env";
-import prokerAxiosInstance from "@/libs/axios/proker-config";
 
 export type TDocumentItem = {
   title?: string;
@@ -139,6 +137,33 @@ const getFileType = (url: string, fileName: string, doc?: unknown): "image" | "p
   return "other";
 };
 
+export const downloadFile = async (doc: unknown, fallbackTitle = "Dokumen") => {
+  const url = getFileUrl(doc);
+  if (!url) return;
+  const name = getFileName(doc, fallbackTitle);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.target = "_blank";
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+};
+
+export const isExcelOrRabDoc = (doc: unknown, label?: string): boolean => {
+  const cleanLabel = (label || "").toUpperCase();
+  if (cleanLabel.includes("RAB")) return true;
+
+  const url = getFileUrl(doc);
+  const name = getFileName(doc, label || "");
+  const targetStr = (name || url || "").toLowerCase();
+  if (targetStr.match(/\.(xls|xlsx|csv)($|\?)/i)) {
+    return true;
+  }
+  return false;
+};
+
 export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
   open,
   onClose,
@@ -159,9 +184,7 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
 
   const [activeTab, setActiveTab] = useState(0);
   const [zoom, setZoom] = useState(1);
-  const [loading, setLoading] = useState(false);
   const [previewSrc, setPreviewSrc] = useState<string>("");
-  const [detectedMime, setDetectedMime] = useState<string>("");
 
   useEffect(() => {
     if (open) {
@@ -176,80 +199,24 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
   const initialFileType = getFileType(fileUrl, fileName);
 
   useEffect(() => {
-    let isMounted = true;
-    let createdBlobUrl = "";
-
-    const fetchDocument = async () => {
-      if (!open || !currentDoc) return;
-
+    if (open && currentDoc) {
       const rawUrl = getFileUrl(currentDoc);
-      if (!rawUrl) return;
-
-      if (rawUrl.startsWith("blob:") || rawUrl.startsWith("data:")) {
-        setPreviewSrc(rawUrl);
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const response = await prokerAxiosInstance.get(rawUrl, {
-          responseType: "blob",
-        });
-        if (!isMounted) return;
-
-        const blob = response.data as Blob;
-        const contentType = blob.type || "";
-        setDetectedMime(contentType);
-
-        createdBlobUrl = URL.createObjectURL(blob);
-        setPreviewSrc(createdBlobUrl);
-      } catch (err) {
-        console.warn("Could not fetch document as blob, fallback to direct URL", err);
-        if (isMounted) {
-          setPreviewSrc(rawUrl);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchDocument();
-
-    return () => {
-      isMounted = false;
-      if (createdBlobUrl) {
-        URL.revokeObjectURL(createdBlobUrl);
-      }
-    };
+      setPreviewSrc(rawUrl);
+    }
   }, [open, currentDoc]);
 
   if (!open || docList.length === 0) return null;
 
-  const isImage =
-    detectedMime.startsWith("image/") ||
-    initialFileType === "image" ||
-    previewSrc.startsWith("data:image");
+  const isImage = initialFileType === "image" || previewSrc.startsWith("data:image");
 
-  const isPdf =
-    detectedMime.includes("pdf") ||
-    initialFileType === "pdf" ||
-    previewSrc.startsWith("data:application/pdf");
+  const isPdf = initialFileType === "pdf" || previewSrc.startsWith("data:application/pdf");
 
-  const displayType = isImage ? "image" : isPdf ? "pdf" : "document";
+  const isExcelOrRab = isExcelOrRabDoc(currentDoc, fileName);
+
+  const displayType = isImage ? "image" : isPdf ? "pdf" : isExcelOrRab ? "spreadsheet" : "document";
 
   const handleDownload = () => {
-    const targetUrl = previewSrc || fileUrl;
-    if (!targetUrl) return;
-    const a = document.createElement("a");
-    a.href = targetUrl;
-    a.target = "_blank";
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    downloadFile(currentDoc, fileName);
   };
 
   const handleOpenNewTab = () => {
@@ -339,14 +306,7 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
           overflow: "auto",
         }}
       >
-        {loading ? (
-          <Box sx={{ textAlign: "center", py: 8 }}>
-            <CircularProgress color="primary" size={48} sx={{ mb: 2 }} />
-            <Typography variant="body1" color="text.secondary" fontWeight={600}>
-              Memuat berkas dokumen...
-            </Typography>
-          </Box>
-        ) : !previewSrc ? (
+        {!previewSrc ? (
           <Box sx={{ textAlign: "center", py: 6 }}>
             <InsertDriveFileOutlined sx={{ fontSize: 60, color: "text.secondary", mb: 2 }} />
             <Typography variant="body1" color="text.secondary">
@@ -416,6 +376,25 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
               }}
             />
           </Box>
+        ) : isExcelOrRab ? (
+          <Box sx={{ textAlign: "center", py: 6, px: 3 }}>
+            <DescriptionOutlined sx={{ fontSize: 64, color: "success.main", mb: 2 }} />
+            <Typography variant="h6" fontWeight={700} gutterBottom color="text.primary">
+              {fileName}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 420, mx: "auto" }}>
+              Dokumen ini berbentuk Spreadsheet/Excel dan tidak dapat dipratinjau secara langsung di browser. Silakan unduh berkas untuk melihat isinya.
+            </Typography>
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={<DownloadOutlined />}
+              onClick={handleDownload}
+              sx={{ fontWeight: 700, borderRadius: 2, px: 3, py: 1 }}
+            >
+              Unduh Berkas RAB
+            </Button>
+          </Box>
         ) : (
           <Box sx={{ width: "100%", height: 580, display: "flex", flexDirection: "column" }}>
             <iframe
@@ -431,7 +410,7 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
 
       <DialogActions sx={{ px: 3, py: 1.5, bgcolor: "grey.50", justifyContent: "space-between" }}>
         <Typography variant="caption" color="text.secondary">
-          Tipe Berkas: {displayType.toUpperCase()} {detectedMime ? `(${detectedMime})` : ""}
+          Tipe Berkas: {displayType.toUpperCase()}
         </Typography>
         <Stack direction="row" spacing={1}>
           <Button
@@ -495,14 +474,23 @@ export const DocumentCell: React.FC<DocumentCellProps> = ({
     });
   }, [documents, docProp]);
 
+  const previewableDocs = useMemo(() => {
+    return docList.filter((item) => !isExcelOrRabDoc(item.doc, item.label));
+  }, [docList]);
+
   if (docList.length === 0) return <>-</>;
 
   const visibleDocs = docList.slice(0, maxItems);
   const hiddenCount = docList.length - maxItems;
 
-  const handleOpenPreview = (idx: number) => {
-    setSelectedIndex(idx);
+  const handleOpenPreview = (docItem: { doc: unknown; label?: string }) => {
+    const idx = previewableDocs.findIndex((d) => d.doc === docItem.doc);
+    setSelectedIndex(idx >= 0 ? idx : 0);
     setModalOpen(true);
+  };
+
+  const handleDirectDownload = (doc: unknown, fallbackTitle?: string) => {
+    downloadFile(doc, fallbackTitle);
   };
 
   return (
@@ -512,12 +500,55 @@ export const DocumentCell: React.FC<DocumentCellProps> = ({
           const url = getFileUrl(item.doc);
           const name = getFileName(item.doc, item.label);
           const type = getFileType(url, name);
+          const isDirectDownload = isExcelOrRabDoc(item.doc, item.label);
+
+          if (isDirectDownload) {
+            return (
+              <Tooltip key={idx} title={`Unduh ${item.label || name}`}>
+                <Box
+                  onClick={() => handleDirectDownload(item.doc, item.label || name)}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: "6px",
+                    border: "1px solid #a7f3d0",
+                    bgcolor: "rgba(209, 250, 229, 0.7)",
+                    cursor: "pointer",
+                    transition: "all 0.15s ease-in-out",
+                    "&:hover": {
+                      bgcolor: "#d1fae5",
+                      borderColor: "#34d399",
+                      transform: "translateY(-1px)",
+                    },
+                  }}
+                >
+                  <DownloadOutlined sx={{ fontSize: 18, color: "#16a34a" }} />
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontWeight: 700,
+                      color: "#065f46",
+                      maxWidth: 80,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.label || "RAB"}
+                  </Typography>
+                </Box>
+              </Tooltip>
+            );
+          }
 
           if (type === "image" && url) {
             return (
               <Tooltip key={idx} title={`Lihat ${name}`}>
                 <Box
-                  onClick={() => handleOpenPreview(idx)}
+                  onClick={() => handleOpenPreview(item)}
                   sx={{
                     width: 38,
                     height: 38,
@@ -549,7 +580,7 @@ export const DocumentCell: React.FC<DocumentCellProps> = ({
             return (
               <Tooltip key={idx} title={`Lihat ${name}`}>
                 <Box
-                  onClick={() => handleOpenPreview(idx)}
+                  onClick={() => handleOpenPreview(item)}
                   sx={{
                     display: "flex",
                     alignItems: "center",
@@ -587,52 +618,10 @@ export const DocumentCell: React.FC<DocumentCellProps> = ({
             );
           }
 
-          if (type === "office") {
-            return (
-              <Tooltip key={idx} title={`Lihat ${name}`}>
-                <Box
-                  onClick={() => handleOpenPreview(idx)}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    px: 1,
-                    py: 0.5,
-                    borderRadius: "6px",
-                    border: "1px solid #a7f3d0",
-                    bgcolor: "rgba(209, 250, 229, 0.7)",
-                    cursor: "pointer",
-                    transition: "all 0.15s ease-in-out",
-                    "&:hover": {
-                      bgcolor: "#d1fae5",
-                      borderColor: "#34d399",
-                      transform: "translateY(-1px)",
-                    },
-                  }}
-                >
-                  <DescriptionOutlined sx={{ fontSize: 18, color: "#16a34a" }} />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      fontWeight: 700,
-                      color: "#065f46",
-                      maxWidth: 80,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {item.label || "DOC"}
-                  </Typography>
-                </Box>
-              </Tooltip>
-            );
-          }
-
           return (
             <Tooltip key={idx} title={`Lihat ${name}`}>
               <Box
-                onClick={() => handleOpenPreview(idx)}
+                onClick={() => handleOpenPreview(item)}
                 sx={{
                   display: "flex",
                   alignItems: "center",
@@ -674,20 +663,27 @@ export const DocumentCell: React.FC<DocumentCellProps> = ({
             <Chip
               label={`+${hiddenCount}`}
               size="small"
-              onClick={() => handleOpenPreview(maxItems)}
+              onClick={() => {
+                if (previewableDocs.length > 0) {
+                  setSelectedIndex(0);
+                  setModalOpen(true);
+                }
+              }}
               sx={{ fontWeight: 700, cursor: "pointer", height: 26 }}
             />
           </Tooltip>
         )}
       </Stack>
 
-      <DocumentPreviewModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title={title}
-        documents={docList.map((d) => d.doc)}
-        initialIndex={selectedIndex}
-      />
+      {previewableDocs.length > 0 && (
+        <DocumentPreviewModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          title={title}
+          documents={previewableDocs.map((d) => d.doc)}
+          initialIndex={selectedIndex}
+        />
+      )}
     </>
   );
 };

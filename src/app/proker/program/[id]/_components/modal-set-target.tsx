@@ -79,16 +79,24 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
 
   useEffect(() => {
     if (open && selectedIndicator) {
+      const selInd = selectedIndicator as unknown as {
+        budget?: string;
+        propsal?: string;
+        rab?: string;
+        proposalDocumentId?: string;
+        rabDocumentId?: string;
+        picIds?: string[];
+      };
       reset({
         category: selectedIndicator.category || "",
         targetQ1: selectedIndicator.targetQ1 || 0,
         targetQ2: selectedIndicator.targetQ2 || 0,
         targetQ3: selectedIndicator.targetQ3 || 0,
         targetQ4: selectedIndicator.targetQ4 || 0,
-        budget: ((selectedIndicator as unknown) as { budget?: string }).budget || "",
-        propsal: ((selectedIndicator as unknown) as { propsal?: string }).propsal || "",
-        rab: ((selectedIndicator as unknown) as { rab?: string }).rab || "",
-        picIds: ((selectedIndicator as unknown) as { picIds?: string[] }).picIds || [],
+        budget: selInd.budget || "",
+        propsal: selInd.proposalDocumentId || selInd.propsal || "",
+        rab: selInd.rabDocumentId || selInd.rab || "",
+        picIds: selInd.picIds || [],
       });
     }
   }, [open, selectedIndicator, reset]);
@@ -120,8 +128,15 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
     const isRutinOrPengembangan = currentCat === "RUTIN" || currentCat === "PENGEMBANGAN";
     const numericBudget = isRutinOrPengembangan && data.budget ? data.budget.replace(/[^0-9]/g, "") : "0";
 
-    let proposalVal = data.propsal;
-    let rabVal = data.rab;
+    let proposalVal = "";
+    let rabVal = "";
+
+    const selInd = selectedIndicator as unknown as {
+      proposalDocumentId?: string;
+      rabDocumentId?: string;
+      propsal?: string;
+      rab?: string;
+    };
 
     if (isRutinOrPengembangan) {
       if (data.propsal instanceof File) {
@@ -133,7 +148,14 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
           setIsUploading(false);
           return;
         }
+      } else {
+        proposalVal =
+          selInd.proposalDocumentId ||
+          (typeof data.propsal === "string" && data.propsal ? data.propsal : "") ||
+          selInd.propsal ||
+          "";
       }
+
       if (data.rab instanceof File) {
         setIsUploading(true);
         try {
@@ -143,6 +165,12 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
           setIsUploading(false);
           return;
         }
+      } else {
+        rabVal =
+          selInd.rabDocumentId ||
+          (typeof data.rab === "string" && data.rab ? data.rab : "") ||
+          selInd.rab ||
+          "";
       }
     }
     setIsUploading(false);
@@ -155,7 +183,14 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
       budget: numericBudget,
       picIds: data.picIds || [],
       pics: usersData?.data?.items?.filter((u: { id: string }) => data.picIds.includes(u.id)) || [],
-      ...(isRutinOrPengembangan ? { propsal: proposalVal, rab: rabVal } : {}),
+      ...(isRutinOrPengembangan
+        ? {
+            propsal: proposalVal,
+            rab: rabVal,
+            proposalDocumentId: proposalVal,
+            rabDocumentId: rabVal,
+          }
+        : {}),
     };
 
     setTargetMutation.mutate(
@@ -311,8 +346,8 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
                         value={value && typeof value === 'object' ? (value as File).name : (value as string) || ""}
                         error={!!error}
                         helper={error?.message}
-                        acceptFormat=".pdf,.xls,.xlsx"
-                        uploadDesc="Format Dokumen PDF, XLSX"
+                        acceptFormat=".xls,.xlsx"
+                        uploadDesc="Format Dokumen XLS, XLSX"
                       />
                     )}
                   />

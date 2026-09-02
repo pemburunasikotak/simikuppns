@@ -484,8 +484,8 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                         value={value && typeof value === 'object' ? (value as File).name : (value as string) || ""}
                         error={!!error}
                         helper={error?.message}
-                        acceptFormat=".pdf,.xls,.xlsx"
-                        uploadDesc="Format Dokumen PDF, XLSX"
+                        acceptFormat=".xls,.xlsx"
+                        uploadDesc="Format Dokumen XLS, XLSX"
                       />
                     )}
                   />

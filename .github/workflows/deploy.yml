@@ -30,15 +30,12 @@ jobs:
 
   # ─────────────────────────────────────────────────────────────
   # Job 2: Production deploy — runs on self-hosted runner (sim-iku)
-  # continue-on-error: true agar workflow tetap hijau jika runner
-  # sim-iku belum terdaftar / sedang offline
   # ─────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to Production (sim-iku)
     runs-on:
       group: sim-iku
       labels: [sim-iku]
-    continue-on-error: true
     environment: production
 
     steps:

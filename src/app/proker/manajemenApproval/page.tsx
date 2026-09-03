@@ -544,7 +544,7 @@ export default function ManajemenApprovalPage() {
               />
 
               {/* Manual User ID if user list is empty or needed */}
-              {userItems.length === 0 && !usersInfiniteQuery.isLoading && (
+              {/* {userItems.length === 0 && !usersInfiniteQuery.isLoading && (
                 <TextField
                   required
                   label="User ID (UUID)"
@@ -554,7 +554,7 @@ export default function ManajemenApprovalPage() {
                   variant="outlined"
                   placeholder="e.g. 550e8400-e29b-41d4-a716-446655440001"
                 />
-              )}
+              )} */}
 
               {/* IKU Selection (Searchable Autocomplete Multi-Select with Infinite Scroll) */}
               {formData.level === "INDICATOR_VERIFICATION" && (

@@ -291,7 +291,7 @@ export default function StructureView() {
                                       </Box>
                                     </TableCell>
                                     <TableCell>
-                                      <Typography variant="body2" color="textSecondary">Satuan: {indicator.unit}</Typography>
+                                      <Typography variant="body2" color="textSecondary">Satuan: {indicator.masterUnitType?.name}</Typography>
                                     </TableCell>
                                     <TableCell>
                                       <Box display="flex" flexWrap="wrap" alignItems="center" gap={1}>

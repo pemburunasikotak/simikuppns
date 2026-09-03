@@ -161,6 +161,9 @@ export type TAssignmentStructureIndicator = {
   name: string;
   unit: string;
   order: number;
+  masterUnitType?: {
+    name: string;
+  }
   assignedUnits: {
     unitId: string;
     unitName: string;
@@ -183,6 +186,9 @@ export type TAssignmentStructureItem = {
     name: string;
     description: string;
   };
+  masterUnitType: {
+    name: string;
+  }
   totalPrograms: number;
   totalIndicators: number;
   programs: TAssignmentStructureProgram[];

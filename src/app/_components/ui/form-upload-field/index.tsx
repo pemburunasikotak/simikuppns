@@ -10,8 +10,9 @@ import {
   IconButton,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { RestoreFromTrashOutlined, CloudUpload } from "@mui/icons-material";
+import { RestoreFromTrashOutlined, CloudUpload, FileDownloadOutlined } from "@mui/icons-material";
 import HelperText from "../helper-text";
+import { downloadTemplate } from "@/api/proker/program/api";
 
 const VisuallyHiddenInput = styled("input")({
   opacity: 0,
@@ -80,6 +81,9 @@ interface Props {
   isV2?: boolean;
   onRemove?: () => void;
   disabled?: boolean;
+  templateType?: "TOR" | "RAB" | string;
+  onDownloadTemplate?: () => void;
+  templateLabel?: string;
 }
 
 const FormUploadField = ({
@@ -95,7 +99,36 @@ const FormUploadField = ({
   isV2 = false,
   onRemove,
   disabled = false,
+  templateType,
+  onDownloadTemplate,
+  templateLabel,
 }: Props) => {
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onDownloadTemplate) {
+      onDownloadTemplate();
+      return;
+    }
+    if (templateType) {
+      try {
+        const type = templateType as "TOR" | "RAB";
+        const blob = await downloadTemplate(type);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        const ext = type === "TOR" ? "docx" : "xlsx";
+        a.download = `Template_${type}.${ext}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error("Download template error:", err);
+      }
+    }
+  };
+
   return (
     <FormControl required={required} fullWidth disabled={disabled}>
       <FormLabel htmlFor={name} error={!!error} required={required} sx={{ mb: 1 }}>
@@ -152,8 +185,30 @@ const FormUploadField = ({
           <HelperText>{value}</HelperText>
         </Box>
       )}
-      <Stack direction="row" justifyContent="space-between">
+      <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" sx={{ mt: 0.5 }}>
         <HelperText>{uploadDesc}</HelperText>
+        {(templateType || onDownloadTemplate) && (
+          <Button
+            size="small"
+            variant="text"
+            startIcon={<FileDownloadOutlined fontSize="small" />}
+            onClick={handleDownload}
+            sx={{
+              p: 0,
+              minWidth: "auto",
+              textTransform: "none",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              color: "primary.main",
+              "&:hover": {
+                bgcolor: "transparent",
+                textDecoration: "underline",
+              },
+            }}
+          >
+            {templateLabel || `Unduh Template ${templateType || ""}`}
+          </Button>
+        )}
       </Stack>
 
       <Stack direction="row" justifyContent="space-between">
@@ -164,3 +219,4 @@ const FormUploadField = ({
 };
 
 export default FormUploadField;
+

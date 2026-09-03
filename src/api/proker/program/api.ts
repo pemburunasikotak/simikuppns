@@ -116,3 +116,11 @@ export const finalisasiIndicators = async (year: string | number = 2025): Promis
   const { data } = await prokerAxiosInstance.patch(`/api/v1/indicators/change-to-in-progress/${year}`);
   return data;
 };
+
+export const downloadTemplate = async (type: "TOR" | "RAB"): Promise<Blob> => {
+  const { data } = await prokerAxiosInstance.get(`/api/v1/templates/${type}/download`, {
+    responseType: "blob",
+  });
+  return data;
+};
+

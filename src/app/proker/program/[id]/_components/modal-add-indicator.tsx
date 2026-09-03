@@ -463,6 +463,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                         helper={error?.message}
                         acceptFormat=".pdf,.doc,.docx"
                         uploadDesc="Format Dokumen PDF, DOCX"
+                        templateType="TOR"
                       />
                     )}
                   />
@@ -486,6 +487,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                         helper={error?.message}
                         acceptFormat=".xls,.xlsx"
                         uploadDesc="Format Dokumen XLS, XLSX"
+                        templateType="RAB"
                       />
                     )}
                   />

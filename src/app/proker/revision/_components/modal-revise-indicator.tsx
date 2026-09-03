@@ -307,6 +307,7 @@ export default function ModalReviseIndicator({
                     helper={error?.message}
                     acceptFormat=".pdf,.doc,.docx"
                     uploadDesc="Format Dokumen PDF, DOCX"
+                    templateType="TOR"
                   />
                 )}
               />
@@ -333,6 +334,7 @@ export default function ModalReviseIndicator({
                     helper={error?.message}
                     acceptFormat=".xls,.xlsx"
                     uploadDesc="Format Dokumen XLS, XLSX"
+                    templateType="RAB"
                   />
                 )}
               />

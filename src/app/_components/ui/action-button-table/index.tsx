@@ -1,8 +1,8 @@
 import React from "react";
-import { AssignmentOutlined, DeleteOutline, EditOutlined, Lock, VisibilityOutlined } from "@mui/icons-material";
+import { AssignmentOutlined, CloudDownloadOutlined, DeleteOutline, EditOutlined, Lock, VisibilityOutlined } from "@mui/icons-material";
 import { ButtonProps, Button as MuiButton, Stack, styled, Tooltip } from "@mui/material";
 
-export type ItemType = "detail" | "delete" | "edit" | "lock" | "assign";
+export type ItemType = "detail" | "delete" | "edit" | "lock" | "assign" | "download";
 
 export interface ActionButtonItem {
   key: React.Key;
@@ -13,6 +13,9 @@ export interface ActionButtonItem {
   onClick?: () => void;
   disabled?: boolean;
   render?: React.ReactNode;
+  href?: string;
+  target?: string;
+  download?: boolean | string;
 }
 
 export interface Props {
@@ -31,6 +34,7 @@ const ActionButtonTable = ({ items = [] }: Props) => {
     edit: "warning",
     lock: "warning",
     assign: "primary",
+    download: "success",
   };
 
   const itemIcon: Record<ItemType, React.ReactNode> = {
@@ -39,6 +43,7 @@ const ActionButtonTable = ({ items = [] }: Props) => {
     edit: <EditOutlined fontSize="small" />,
     lock: <Lock fontSize="small" />,
     assign: <AssignmentOutlined fontSize="small" />,
+    download: <CloudDownloadOutlined fontSize="small" />,
   };
 
   const itemLabel: Record<ItemType, string> = {
@@ -47,6 +52,7 @@ const ActionButtonTable = ({ items = [] }: Props) => {
     edit: "Ubah",
     lock: "Kunci",
     assign: "Tugaskan",
+    download: "Unduh / Download",
   };
 
   return (
@@ -68,18 +74,34 @@ const ActionButtonTable = ({ items = [] }: Props) => {
 
         const label = item.label || (item.type ? itemLabel[item.type] : "");
 
+        const buttonBtn = (
+          <Button
+            variant="text"
+            color={item.type ? itemColor[item.type] : item.color}
+            onClick={item.onClick}
+            size="small"
+            disabled={item.disabled}
+          >
+            {item.icon ? item.icon : (item.type ? itemIcon[item.type] : undefined)}
+          </Button>
+        );
+
         return (
           <Tooltip key={item.key} title={label} arrow placement="top">
             <span>
-              <Button
-                variant="text"
-                color={item.type ? itemColor[item.type] : item.color}
-                onClick={item.onClick}
-                size="small"
-                disabled={item.disabled}
-              >
-                {item.icon ? item.icon : (item.type ? itemIcon[item.type] : undefined)}
-              </Button>
+              {item.href ? (
+                <a
+                  href={item.href}
+                  target={item.target || "_blank"}
+                  download={item.download}
+                  style={{ textDecoration: "none" }}
+                  rel="noreferrer"
+                >
+                  {buttonBtn}
+                </a>
+              ) : (
+                buttonBtn
+              )}
             </span>
           </Tooltip>
         );

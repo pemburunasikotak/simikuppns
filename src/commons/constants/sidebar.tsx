@@ -6,6 +6,7 @@ import {
   // CorporateFareOutlined,
   AssignmentIndOutlined,
   FactCheckOutlined,
+  MenuBookOutlined,
 } from "@mui/icons-material";
 
 import { paths } from "./paths";
@@ -98,6 +99,12 @@ export const SIDEBAR_ITEMS: TSidebarItem[] = [
     key: "master-data-setting-lock",
     label: "Setting Lock",
     path: paths.master.settingLock,
+  },
+  {
+    key: "guides",
+    label: "Panduan",
+    path: paths.guides,
+    icon: <MenuBookOutlined />,
   },
   // {
   //   key: "bidang",

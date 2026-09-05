@@ -134,6 +134,8 @@ export const paths = {
     manajemenApproval: "/proker/manajemenApproval",
     revision: "/proker/revision",
     rejected: "/proker/rejected",
+    guides: "/proker/guides",
   },
   verifikator: "/verifikator",
+  guides: "/guides",
 };

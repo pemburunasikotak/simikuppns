@@ -211,12 +211,12 @@ const ProtectedLayout = () => {
       return true;
     }
     if (isDewas) {
-      return item.key === "dashboard";
+      return item.key === "dashboard" || item.key === "guides";
     }
     if (isVerifikator) {
-      return item.key === "dashboard" || item.key === "component" || item.key === "verifikator";
+      return item.key === "dashboard" || item.key === "component" || item.key === "verifikator" || item.key === "guides";
     }
-    return item.key === "dashboard" || item.key === "component";
+    return item.key === "dashboard" || item.key === "component" || item.key === "guides";
   });
 
   // Redirect if unauthorized page access is attempted

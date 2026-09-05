@@ -112,6 +112,7 @@ export const queryKeys = {
     aktivitas: "proker/aktivitas",
     progress: "proker/progress",
     evidence: "proker/evidence",
+    guides: "proker/guides",
   },
   unit: {
     list: "unit/list",
@@ -124,6 +125,10 @@ export const queryKeys = {
   },
   verification: {
     dashboard: "verification/dashboard",
+  },
+  guides: {
+    list: "guides/list",
+    detail: "guides/detail",
   },
 } as const;
 

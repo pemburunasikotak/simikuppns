@@ -4,6 +4,7 @@ import { Link as RouterLink } from "react-router";
 
 interface Props {
   title?: string;
+  description?: React.ReactNode;
   children?: React.ReactNode;
   topPage?: React.ReactNode;
   breadcrumbs?: {
@@ -13,7 +14,7 @@ interface Props {
   loading?: boolean;
 }
 
-const Page = ({ children, topPage, title, breadcrumbs, loading }: Props) => {
+const Page = ({ children, topPage, title, description, breadcrumbs, loading }: Props) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "16px", paddingBottom: "36px" }}>
       {breadcrumbs?.length ? (
@@ -51,16 +52,29 @@ const Page = ({ children, topPage, title, breadcrumbs, loading }: Props) => {
           </>
         ) : null}
         <Box sx={{ p: "16px" }}>
-          {title && (
+          {(title || description) && (
             <Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  color: "rgba(57, 61, 78, 1)",
-                }}
-              >
-                {title}
-              </Typography>
+              {title && (
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: "rgba(57, 61, 78, 1)",
+                  }}
+                >
+                  {title}
+                </Typography>
+              )}
+              {description && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                    mt: 0.5,
+                  }}
+                >
+                  {description}
+                </Typography>
+              )}
             </Box>
           )}
 

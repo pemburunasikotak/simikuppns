@@ -36,6 +36,7 @@ import {
   AccountBalanceWalletOutlined,
   RateReviewOutlined,
   CancelOutlined,
+  MenuBookOutlined,
 } from "@mui/icons-material";
 
 import { useProkerSession } from "@/app/_components/providers/proker-session";
@@ -137,6 +138,13 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
     path: paths.proker.manajemenApproval,
     icon: <AdminPanelSettingsOutlined />,
     roles: ["admin_sim_proker"],
+  },
+  {
+    key: "proker-guides",
+    label: "Panduan",
+    path: paths.proker.guides,
+    icon: <MenuBookOutlined />,
+    roles: ["admin_sim_proker", "user_sim_proker"],
   },
 ];
 

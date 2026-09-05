@@ -415,7 +415,7 @@ export default function ProkerGuidesPage() {
     {
       field: "actions",
       headerName: "Aksi",
-      width: 130,
+      width: 200,
       headerAlign: "center",
       align: "center",
       sortable: false,
@@ -435,15 +435,15 @@ export default function ProkerGuidesPage() {
                 },
                 ...(downloadUrl
                   ? [
-                      {
-                        key: "download",
-                        type: "download" as const,
-                        label: "Unduh / Download",
-                        href: downloadUrl,
-                        target: "_blank",
-                        download: fileUrl ? true : undefined,
-                      },
-                    ]
+                    {
+                      key: "download",
+                      type: "download" as const,
+                      label: "Unduh / Download",
+                      href: downloadUrl,
+                      target: "_blank",
+                      download: fileUrl ? true : undefined,
+                    },
+                  ]
                   : []),
                 {
                   key: "edit",

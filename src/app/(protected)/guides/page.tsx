@@ -429,7 +429,7 @@ const GuidesPage: FC = (): ReactElement => {
     {
       field: "actions",
       headerName: "Aksi",
-      width: 130,
+      width: 200,
       headerAlign: "center",
       align: "center",
       sortable: false,
@@ -449,15 +449,15 @@ const GuidesPage: FC = (): ReactElement => {
                 },
                 ...(downloadUrl
                   ? [
-                      {
-                        key: "download",
-                        type: "download" as const,
-                        label: "Unduh / Download",
-                        href: downloadUrl,
-                        target: "_blank",
-                        download: fileUrl ? true : undefined,
-                      },
-                    ]
+                    {
+                      key: "download",
+                      type: "download" as const,
+                      label: "Unduh / Download",
+                      href: downloadUrl,
+                      target: "_blank",
+                      download: fileUrl ? true : undefined,
+                    },
+                  ]
                   : []),
                 {
                   key: "edit",

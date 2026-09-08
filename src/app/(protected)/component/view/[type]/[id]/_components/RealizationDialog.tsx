@@ -216,8 +216,6 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
     }
   };
 
-  console.log('CEK DATA BARU', monthlyValues)
-
   const isImageFile = (item: TFileItem) => {
     if (item.file) {
       return item.file.type.startsWith("image/");
@@ -250,12 +248,10 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
 
     if (type === "IKU") {
       const data = ikuDetailData;
-      // console.log('CEK DATA', data)
       if (data?.result) {
         const result = data.result;
         const isText = unit?.toLowerCase() === "text";
         const val = isText ? result.textValue : Number(result.calculatedValue);
-        console.log('CEK DATA', val, result.calculatedValue)
 
         setMonthlyValues((prev) => ({
           ...prev,
@@ -263,34 +259,61 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
         }));
         setNarrativeValue(result.narrative || "");
 
-        const rawDocIds = result.documentIds;
-        let docIds: string[] = [];
-        if (Array.isArray(rawDocIds)) {
-          docIds = rawDocIds;
-        } else if (typeof rawDocIds === "string" && rawDocIds.trim() !== "") {
-          try {
-            const parsed = JSON.parse(rawDocIds);
-            if (Array.isArray(parsed)) {
-              docIds = parsed;
-            } else {
-              docIds = [rawDocIds];
-            }
-          } catch {
-            docIds = rawDocIds.includes(",") ? rawDocIds.split(",") : [rawDocIds];
-          }
-        }
-
-        if (docIds.length > 0) {
+        const rawDocs = (result as Record<string, unknown>).documents as TRealizationDocument[] | undefined;
+        if (Array.isArray(rawDocs) && rawDocs.length > 0) {
           const baseUrl = "https://sim.ntech.web.id";
-          setFileItems(docIds.map((docId: string) => ({
-            id: docId,
-            name: `Dokumen (${docId.slice(0, 8)})`,
-            previewUrl: `${baseUrl}/api/documents/${docId}`,
-            dataType: dataType ?? "document",
-            type: type ?? "COMPONENT"
-          })));
+          setFileItems(
+            rawDocs.map((item: TRealizationDocument) => {
+              const doc = item.document;
+              const docId = doc?.id || item.documentId || item.id;
+              const rawUrl = doc?.url || "";
+              const previewUrl = rawUrl
+                ? rawUrl.startsWith("http")
+                  ? rawUrl
+                  : `${baseUrl}${rawUrl}`
+                : docId
+                  ? `${baseUrl}/api/documents/${docId}`
+                  : "";
+
+              return {
+                id: docId,
+                name: doc?.originalName || doc?.filename || `Dokumen (${docId ? docId.slice(0, 8) : ""})`,
+                previewUrl,
+                dataType: dataType ?? "document",
+                type: type ?? "COMPONENT",
+              };
+            })
+          );
         } else {
-          setFileItems([]);
+          const rawDocIds = result.documentIds;
+          let docIds: string[] = [];
+          if (Array.isArray(rawDocIds)) {
+            docIds = rawDocIds;
+          } else if (typeof rawDocIds === "string" && rawDocIds.trim() !== "") {
+            try {
+              const parsed = JSON.parse(rawDocIds);
+              if (Array.isArray(parsed)) {
+                docIds = parsed;
+              } else {
+                docIds = [rawDocIds];
+              }
+            } catch {
+              docIds = rawDocIds.includes(",") ? rawDocIds.split(",") : [rawDocIds];
+            }
+          }
+
+          if (docIds.length > 0) {
+            const baseUrl = "https://sim.ntech.web.id";
+            setFileItems(docIds.map((docId: string) => ({
+              id: docId,
+              name: `Dokumen (${docId.slice(0, 8)})`,
+              previewUrl: `${baseUrl}/api/documents/${docId}`,
+              dataType: dataType ?? "document",
+              type: type ?? "COMPONENT"
+            })));
+          } else {
+            setFileItems([]);
+          }
         }
       } else {
         setFileItems([]);
@@ -364,8 +387,6 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
   const renderInputFields = ({ type }: { type?: string }) => {
     const isText = unit?.toLowerCase() === "text";
     const monthKey = type === "bulan" ? (selectedMonth ?? 0) : 0;
-
-    console.log('HHEHHH', monthlyValues, selectedMonth)
 
     // if (isYearly) {
     return (
@@ -447,9 +468,7 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
       const filesToUpload = fileItems.filter(item => !!item.file).map(item => item.file!);
       const existingIds = fileItems.filter(item => !!item.id).map(item => item.id!);
       if (filesToUpload.length > 0) {
-        console.log("Uploading files...", filesToUpload);
         const res = await uploadDocuments(filesToUpload);
-        console.log("Upload response:", res);
 
         if (res.status && res.result) {
           const uploadedIds = res.result.map((doc: { id: string }) => doc.id);
@@ -460,8 +479,6 @@ const RealizationDialog: React.FC<RealizationDialogProps> = ({
       } else {
         finalDocumentIds = existingIds;
       }
-
-      console.log("Saving IKU result with documentIds:", finalDocumentIds);
 
       const newIdComponent = ikuDetailData?.result?.idIku || idComponent;
       let finalIdComponent = newIdComponent;

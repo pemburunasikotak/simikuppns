@@ -66,16 +66,11 @@ const formatFileSize = (bytes: number): string => {
 
 const getYouTubeEmbedUrl = (url: string): string | null => {
   try {
-    let videoId = "";
-    if (url.includes("youtu.be/")) {
-      videoId = url.split("youtu.be/")[1]?.split("?")[0] || "";
-    } else if (url.includes("youtube.com/watch")) {
-      const urlObj = new URL(url);
-      videoId = urlObj.searchParams.get("v") || "";
-    } else if (url.includes("youtube.com/embed/")) {
-      videoId = url.split("youtube.com/embed/")[1]?.split("?")[0] || "";
-    }
-    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11
+      ? `https://www.youtube.com/embed/${match[2]}`
+      : null;
   } catch {
     return null;
   }

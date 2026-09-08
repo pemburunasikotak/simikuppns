@@ -54,7 +54,7 @@ export const updateProkerGuide = async (payload: TUpdateProkerGuidePayload): Pro
     formData.append("file", rest.file);
   }
 
-  const { data } = await prokerAxiosInstance.put(`/api/v1/guides/${id}`, formData, {
+  const { data } = await prokerAxiosInstance.patch(`/api/v1/guides/${id}`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

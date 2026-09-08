@@ -67,7 +67,7 @@ export const updateGuide = async (payload: TUpdateGuidePayload): Promise<TGuideD
 
   const { data } = await api({
     url: `/api/guides/${id}`,
-    method: "PUT",
+    method: "PATCH",
     data: formData,
     headers: {
       "Content-Type": "multipart/form-data",

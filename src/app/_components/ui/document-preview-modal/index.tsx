@@ -441,6 +441,7 @@ interface DocumentCellProps {
   document?: unknown;
   title?: string;
   maxItems?: number;
+  direction?: "row" | "column";
 }
 
 export const DocumentCell: React.FC<DocumentCellProps> = ({
@@ -448,6 +449,7 @@ export const DocumentCell: React.FC<DocumentCellProps> = ({
   document: docProp,
   title = "Pratinjau Dokumen",
   maxItems = 3,
+  direction = "row",
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -495,7 +497,37 @@ export const DocumentCell: React.FC<DocumentCellProps> = ({
 
   return (
     <>
-      <Stack direction="row" spacing={1} alignItems="center" sx={{ height: "100%", py: 0.5 }}>
+      <Stack
+        direction={direction}
+        spacing={0.75}
+        alignItems={direction === "column" ? "flex-start" : "center"}
+        onWheel={(e) => {
+          if (direction === "column") {
+            e.stopPropagation();
+          }
+        }}
+        sx={{
+          maxHeight: direction === "column" ? 130 : "100%",
+          overflowY: direction === "column" ? "auto" : "visible",
+          overflowX: "hidden",
+          width: "100%",
+          py: 0.5,
+          pr: direction === "column" ? 0.5 : 0,
+          "&::-webkit-scrollbar": {
+            width: "4px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#cbd5e1",
+            borderRadius: "4px",
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: "#94a3b8",
+          },
+        }}
+      >
         {visibleDocs.map((item, idx) => {
           const url = getFileUrl(item.doc);
           const name = getFileName(item.doc, item.label);
@@ -531,7 +563,7 @@ export const DocumentCell: React.FC<DocumentCellProps> = ({
                     sx={{
                       fontWeight: 700,
                       color: "#065f46",
-                      maxWidth: 80,
+                      maxWidth: direction === "column" ? 180 : 80,
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -605,7 +637,7 @@ export const DocumentCell: React.FC<DocumentCellProps> = ({
                     sx={{
                       fontWeight: 700,
                       color: "#991b1b",
-                      maxWidth: 80,
+                      maxWidth: direction === "column" ? 180 : 80,
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -645,7 +677,7 @@ export const DocumentCell: React.FC<DocumentCellProps> = ({
                   sx={{
                     fontWeight: 700,
                     color: "#334155",
-                    maxWidth: 80,
+                    maxWidth: direction === "column" ? 180 : 80,
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",

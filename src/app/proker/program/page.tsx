@@ -269,7 +269,17 @@ const ProgramPage: FC = (): ReactElement => {
                   Tambah Program
                 </Button>,
               ]
-              : []
+              : [
+                <Button
+                  key="export-excel"
+                  variant="outlined"
+                  color="primary"
+                  startIcon={<FileDownloadOutlined />}
+                  onClick={() => setOpenExportModal(true)}
+                >
+                  Unduh Excel
+                </Button>,
+              ]
           }
         />
       }

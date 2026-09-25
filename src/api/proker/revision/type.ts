@@ -21,6 +21,11 @@ export type TRevisionIndicatorItem = {
   budget?: number | string;
   proposalURL?: string;
   rabURL?: string;
+  usulanPerbaikanURL?: string;
+  usulanBahanHabisURL?: string;
+  usulanPeralatanURL?: string;
+  usulanPelatihanURL?: string;
+  usulanMeubelairURL?: string;
   proposalDocumentId?: string;
   rabDocumentId?: string;
   program?: TRevisionIndicatorProgram;

@@ -117,10 +117,20 @@ export const finalisasiIndicators = async (year: string | number = 2025): Promis
   return data;
 };
 
-export const downloadTemplate = async (type: "TOR" | "RAB"): Promise<Blob> => {
+export type TemplateType =
+  | "TOR"
+  | "RAB"
+  | "FORMAT_USULAN_PERBAIKAN"
+  | "FORMAT_USULAN_BAHAN_HABIS"
+  | "FORMAT_USULAN_PERALATAN"
+  | "FORMAT_USULAN_PELATIHAN"
+  | "FORMAT_USULAN_MEUBELAIR";
+
+export const downloadTemplate = async (type: TemplateType | string): Promise<Blob> => {
   const { data } = await prokerAxiosInstance.get(`/api/v1/templates/${type}/download`, {
     responseType: "blob",
   });
   return data;
 };
+
 

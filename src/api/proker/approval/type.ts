@@ -36,6 +36,13 @@ export type TSubmittedIndicatorItem = {
   order?: number;
   program?: TSubmittedIndicatorProgram;
   unit?: TSubmittedIndicatorUnit;
+  proposalURL?: string;
+  rabURL?: string;
+  usulanPerbaikanURL?: string;
+  usulanBahanHabisURL?: string;
+  usulanPeralatanURL?: string;
+  usulanPelatihanURL?: string;
+  usulanMeubelairURL?: string;
   createdAt: string;
   updatedAt: string;
 };

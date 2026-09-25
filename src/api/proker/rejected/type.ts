@@ -21,6 +21,11 @@ export type TRejectedIndicatorItem = {
   budget?: number | string;
   proposalURL?: string;
   rabURL?: string;
+  usulanPerbaikanURL?: string;
+  usulanBahanHabisURL?: string;
+  usulanPeralatanURL?: string;
+  usulanPelatihanURL?: string;
+  usulanMeubelairURL?: string;
   program?: TRejectedIndicatorProgram;
   unit?: TRejectedIndicatorUnit;
   rejectionLevel?: string;

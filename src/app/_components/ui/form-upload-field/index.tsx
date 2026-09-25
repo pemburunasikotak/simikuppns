@@ -12,7 +12,7 @@ import {
 import { styled } from "@mui/material/styles";
 import { RestoreFromTrashOutlined, CloudUpload, FileDownloadOutlined } from "@mui/icons-material";
 import HelperText from "../helper-text";
-import { downloadTemplate } from "@/api/proker/program/api";
+import { downloadTemplate, TemplateType } from "@/api/proker/program/api";
 
 const VisuallyHiddenInput = styled("input")({
   opacity: 0,
@@ -81,7 +81,7 @@ interface Props {
   isV2?: boolean;
   onRemove?: () => void;
   disabled?: boolean;
-  templateType?: "TOR" | "RAB" | string;
+  templateType?: TemplateType | string;
   onDownloadTemplate?: () => void;
   templateLabel?: string;
 }
@@ -112,7 +112,7 @@ const FormUploadField = ({
     }
     if (templateType) {
       try {
-        const type = templateType as "TOR" | "RAB";
+        const type = templateType;
         const blob = await downloadTemplate(type);
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -131,9 +131,33 @@ const FormUploadField = ({
 
   return (
     <FormControl required={required} fullWidth disabled={disabled}>
-      <FormLabel htmlFor={name} error={!!error} required={required} sx={{ mb: 1 }}>
-        {label}
-      </FormLabel>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+        <FormLabel htmlFor={name} error={!!error} required={required} sx={{ mb: 0 }}>
+          {label}
+        </FormLabel>
+        {(templateType || onDownloadTemplate) && (
+          <Button
+            size="small"
+            variant="text"
+            startIcon={<FileDownloadOutlined fontSize="small" />}
+            onClick={handleDownload}
+            sx={{
+              p: 0,
+              minWidth: "auto",
+              textTransform: "none",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              color: "primary.main",
+              "&:hover": {
+                bgcolor: "transparent",
+                textDecoration: "underline",
+              },
+            }}
+          >
+            {templateLabel || `Unduh Template ${templateType || ""}`}
+          </Button>
+        )}
+      </Stack>
       {isV2 ? (
         <UploadContainer
           as="label"
@@ -175,7 +199,6 @@ const FormUploadField = ({
           )}
         </UploadContainer>
       ) : (
-        // )}
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Upload error={error} component="label" variant="contained" disabled={disabled}>
             Browser
@@ -187,28 +210,6 @@ const FormUploadField = ({
       )}
       <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" sx={{ mt: 0.5 }}>
         <HelperText>{uploadDesc}</HelperText>
-        {(templateType || onDownloadTemplate) && (
-          <Button
-            size="small"
-            variant="text"
-            startIcon={<FileDownloadOutlined fontSize="small" />}
-            onClick={handleDownload}
-            sx={{
-              p: 0,
-              minWidth: "auto",
-              textTransform: "none",
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              color: "primary.main",
-              "&:hover": {
-                bgcolor: "transparent",
-                textDecoration: "underline",
-              },
-            }}
-          >
-            {templateLabel || `Unduh Template ${templateType || ""}`}
-          </Button>
-        )}
       </Stack>
 
       <Stack direction="row" justifyContent="space-between">

@@ -34,6 +34,7 @@ const DataTable = ({
   return (
     <Box sx={{ width: "100%" }}>
       <DataGrid
+        getRowHeight={others.getRowHeight || (() => "auto")}
         {...others}
         hideFooterPagination
         hideFooter
@@ -54,6 +55,12 @@ const DataTable = ({
           "& .MuiDataGrid-columnHeaders .MuiDataGrid-filler": {
             backgroundColor: "#ffffff",
           },
+          "& .MuiDataGrid-cell": {
+            display: "flex",
+            alignItems: "center",
+            py: 1,
+          },
+          ...others.sx,
         }}
       />
       {!hidePagination && paginationInfo && handleChange && (

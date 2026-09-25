@@ -66,6 +66,11 @@ const schema = z.object({
   budget: z.string().optional(),
   propsal: z.any().optional(),
   rab: z.any().optional(),
+  usulanBahanHabisPakai: z.any().optional(),
+  usulanPeralatan: z.any().optional(),
+  usulanMebel: z.any().optional(),
+  usulanPerawatanPerbaikan: z.any().optional(),
+  usulanLainnya: z.any().optional(),
   proposalDocumentId: z.string().optional(),
   rabDocumentId: z.string().optional(),
 });
@@ -107,6 +112,11 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
       budget: "",
       propsal: "",
       rab: "",
+      usulanBahanHabisPakai: "",
+      usulanPeralatan: "",
+      usulanMebel: "",
+      usulanPerawatanPerbaikan: "",
+      usulanLainnya: "",
       proposalDocumentId: "",
       rabDocumentId: "",
     },
@@ -140,6 +150,8 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
           ? selectedIndicator.pics.map((pic) => pic.userId).filter(Boolean)
           : [];
 
+        const selInd = selectedIndicator as unknown as Record<string, unknown>;
+
         reset({
           name: selectedIndicator.name,
           category: selectedIndicator.category || "",
@@ -151,11 +163,16 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
           targetQ2: selectedIndicator.targetQ2 || 0,
           targetQ3: selectedIndicator.targetQ3 || 0,
           targetQ4: selectedIndicator.targetQ4 || 0,
-          budget: ((selectedIndicator as unknown) as { budget?: string }).budget || "",
-          propsal: ((selectedIndicator as unknown) as { propsal?: string }).propsal || "",
-          proposalDocumentId: ((selectedIndicator as unknown) as { proposalDocumentId?: string }).proposalDocumentId || "",
-          rab: ((selectedIndicator as unknown) as { rab?: string }).rab || "",
-          rabDocumentId: ((selectedIndicator as unknown) as { rabDocumentId?: string }).rabDocumentId || "",
+          budget: (selInd.budget as string) || "",
+          propsal: (selInd.propsal as string) || "",
+          proposalDocumentId: (selInd.proposalDocumentId as string) || "",
+          rab: (selInd.rab as string) || "",
+          rabDocumentId: (selInd.rabDocumentId as string) || "",
+          usulanBahanHabisPakai: (selInd.usulanBahanHabisPakai as string) || "",
+          usulanPeralatan: (selInd.usulanPeralatan as string) || "",
+          usulanMebel: (selInd.usulanMebel as string) || "",
+          usulanPerawatanPerbaikan: (selInd.usulanPerawatanPerbaikan as string) || "",
+          usulanLainnya: (selInd.usulanLainnya as string) || "",
         });
       } else {
         reset({
@@ -172,6 +189,11 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
           budget: "",
           propsal: "",
           rab: "",
+          usulanBahanHabisPakai: "",
+          usulanPeralatan: "",
+          usulanMebel: "",
+          usulanPerawatanPerbaikan: "",
+          usulanLainnya: "",
           proposalDocumentId: "",
           rabDocumentId: "",
         });
@@ -205,6 +227,11 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
 
     let proposalVal = data.propsal;
     let rabVal = data.rab;
+    let usulanBahanHabisPakaiVal = data.usulanBahanHabisPakai;
+    let usulanPeralatanVal = data.usulanPeralatan;
+    let usulanMebelVal = data.usulanMebel;
+    let usulanPerawatanPerbaikanVal = data.usulanPerawatanPerbaikan;
+    let usulanLainnyaVal = data.usulanLainnya;
 
     if (isRutinOrPengembangan) {
       if (data.propsal instanceof File) {
@@ -227,10 +254,60 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
           return;
         }
       }
+      if (data.usulanBahanHabisPakai instanceof File) {
+        setIsUploading(true);
+        try {
+          usulanBahanHabisPakaiVal = await uploadProkerDocument(data.usulanBahanHabisPakai, "OTHER");
+        } catch {
+          enqueueSnackbar("Gagal mengunggah berkas Usulan Bahan Habis Pakai", { variant: "error" });
+          setIsUploading(false);
+          return;
+        }
+      }
+      if (data.usulanPeralatan instanceof File) {
+        setIsUploading(true);
+        try {
+          usulanPeralatanVal = await uploadProkerDocument(data.usulanPeralatan, "OTHER");
+        } catch {
+          enqueueSnackbar("Gagal mengunggah berkas Usulan Peralatan", { variant: "error" });
+          setIsUploading(false);
+          return;
+        }
+      }
+      if (data.usulanMebel instanceof File) {
+        setIsUploading(true);
+        try {
+          usulanMebelVal = await uploadProkerDocument(data.usulanMebel, "OTHER");
+        } catch {
+          enqueueSnackbar("Gagal mengunggah berkas Usulan Mebel", { variant: "error" });
+          setIsUploading(false);
+          return;
+        }
+      }
+      if (data.usulanPerawatanPerbaikan instanceof File) {
+        setIsUploading(true);
+        try {
+          usulanPerawatanPerbaikanVal = await uploadProkerDocument(data.usulanPerawatanPerbaikan, "OTHER");
+        } catch {
+          enqueueSnackbar("Gagal mengunggah berkas Usulan Perawatan & Perbaikan", { variant: "error" });
+          setIsUploading(false);
+          return;
+        }
+      }
+      if (data.usulanLainnya instanceof File) {
+        setIsUploading(true);
+        try {
+          usulanLainnyaVal = await uploadProkerDocument(data.usulanLainnya, "OTHER");
+        } catch {
+          enqueueSnackbar("Gagal mengunggah berkas Usulan Pelatihan", { variant: "error" });
+          setIsUploading(false);
+          return;
+        }
+      }
     }
     setIsUploading(false);
 
-    const fullPayload: import("@/api/proker/manajemenProgram/type").TDefaultProgramIndicatorPayload = {
+    const fullPayload: import("@/api/proker/manajemenProgram/type").TDefaultProgramIndicatorPayload & Record<string, unknown> = {
       name: data.name,
       category: data.category,
       unit: data.masterUnitTypeId,
@@ -249,6 +326,11 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
         rab: rabVal,
         rabDocumentId: rabVal,
         proposalDocumentId: proposalVal,
+        usulanBahanHabisPakai: usulanBahanHabisPakaiVal,
+        usulanPeralatan: usulanPeralatanVal,
+        usulanMebel: usulanMebelVal,
+        usulanPerawatanPerbaikan: usulanPerawatanPerbaikanVal,
+        usulanLainnya: usulanLainnyaVal,
       } : {}),
     };
 
@@ -492,6 +574,130 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                     )}
                   />
                 </Grid>
+
+                {selectedCategory === "RUTIN" && (
+                  <>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <Controller
+                        name="usulanBahanHabisPakai"
+                        control={control}
+                        render={({ field: { onChange, value }, fieldState: { error } }) => (
+                          <FormUploadField
+                            label="Usulan Bahan Habis Pakai (Opsional)"
+                            name="usulanBahanHabisPakai"
+                            disabled={isDetail}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) onChange(file);
+                            }}
+                            value={value && typeof value === 'object' ? (value as File).name : (value as string) || ""}
+                            error={!!error}
+                            helper={error?.message}
+                            acceptFormat=".pdf,.doc,.docx,.xls,.xlsx"
+                            uploadDesc="Format Dokumen PDF, DOCX, XLS, XLSX"
+                            templateType="FORMAT_USULAN_BAHAN_HABIS"
+                          />
+                        )}
+                      />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <Controller
+                        name="usulanPeralatan"
+                        control={control}
+                        render={({ field: { onChange, value }, fieldState: { error } }) => (
+                          <FormUploadField
+                            label="Usulan Peralatan (Opsional)"
+                            name="usulanPeralatan"
+                            disabled={isDetail}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) onChange(file);
+                            }}
+                            value={value && typeof value === 'object' ? (value as File).name : (value as string) || ""}
+                            error={!!error}
+                            helper={error?.message}
+                            acceptFormat=".pdf,.doc,.docx,.xls,.xlsx"
+                            uploadDesc="Format Dokumen PDF, DOCX, XLS, XLSX"
+                            templateType="FORMAT_USULAN_PERALATAN"
+                          />
+                        )}
+                      />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <Controller
+                        name="usulanMebel"
+                        control={control}
+                        render={({ field: { onChange, value }, fieldState: { error } }) => (
+                          <FormUploadField
+                            label="Usulan Mebel (Opsional)"
+                            name="usulanMebel"
+                            disabled={isDetail}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) onChange(file);
+                            }}
+                            value={value && typeof value === 'object' ? (value as File).name : (value as string) || ""}
+                            error={!!error}
+                            helper={error?.message}
+                            acceptFormat=".pdf,.doc,.docx,.xls,.xlsx"
+                            uploadDesc="Format Dokumen PDF, DOCX, XLS, XLSX"
+                            templateType="FORMAT_USULAN_MEUBELAIR"
+                          />
+                        )}
+                      />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <Controller
+                        name="usulanPerawatanPerbaikan"
+                        control={control}
+                        render={({ field: { onChange, value }, fieldState: { error } }) => (
+                          <FormUploadField
+                            label="Usulan Perawatan & Perbaikan (Opsional)"
+                            name="usulanPerawatanPerbaikan"
+                            disabled={isDetail}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) onChange(file);
+                            }}
+                            value={value && typeof value === 'object' ? (value as File).name : (value as string) || ""}
+                            error={!!error}
+                            helper={error?.message}
+                            acceptFormat=".pdf,.doc,.docx,.xls,.xlsx"
+                            uploadDesc="Format Dokumen PDF, DOCX, XLS, XLSX"
+                            templateType="FORMAT_USULAN_PERBAIKAN"
+                          />
+                        )}
+                      />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <Controller
+                        name="usulanLainnya"
+                        control={control}
+                        render={({ field: { onChange, value }, fieldState: { error } }) => (
+                          <FormUploadField
+                            label="Usulan Pelatihan (Opsional)"
+                            name="usulanLainnya"
+                            disabled={isDetail}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) onChange(file);
+                            }}
+                            value={value && typeof value === 'object' ? (value as File).name : (value as string) || ""}
+                            error={!!error}
+                            helper={error?.message}
+                            acceptFormat=".pdf,.doc,.docx,.xls,.xlsx"
+                            uploadDesc="Format Dokumen PDF, DOCX, XLS, XLSX"
+                            templateType="FORMAT_USULAN_PELATIHAN"
+                          />
+                        )}
+                      />
+                    </Grid>
+                  </>
+                )}
 
                 <Grid size={{ xs: 12 }}>
                   <Typography

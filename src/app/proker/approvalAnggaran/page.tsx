@@ -24,7 +24,7 @@ import { useSnackbar } from "notistack";
 import { GridColDef } from "@mui/x-data-grid";
 import DataTable from "@/app/_components/ui/data-table";
 import { createPaginationInfo } from "@/utils/data-table";
-import { Page } from "@/app/_components/ui";
+import { Page, DocumentCell } from "@/app/_components/ui";
 import Filter from "@/app/_components/ui/filter";
 import { useGetApprovedIndicators } from "./_hooks/use-get-approved-indicators";
 import {
@@ -316,6 +316,38 @@ export default function ApprovalAnggaranPage() {
               variant="filled"
               sx={{ height: 24, fontSize: "0.72rem", fontWeight: 600, borderRadius: "6px" }}
             />
+          </Box>
+        );
+      },
+    },
+    {
+      field: "documents",
+      headerName: "Dokumen",
+      minWidth: 180,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => {
+        const row = params.row;
+        const docs: { label: string; doc: unknown }[] = [];
+        if (row.proposalURL) docs.push({ label: "TOR", doc: row.proposalURL });
+        if (row.rabURL) docs.push({ label: "RAB", doc: row.rabURL });
+        if (row.usulanBahanHabisURL) docs.push({ label: "Usulan Bahan Habis", doc: row.usulanBahanHabisURL });
+        if (row.usulanPeralatanURL) docs.push({ label: "Usulan Peralatan", doc: row.usulanPeralatanURL });
+        if (row.usulanMeubelairURL) docs.push({ label: "Usulan Meubelair", doc: row.usulanMeubelairURL });
+        if (row.usulanPerbaikanURL) docs.push({ label: "Usulan Perbaikan", doc: row.usulanPerbaikanURL });
+        if (row.usulanPelatihanURL) docs.push({ label: "Usulan Pelatihan", doc: row.usulanPelatihanURL });
+
+        if (docs.length === 0)
+          return (
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}>
+              <Typography variant="body2" color="text.secondary">
+                -
+              </Typography>
+            </Box>
+          );
+        return (
+          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", py: 1 }}>
+            <DocumentCell documents={docs} title={`Dokumen: ${row.name}`} direction="column" maxItems={10} />
           </Box>
         );
       },

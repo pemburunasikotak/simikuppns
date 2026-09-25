@@ -254,7 +254,7 @@ export default function RejectedPage() {
     {
       field: "documents",
       headerName: "Dokumen",
-      width: 150,
+      width: 180,
       headerAlign: "center",
       align: "center",
       renderCell: (params) => {
@@ -262,6 +262,11 @@ export default function RejectedPage() {
         const docs: { label: string; doc: unknown }[] = [];
         if (row.proposalURL) docs.push({ label: "TOR", doc: row.proposalURL });
         if (row.rabURL) docs.push({ label: "RAB", doc: row.rabURL });
+        if (row.usulanBahanHabisURL) docs.push({ label: "Usulan Bahan Habis", doc: row.usulanBahanHabisURL });
+        if (row.usulanPeralatanURL) docs.push({ label: "Usulan Peralatan", doc: row.usulanPeralatanURL });
+        if (row.usulanMeubelairURL) docs.push({ label: "Usulan Meubelair", doc: row.usulanMeubelairURL });
+        if (row.usulanPerbaikanURL) docs.push({ label: "Usulan Perbaikan", doc: row.usulanPerbaikanURL });
+        if (row.usulanPelatihanURL) docs.push({ label: "Usulan Pelatihan", doc: row.usulanPelatihanURL });
         if (docs.length === 0)
           return (
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}>
@@ -269,8 +274,8 @@ export default function RejectedPage() {
             </Box>
           );
         return (
-          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}>
-            <DocumentCell documents={docs} title={`Dokumen: ${row.name}`} />
+          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", py: 1 }}>
+            <DocumentCell documents={docs} title={`Dokumen: ${row.name}`} direction="column" maxItems={10} />
           </Box>
         );
       },

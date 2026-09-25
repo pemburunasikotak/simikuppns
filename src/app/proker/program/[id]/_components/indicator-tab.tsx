@@ -101,7 +101,7 @@ const IndicatorTab: FC = (): ReactElement => {
       {
         field: "documents",
         headerName: "Dokumen",
-        width: 160,
+        minWidth: 200,
         align: "center",
         headerAlign: "center",
         renderCell: (params) => {
@@ -113,10 +113,19 @@ const IndicatorTab: FC = (): ReactElement => {
           const docs: { label: string; doc: unknown }[] = [];
           if (proposalDoc) docs.push({ label: "TOR", doc: proposalDoc });
           if (rabDoc) docs.push({ label: "RAB", doc: rabDoc });
+          if (row.usulanBahanHabisURL) docs.push({ label: "Usulan Bahan Habis", doc: row.usulanBahanHabisURL });
+          if (row.usulanPeralatanURL) docs.push({ label: "Usulan Peralatan", doc: row.usulanPeralatanURL });
+          if (row.usulanMeubelairURL) docs.push({ label: "Usulan Meubelair", doc: row.usulanMeubelairURL });
+          if (row.usulanPerbaikanURL) docs.push({ label: "Usulan Perbaikan", doc: row.usulanPerbaikanURL });
+          if (row.usulanPelatihanURL) docs.push({ label: "Usulan Pelatihan", doc: row.usulanPelatihanURL });
 
           if (docs.length === 0) return "-";
 
-          return <DocumentCell documents={docs} title={`Dokumen: ${row.name}`} />;
+          return (
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", py: 1 }}>
+              <DocumentCell documents={docs} title={`Dokumen: ${row.name}`} direction="column" maxItems={10} />
+            </Box>
+          );
         },
       },
       {

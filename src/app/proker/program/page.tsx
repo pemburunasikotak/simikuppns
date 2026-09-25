@@ -123,8 +123,8 @@ const ProgramPage: FC = (): ReactElement => {
   const columns: GridColDef<TProkerProgram>[] = [
     { field: "code", headerName: "Kode Program", width: 150, valueFormatter: formatValue },
     { field: "title", headerName: "Nama Program", minWidth: 200, flex: 1, valueFormatter: formatValue },
-    { field: "description", headerName: "Deskripsi", minWidth: 250, flex: 1, valueFormatter: formatValue },
-    { field: "objective", headerName: "Objective", minWidth: 200, flex: 1, valueFormatter: formatValue },
+    // { field: "description", headerName: "Deskripsi", minWidth: 250, flex: 1, valueFormatter: formatValue },
+    // { field: "objective", headerName: "Objective", minWidth: 200, flex: 1, valueFormatter: formatValue },
     { field: "year", headerName: "Tahun", width: 100, valueFormatter: formatValue },
     {
       field: "indicators",

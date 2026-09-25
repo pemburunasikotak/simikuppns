@@ -1,4 +1,4 @@
-import { FC, ReactElement, useState } from "react";
+import { FC, ReactElement, useState, useEffect } from "react";
 import {
   Button,
   Chip,
@@ -31,6 +31,7 @@ import ActionButtonTable from "@/app/_components/ui/action-button-table";
 import useModal from "@/app/_components/ui/modal";
 import useDeleteProgram from "./_hooks/use-delete-program";
 import useFinalisasiIndicators from "./_hooks/use-finalisasi-indicators";
+import useGetMyUnits from "@/app/proker/unit/_hooks/use-get-my-units";
 import { ProkerSessionUser } from "@/libs/localstorage/proker-session";
 
 
@@ -65,6 +66,19 @@ const ProgramPage: FC = (): ReactElement => {
   const userRoleKeys = user?.roles?.map((r: { key: string }) => r.key) || [];
   const isAdmin = userRoleKeys.includes("admin_sim_proker");
 
+  const [selectedUnitId, setSelectedUnitId] = useState<string>("");
+  const { data: myUnitsData } = useGetMyUnits({ limit: 50 });
+  const myUnitOptions = myUnitsData?.map((item) => ({
+    value: item?.unit?.id || item?.id || "",
+    label: item?.unit?.name || item?.name || "",
+  })) || [];
+
+  useEffect(() => {
+    if (myUnitOptions.length > 0 && !selectedUnitId) {
+      setSelectedUnitId(myUnitOptions[0].value);
+    }
+  }, [myUnitOptions, selectedUnitId]);
+
   const items = data?.data?.items || [];
 
   const handleDownloadExcel = async () => {
@@ -78,7 +92,7 @@ const ProgramPage: FC = (): ReactElement => {
     }
     try {
       setIsExporting(true);
-      const blob = await exportProkerExcel(selectedYear, selectedType);
+      const blob = await exportProkerExcel(selectedYear, selectedType, !isAdmin ? selectedUnitId : undefined);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -314,6 +328,21 @@ const ProgramPage: FC = (): ReactElement => {
               fullWidth
               placeholder="Contoh: 2025"
             />
+            {!isAdmin && (
+              <TextField
+                select
+                label="Unit"
+                value={selectedUnitId}
+                onChange={(e) => setSelectedUnitId(e.target.value)}
+                fullWidth
+              >
+                {myUnitOptions.map((opt) => (
+                  <MenuItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
             <TextField
               select
               label="Tipe"

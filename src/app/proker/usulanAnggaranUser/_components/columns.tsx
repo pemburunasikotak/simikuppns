@@ -1,7 +1,7 @@
 import { Box, Chip, Typography } from "@mui/material";
 import { PictureAsPdfOutlined } from "@mui/icons-material";
 import { GridColDef } from "@mui/x-data-grid";
-import ActionButtonTable from "@/app/_components/ui/action-button-table";
+import ActionButtonTable, { ActionButtonItem } from "@/app/_components/ui/action-button-table";
 import { TUnitBudgetProposal } from "@/api/proker/usulanAnggaran/type";
 import { formatCurrency } from "../_utils/format";
 
@@ -12,6 +12,7 @@ interface GetColumnsOptions {
     onPreviewDoc: (doc: { url: string; title: string }) => void;
     onEdit: (item: TUnitBudgetProposal) => void;
     onDelete: (item: TUnitBudgetProposal) => void;
+    isAdmin?: boolean;
 }
 
 export const getProposalColumns = ({
@@ -19,6 +20,7 @@ export const getProposalColumns = ({
     onPreviewDoc,
     onEdit,
     onDelete,
+    isAdmin,
 }: GetColumnsOptions): GridColDef<TRow>[] => {
     const renderDocValueCell = (
         value?: number,
@@ -172,24 +174,27 @@ export const getProposalColumns = ({
         {
             field: "actions",
             headerName: "Aksi",
-            width: 110,
+            width: 120,
             sortable: false,
-            renderCell: (params) => (
-                <ActionButtonTable
-                    items={[
-                        {
-                            key: "edit",
-                            type: "edit",
-                            onClick: () => onEdit(params.row),
-                        },
-                        {
-                            key: "delete",
-                            type: "delete",
-                            onClick: () => onDelete(params.row),
-                        },
-                    ]}
-                />
-            ),
+            renderCell: (params) => {
+                const actionItems: ActionButtonItem[] = [
+                    {
+                        key: "edit",
+                        type: "edit",
+                        onClick: () => onEdit(params.row),
+                    },
+                ];
+
+                if (isAdmin) {
+                    actionItems.push({
+                        key: "delete",
+                        type: "delete",
+                        onClick: () => onDelete(params.row),
+                    });
+                }
+
+                return <ActionButtonTable items={actionItems} />;
+            },
         },
     ];
 };

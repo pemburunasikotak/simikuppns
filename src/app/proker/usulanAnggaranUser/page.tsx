@@ -311,6 +311,7 @@ export default function UsulanAnggaranUserPage() {
         onPreviewDoc: setPreviewDoc,
         onEdit: handleOpenEdit,
         onDelete: handleOpenDelete,
+        isAdmin,
     });
 
     const isPending = saveMutation.isPending || deleteMutation.isPending || isUploading;

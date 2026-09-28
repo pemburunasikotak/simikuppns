@@ -112,6 +112,7 @@ export const queryKeys = {
     aktivitas: "proker/aktivitas",
     progress: "proker/progress",
     evidence: "proker/evidence",
+    usulanAnggaran: "proker/usulanAnggaran",
     guides: "proker/guides",
   },
   unit: {

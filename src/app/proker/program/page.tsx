@@ -250,51 +250,41 @@ const ProgramPage: FC = (): ReactElement => {
           defaultValue={{
             search_value: filter.search || filter.search_value,
           }}
-          actions={
-            isAdmin
+          actions={[
+            <Button
+              key="export-excel"
+              variant="outlined"
+              color="primary"
+              startIcon={<FileDownloadOutlined />}
+              onClick={() => setOpenExportModal(true)}
+            >
+              Unduh Excel
+            </Button>,
+            ...(isAdmin
               ? [
-                <Button
-                  key="export-excel"
-                  variant="outlined"
-                  color="primary"
-                  startIcon={<FileDownloadOutlined />}
-                  onClick={() => setOpenExportModal(true)}
-                >
-                  Unduh Excel
-                </Button>,
-                <Button
-                  key="finalisasi"
-                  variant="outlined"
-                  color="success"
-                  startIcon={<CheckCircleOutlined />}
-                  onClick={() => setOpenFinalisasiModal(true)}
-                  disabled={finalisasiMutation.isPending}
-                >
-                  Finalisasi
-                </Button>,
-                <Button
-                  key="add"
-                  variant="contained"
-                  startIcon={<AddOutlined />}
-                  onClick={() => {
-                    navigate("/proker/program/tambah");
-                  }}
-                >
-                  Tambah Program
-                </Button>,
-              ]
-              : [
-                <Button
-                  key="export-excel"
-                  variant="outlined"
-                  color="primary"
-                  startIcon={<FileDownloadOutlined />}
-                  onClick={() => setOpenExportModal(true)}
-                >
-                  Unduh Excel
-                </Button>,
-              ]
-          }
+                  <Button
+                    key="finalisasi"
+                    variant="outlined"
+                    color="success"
+                    startIcon={<CheckCircleOutlined />}
+                    onClick={() => setOpenFinalisasiModal(true)}
+                    disabled={finalisasiMutation.isPending}
+                  >
+                    Finalisasi
+                  </Button>,
+                ]
+              : []),
+            <Button
+              key="add"
+              variant="contained"
+              startIcon={<AddOutlined />}
+              onClick={() => {
+                navigate("/proker/program/tambah");
+              }}
+            >
+              Tambah Program
+            </Button>,
+          ]}
         />
       }
     >

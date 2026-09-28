@@ -66,11 +66,11 @@ const schema = z.object({
   budget: z.string().optional(),
   propsal: z.any().optional(),
   rab: z.any().optional(),
-  usulanBahanHabisPakai: z.any().optional(),
-  usulanPeralatan: z.any().optional(),
-  usulanMebel: z.any().optional(),
-  usulanPerawatanPerbaikan: z.any().optional(),
-  usulanLainnya: z.any().optional(),
+  // usulanBahanHabisPakai: z.any().optional(),
+  // usulanPeralatan: z.any().optional(),
+  // usulanMebel: z.any().optional(),
+  // usulanPerawatanPerbaikan: z.any().optional(),
+  // usulanLainnya: z.any().optional(),
   proposalDocumentId: z.string().optional(),
   rabDocumentId: z.string().optional(),
 });
@@ -112,11 +112,11 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
       budget: "",
       propsal: "",
       rab: "",
-      usulanBahanHabisPakai: "",
-      usulanPeralatan: "",
-      usulanMebel: "",
-      usulanPerawatanPerbaikan: "",
-      usulanLainnya: "",
+      // usulanBahanHabisPakai: "",
+      // usulanPeralatan: "",
+      // usulanMebel: "",
+      // usulanPerawatanPerbaikan: "",
+      // usulanLainnya: "",
       proposalDocumentId: "",
       rabDocumentId: "",
     },
@@ -168,11 +168,11 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
           proposalDocumentId: (selInd.proposalDocumentId as string) || "",
           rab: (selInd.rab as string) || "",
           rabDocumentId: (selInd.rabDocumentId as string) || "",
-          usulanBahanHabisPakai: (selInd.usulanBahanHabisPakai as string) || "",
-          usulanPeralatan: (selInd.usulanPeralatan as string) || "",
-          usulanMebel: (selInd.usulanMebel as string) || "",
-          usulanPerawatanPerbaikan: (selInd.usulanPerawatanPerbaikan as string) || "",
-          usulanLainnya: (selInd.usulanLainnya as string) || "",
+          // usulanBahanHabisPakai: (selInd.usulanBahanHabisPakai as string) || "",
+          // usulanPeralatan: (selInd.usulanPeralatan as string) || "",
+          // usulanMebel: (selInd.usulanMebel as string) || "",
+          // usulanPerawatanPerbaikan: (selInd.usulanPerawatanPerbaikan as string) || "",
+          // usulanLainnya: (selInd.usulanLainnya as string) || "",
         });
       } else {
         reset({
@@ -189,11 +189,11 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
           budget: "",
           propsal: "",
           rab: "",
-          usulanBahanHabisPakai: "",
-          usulanPeralatan: "",
-          usulanMebel: "",
-          usulanPerawatanPerbaikan: "",
-          usulanLainnya: "",
+          // usulanBahanHabisPakai: "",
+          // usulanPeralatan: "",
+          // usulanMebel: "",
+          // usulanPerawatanPerbaikan: "",
+          // usulanLainnya: "",
           proposalDocumentId: "",
           rabDocumentId: "",
         });
@@ -227,11 +227,11 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
 
     let proposalVal = data.propsal;
     let rabVal = data.rab;
-    let usulanBahanHabisPakaiVal = data.usulanBahanHabisPakai;
-    let usulanPeralatanVal = data.usulanPeralatan;
-    let usulanMebelVal = data.usulanMebel;
-    let usulanPerawatanPerbaikanVal = data.usulanPerawatanPerbaikan;
-    let usulanLainnyaVal = data.usulanLainnya;
+    // let usulanBahanHabisPakaiVal = data.usulanBahanHabisPakai;
+    // let usulanPeralatanVal = data.usulanPeralatan;
+    // let usulanMebelVal = data.usulanMebel;
+    // let usulanPerawatanPerbaikanVal = data.usulanPerawatanPerbaikan;
+    // let usulanLainnyaVal = data.usulanLainnya;
 
     if (isRutinOrPengembangan) {
       if (data.propsal instanceof File) {
@@ -254,56 +254,56 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
           return;
         }
       }
-      if (data.usulanBahanHabisPakai instanceof File) {
-        setIsUploading(true);
-        try {
-          usulanBahanHabisPakaiVal = await uploadProkerDocument(data.usulanBahanHabisPakai, "OTHER");
-        } catch {
-          enqueueSnackbar("Gagal mengunggah berkas Usulan Bahan Habis Pakai", { variant: "error" });
-          setIsUploading(false);
-          return;
-        }
-      }
-      if (data.usulanPeralatan instanceof File) {
-        setIsUploading(true);
-        try {
-          usulanPeralatanVal = await uploadProkerDocument(data.usulanPeralatan, "OTHER");
-        } catch {
-          enqueueSnackbar("Gagal mengunggah berkas Usulan Peralatan", { variant: "error" });
-          setIsUploading(false);
-          return;
-        }
-      }
-      if (data.usulanMebel instanceof File) {
-        setIsUploading(true);
-        try {
-          usulanMebelVal = await uploadProkerDocument(data.usulanMebel, "OTHER");
-        } catch {
-          enqueueSnackbar("Gagal mengunggah berkas Usulan Mebel", { variant: "error" });
-          setIsUploading(false);
-          return;
-        }
-      }
-      if (data.usulanPerawatanPerbaikan instanceof File) {
-        setIsUploading(true);
-        try {
-          usulanPerawatanPerbaikanVal = await uploadProkerDocument(data.usulanPerawatanPerbaikan, "OTHER");
-        } catch {
-          enqueueSnackbar("Gagal mengunggah berkas Usulan Perawatan & Perbaikan", { variant: "error" });
-          setIsUploading(false);
-          return;
-        }
-      }
-      if (data.usulanLainnya instanceof File) {
-        setIsUploading(true);
-        try {
-          usulanLainnyaVal = await uploadProkerDocument(data.usulanLainnya, "OTHER");
-        } catch {
-          enqueueSnackbar("Gagal mengunggah berkas Usulan Pelatihan", { variant: "error" });
-          setIsUploading(false);
-          return;
-        }
-      }
+      // if (data.usulanBahanHabisPakai instanceof File) {
+      //   setIsUploading(true);
+      //   try {
+      //     usulanBahanHabisPakaiVal = await uploadProkerDocument(data.usulanBahanHabisPakai, "OTHER");
+      //   } catch {
+      //     enqueueSnackbar("Gagal mengunggah berkas Usulan Bahan Habis Pakai", { variant: "error" });
+      //     setIsUploading(false);
+      //     return;
+      //   }
+      // }
+      // if (data.usulanPeralatan instanceof File) {
+      //   setIsUploading(true);
+      //   try {
+      //     usulanPeralatanVal = await uploadProkerDocument(data.usulanPeralatan, "OTHER");
+      //   } catch {
+      //     enqueueSnackbar("Gagal mengunggah berkas Usulan Peralatan", { variant: "error" });
+      //     setIsUploading(false);
+      //     return;
+      //   }
+      // }
+      // if (data.usulanMebel instanceof File) {
+      //   setIsUploading(true);
+      //   try {
+      //     usulanMebelVal = await uploadProkerDocument(data.usulanMebel, "OTHER");
+      //   } catch {
+      //     enqueueSnackbar("Gagal mengunggah berkas Usulan Mebel", { variant: "error" });
+      //     setIsUploading(false);
+      //     return;
+      //   }
+      // }
+      // if (data.usulanPerawatanPerbaikan instanceof File) {
+      //   setIsUploading(true);
+      //   try {
+      //     usulanPerawatanPerbaikanVal = await uploadProkerDocument(data.usulanPerawatanPerbaikan, "OTHER");
+      //   } catch {
+      //     enqueueSnackbar("Gagal mengunggah berkas Usulan Perawatan & Perbaikan", { variant: "error" });
+      //     setIsUploading(false);
+      //     return;
+      //   }
+      // }
+      // if (data.usulanLainnya instanceof File) {
+      //   setIsUploading(true);
+      //   try {
+      //     usulanLainnyaVal = await uploadProkerDocument(data.usulanLainnya, "OTHER");
+      //   } catch {
+      //     enqueueSnackbar("Gagal mengunggah berkas Usulan Pelatihan", { variant: "error" });
+      //     setIsUploading(false);
+      //     return;
+      //   }
+      // }
     }
     setIsUploading(false);
 
@@ -326,11 +326,11 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
         rab: rabVal,
         rabDocumentId: rabVal,
         proposalDocumentId: proposalVal,
-        usulanBahanHabisPakai: usulanBahanHabisPakaiVal,
-        usulanPeralatan: usulanPeralatanVal,
-        usulanMebel: usulanMebelVal,
-        usulanPerawatanPerbaikan: usulanPerawatanPerbaikanVal,
-        usulanLainnya: usulanLainnyaVal,
+        // usulanBahanHabisPakai: usulanBahanHabisPakaiVal,
+        // usulanPeralatan: usulanPeralatanVal,
+        // usulanMebel: usulanMebelVal,
+        // usulanPerawatanPerbaikan: usulanPerawatanPerbaikanVal,
+        // usulanLainnya: usulanLainnyaVal,
       } : {}),
     };
 
@@ -575,7 +575,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                   />
                 </Grid>
 
-                {selectedCategory === "RUTIN" && (
+                {/* {selectedCategory === "RUTIN" && (
                   <>
                     <Grid size={{ xs: 12, md: 6 }}>
                       <Controller
@@ -697,7 +697,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                       />
                     </Grid>
                   </>
-                )}
+                )} */}
 
                 <Grid size={{ xs: 12 }}>
                   <Typography

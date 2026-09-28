@@ -98,6 +98,13 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
     roles: ["admin_sim_proker", "user_sim_proker"],
   },
   {
+    key: "proker-usulan-anggaran",
+    label: "Usulan Anggaran User",
+    path: paths.proker.usulanAnggaranUser,
+    icon: <AccountBalanceWalletOutlined />,
+    roles: ["admin_sim_proker", "user_sim_proker"],
+  },
+  {
     key: "proker-revision",
     label: "Revision",
     path: paths.proker.revision,

@@ -14,6 +14,24 @@ export const ProgramSchema = z.object({
   endDate: z.string().optional(),
   budget: z.coerce.number().min(0, "Anggaran tidak valid").optional(),
   picId: z.string().optional(),
+  ikuId: z.string().optional(),
+  indicators: z.array(
+    z.object({
+      unitId: z.string().min(1, "Unit ID harus diisi"),
+      name: z.string().min(1, "Nama indikator harus diisi"),
+      masterUnitTypeId: z.string().min(1, "Master Unit Type ID harus diisi"),
+      category: z.string().min(1, "Kategori harus diisi"),
+      targetQ1: z.coerce.number().optional(),
+      targetQ2: z.coerce.number().optional(),
+      targetQ3: z.coerce.number().optional(),
+      targetQ4: z.coerce.number().optional(),
+      budget: z.coerce.number().optional(),
+      picIds: z.array(z.string()).optional(),
+      order: z.coerce.number().optional(),
+      propsal: z.any().optional(),
+      rab: z.any().optional(),
+    })
+  ).optional(),
 });
 
 export type TProgramFormData = z.infer<typeof ProgramSchema>;

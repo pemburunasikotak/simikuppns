@@ -1,4 +1,4 @@
-import { FC, ReactElement, useState, useEffect } from "react";
+import { FC, ReactElement, useState, useEffect, useMemo } from "react";
 import {
   Button,
   Chip,
@@ -68,10 +68,12 @@ const ProgramPage: FC = (): ReactElement => {
 
   const [selectedUnitId, setSelectedUnitId] = useState<string>("");
   const { data: myUnitsData } = useGetMyUnits({ limit: 50 });
-  const myUnitOptions = myUnitsData?.map((item) => ({
-    value: item?.unit?.id || item?.id || "",
-    label: item?.unit?.name || item?.name || "",
-  })) || [];
+  const myUnitOptions = useMemo(() => {
+    return myUnitsData?.map((item) => ({
+      value: item?.unit?.id || item?.id || "",
+      label: item?.unit?.name || item?.name || "",
+    })) || [];
+  }, [myUnitsData]);
 
   useEffect(() => {
     if (myUnitOptions.length > 0 && !selectedUnitId) {
@@ -218,7 +220,7 @@ const ProgramPage: FC = (): ReactElement => {
                     description: "Apakah anda yakin ingin menghapus program ini?",
                     icon: <DeleteOutlined sx={{ height: 40, width: 40 }} />,
                     onOk: () => {
-                      deleteProgram.mutate({ id: params.row.id });
+                      deleteProgram.mutate({ id: params.row.id as string });
                     },
                   });
                 },

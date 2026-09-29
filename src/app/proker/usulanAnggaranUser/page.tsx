@@ -320,7 +320,7 @@ export default function UsulanAnggaranUserPage() {
         <Page
             breadcrumbs={[
                 {
-                    label: "Usulan Anggaran User",
+                    label: "Usulan Anggaran Unit",
                     path: "/proker/usulanAnggaranUser",
                 },
             ]}

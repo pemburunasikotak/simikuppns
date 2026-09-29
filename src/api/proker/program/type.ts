@@ -1,7 +1,7 @@
 import { TDefaultProgramIndicator } from "../manajemenProgram/type";
 
 export type TProkerProgram = {
-  id: string;
+  id?: string;
   code: string;
   title: string;
   description?: string;
@@ -20,7 +20,9 @@ export type TProkerProgram = {
   indicators?: TDefaultProgramIndicator[];
 };
 
-export type TProkerProgramPayload = Omit<TProkerProgram, 'id' | 'createdAt' | 'updatedAt'>;
+export type TProkerProgramPayload = Omit<TProkerProgram, 'id' | 'createdAt' | 'updatedAt' | 'indicators'> & {
+  indicators?: (Omit<TDefaultProgramIndicator, 'id' | 'order'> & { id?: string; order?: number; propsal?: unknown; rab?: unknown; proposalDocumentId?: string; rabDocumentId?: string; })[];
+};
 
 export type TProkerProgramResponse = {
   isSuccess: boolean;

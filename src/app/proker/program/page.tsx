@@ -23,7 +23,7 @@ import { useGetPrograms } from "./_hooks/use-get-list-program";
 import { TProkerProgram } from "@/api/proker/program/type";
 import { exportProkerExcel } from "@/api/proker/program/api";
 
-import { Page, DocumentCell, DocumentPreviewModal } from "@/app/_components/ui";
+import { Page, DocumentPreviewModal } from "@/app/_components/ui";
 import Filter from "@/app/_components/ui/filter";
 import DataTable from "@/app/_components/ui/data-table";
 import { createPaginationInfo } from "@/utils/data-table";
@@ -165,28 +165,28 @@ const ProgramPage: FC = (): ReactElement => {
         );
       },
     },
-    {
-      field: "documents",
-      headerName: "Dokumen",
-      width: 160,
-      align: "center",
-      headerAlign: "center",
-      renderCell: (params) => {
-        const indicators = params.row.indicators || [];
-        const allDocs: { label: string; doc: unknown }[] = [];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        indicators.forEach((ind: any) => {
-          const proposalDoc = ind.proposalURL || ind.proposalDocument || ind.propsal || ind.proposalDocumentId;
-          const rabDoc = ind.rabURL || ind.rabDocument || ind.rab || ind.rabDocumentId;
-          if (proposalDoc) allDocs.push({ label: "TOR", doc: proposalDoc });
-          if (rabDoc) allDocs.push({ label: "RAB", doc: rabDoc });
-        });
+    // {
+    //   field: "documents",
+    //   headerName: "Dokumen",
+    //   width: 160,
+    //   align: "center",
+    //   headerAlign: "center",
+    //   renderCell: (params) => {
+    //     const indicators = params.row.indicators || [];
+    //     const allDocs: { label: string; doc: unknown }[] = [];
+    //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //     indicators.forEach((ind: any) => {
+    //       const proposalDoc = ind.proposalURL || ind.proposalDocument || ind.propsal || ind.proposalDocumentId;
+    //       const rabDoc = ind.rabURL || ind.rabDocument || ind.rab || ind.rabDocumentId;
+    //       if (proposalDoc) allDocs.push({ label: "TOR", doc: proposalDoc });
+    //       if (rabDoc) allDocs.push({ label: "RAB", doc: rabDoc });
+    //     });
 
-        if (allDocs.length === 0) return "-";
+    //     if (allDocs.length === 0) return "-";
 
-        return <DocumentCell documents={allDocs} title={`Dokumen Program: ${params.row.title}`} />;
-      },
-    },
+    //     return <DocumentCell documents={allDocs} title={`Dokumen Program: ${params.row.title}`} />;
+    //   },
+    // },
     {
       field: "actions",
       headerName: "Aksi",
@@ -264,17 +264,17 @@ const ProgramPage: FC = (): ReactElement => {
             </Button>,
             ...(isAdmin
               ? [
-                  <Button
-                    key="finalisasi"
-                    variant="outlined"
-                    color="success"
-                    startIcon={<CheckCircleOutlined />}
-                    onClick={() => setOpenFinalisasiModal(true)}
-                    disabled={finalisasiMutation.isPending}
-                  >
-                    Finalisasi
-                  </Button>,
-                ]
+                <Button
+                  key="finalisasi"
+                  variant="outlined"
+                  color="success"
+                  startIcon={<CheckCircleOutlined />}
+                  onClick={() => setOpenFinalisasiModal(true)}
+                  disabled={finalisasiMutation.isPending}
+                >
+                  Finalisasi
+                </Button>,
+              ]
               : []),
             <Button
               key="add"

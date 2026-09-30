@@ -29,14 +29,14 @@ const EditProgramPage = () => {
         description: data.description || "",
         objective: data.objective || "",
         year: data.year,
-        unitId: data.unitId || "",
+        // unitId: data.unitId || "",
         // categoryId: data.categoryId || "",
-        categoryName: data.categoryName || "",
-        status: data.status || "DRAFT",
-        startDate: data.startDate ? data.startDate.split("T")[0] : "",
-        endDate: data.endDate ? data.endDate.split("T")[0] : "",
+        // categoryName: data.categoryName || "",
+        // status: data.status || "DRAFT",
+        // startDate: data.startDate ? data.startDate.split("T")[0] : "",
+        // endDate: data.endDate ? data.endDate.split("T")[0] : "",
         budget: data.budget || 0,
-        picId: data.picId || "",
+        // picId: data.picId || "",
       });
     }
   }, [programData]);
@@ -44,8 +44,8 @@ const EditProgramPage = () => {
   const handleSubmit = (data: TProgramFormData) => {
     const payload: TProkerProgramPayload = {
       ...data,
-      startDate: data.startDate ? new Date(data.startDate).toISOString() : undefined,
-      endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
+      // startDate: data.startDate ? new Date(data.startDate).toISOString() : undefined,
+      // endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
     };
 
     mutation.mutate(payload, {

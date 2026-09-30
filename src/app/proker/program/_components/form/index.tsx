@@ -16,6 +16,7 @@ import useGetMyUnits from "@/app/proker/unit/_hooks/use-get-my-units";
 import useGetUnitUsers from "@/app/proker/unit/_hooks/use-get-unit-users";
 import { useGetProkerMasterUnits } from "@/app/proker/master-unit/_hooks/use-get-master-units";
 import { ProkerSessionUser } from "@/libs/localstorage/proker-session";
+import useGetListIKU from "@/app/proker/unit/[id]/_hooks/use-get-list-iku";
 
 const formatRupiah = (value: string) => {
   const numberString = value.replace(/[^,\d]/g, "").toString();
@@ -302,6 +303,25 @@ const ProgramForm = ({ loading, handleSubmit, defaultValues }: Props) => {
   const { data: masterUnitTypesData } = useGetProkerMasterUnits({ limit: 50 });
   const masterUnitOptions = masterUnitTypesData?.items?.map(unit => ({ value: unit.id, label: unit.name })) || [];
 
+  const allIKUsQuery = useGetListIKU({ limit: 100, page: 1 });
+  const extractArray = (res: unknown): Record<string, unknown>[] => {
+    if (!res) return [];
+    if (Array.isArray(res)) return res as Record<string, unknown>[];
+    if (typeof res === "object") {
+      const r = res as Record<string, unknown>;
+      if (Array.isArray(r.data)) return r.data as Record<string, unknown>[];
+      if (r.data && typeof r.data === "object") {
+        const d = r.data as Record<string, unknown>;
+        if (Array.isArray(d.data)) return d.data as Record<string, unknown>[];
+        if (Array.isArray(d.items)) return d.items as Record<string, unknown>[];
+      }
+      if (Array.isArray(r.items)) return r.items as Record<string, unknown>[];
+    }
+    return [];
+  };
+  const allIKUs = extractArray(allIKUsQuery.data);
+  const ikuOptions = allIKUs.map((iku) => ({ value: String(iku.id), label: `${iku.code ? String(iku.code) + ' - ' : ''}${String(iku.name)}` }));
+
   const onSubmit = (data: TProgramFormData) => {
     handleSubmit(data);
   };
@@ -398,7 +418,7 @@ const ProgramForm = ({ loading, handleSubmit, defaultValues }: Props) => {
             )}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
+        {/* <Grid size={{ xs: 12, sm: 6 }}>
           <FormTextField
             variant="filled"
             label="Tanggal Mulai"
@@ -427,7 +447,7 @@ const ProgramForm = ({ loading, handleSubmit, defaultValues }: Props) => {
             placeholder="Pilih Unit"
             options={unitOptions}
           />
-        </Grid>
+        </Grid> */}
         {/* <Grid size={{ xs: 12, sm: 6 }}>
           <FormTextField
             variant="filled"
@@ -438,7 +458,7 @@ const ProgramForm = ({ loading, handleSubmit, defaultValues }: Props) => {
             placeholder="Masukkan ID Kategori"
           />
         </Grid> */}
-        <Grid size={{ xs: 12, sm: 6 }}>
+        {/* <Grid size={{ xs: 12, sm: 6 }}>
           <FormDropdownField
             label="Status"
             control={form.control}
@@ -458,14 +478,14 @@ const ProgramForm = ({ loading, handleSubmit, defaultValues }: Props) => {
             name="picId"
             placeholder="Masukkan ID PIC"
           />
-        </Grid>
+        </Grid> */}
         <Grid size={{ xs: 12 }}>
-          <FormTextField
-            variant="filled"
+          <FormDropdownField
             label="IKU ID"
             control={form.control}
             name="ikuId"
-            placeholder="Masukkan IKU ID"
+            options={ikuOptions}
+            placeholder="Pilih IKU"
           />
         </Grid>
 

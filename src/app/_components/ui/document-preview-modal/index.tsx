@@ -137,7 +137,7 @@ const getFileType = (url: string, fileName: string, doc?: unknown): "image" | "p
   return "other";
 };
 
-export const downloadFile = async (doc: unknown, fallbackTitle = "Dokumen") => {
+const downloadFile = async (doc: unknown, fallbackTitle = "Dokumen") => {
   const url = getFileUrl(doc);
   if (!url) return;
   const name = getFileName(doc, fallbackTitle);
@@ -151,7 +151,7 @@ export const downloadFile = async (doc: unknown, fallbackTitle = "Dokumen") => {
   a.remove();
 };
 
-export const isExcelOrRabDoc = (doc: unknown, label?: string): boolean => {
+const isExcelOrRabDoc = (doc: unknown, label?: string): boolean => {
   const cleanLabel = (label || "").toUpperCase();
   if (cleanLabel.includes("RAB")) return true;
 

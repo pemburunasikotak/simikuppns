@@ -47,8 +47,8 @@ const CreateProgramPage = () => {
       const payload: TProkerProgramPayload = {
         ...data,
         indicators,
-        startDate: data.startDate ? new Date(data.startDate).toISOString() : undefined,
-        endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
+        // startDate: data.startDate ? new Date(data.startDate).toISOString() : undefined,
+        // endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
       };
 
       mutation.mutate(payload, {
@@ -85,7 +85,7 @@ const CreateProgramPage = () => {
         },
       ]}
     >
-      <ProgramForm loading={mutation.isPending || isUploading} handleSubmit={handleSubmit} defaultValues={{ status: "DRAFT" }} />
+      <ProgramForm loading={mutation.isPending || isUploading} handleSubmit={handleSubmit} defaultValues={{}} />
     </Page>
   );
 };

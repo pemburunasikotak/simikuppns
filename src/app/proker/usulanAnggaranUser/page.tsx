@@ -246,13 +246,13 @@ export default function UsulanAnggaranUserPage() {
                 { unitId: formUnitId, year: formYear, payload },
                 {
                     onSuccess: () => {
-                        enqueueSnackbar("Usulan anggaran berhasil disimpan", { variant: "success" });
+                        enqueueSnackbar("Usulan Sarana dan Prasarana berhasil disimpan", { variant: "success" });
                         setOpenModal(false);
                     },
                     onError: (err: unknown) => {
                         const error = err as { response?: { data?: { message?: string } } };
                         enqueueSnackbar(
-                            error?.response?.data?.message || "Gagal menyimpan usulan anggaran",
+                            error?.response?.data?.message || "Gagal menyimpan usulan Sarana dan Prasarana",
                             { variant: "error" }
                         );
                     },
@@ -276,13 +276,13 @@ export default function UsulanAnggaranUserPage() {
                 { unitId: targetUnitId, year: selectedProposal.year },
                 {
                     onSuccess: () => {
-                        enqueueSnackbar("Usulan anggaran berhasil dihapus", { variant: "success" });
+                        enqueueSnackbar("Usulan Sarana dan Prasarana berhasil dihapus", { variant: "success" });
                         setOpenDelete(false);
                     },
                     onError: (err: unknown) => {
                         const error = err as { response?: { data?: { message?: string } } };
                         enqueueSnackbar(
-                            error?.response?.data?.message || "Gagal menghapus usulan anggaran",
+                            error?.response?.data?.message || "Gagal menghapus usulan Sarana dan Prasarana",
                             { variant: "error" }
                         );
                     },
@@ -320,7 +320,7 @@ export default function UsulanAnggaranUserPage() {
         <Page
             breadcrumbs={[
                 {
-                    label: "Usulan Anggaran Unit",
+                    label: "Usulan Sarana dan Prasarana",
                     path: "/proker/usulanAnggaranUser",
                 },
             ]}
@@ -345,7 +345,7 @@ export default function UsulanAnggaranUserPage() {
                 {/* ── Table Header Controls ── */}
                 <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems="center" gap={2}>
                     <Typography variant="h6" fontWeight={700}>
-                        Daftar Usulan Anggaran Unit
+                        Daftar Usulan Sarana dan Prasarana
                     </Typography>
                     <Button
                         variant="contained"
@@ -354,7 +354,7 @@ export default function UsulanAnggaranUserPage() {
                         onClick={handleOpenAdd}
                         sx={{ fontWeight: 700, borderRadius: "8px" }}
                     >
-                        Tambah Usulan Anggaran
+                        Tambah Usulan Sarana dan Prasarana
                     </Button>
                 </Stack>
 

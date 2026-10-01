@@ -99,7 +99,7 @@ const PROKER_SIDEBAR_ITEMS: TProkerSidebarItem[] = [
   },
   {
     key: "proker-usulan-anggaran",
-    label: "Usulan Anggaran Unit",
+    label: "Usulan Sarana dan Prasarana",
     path: paths.proker.usulanAnggaranUser,
     icon: <AccountBalanceWalletOutlined />,
     roles: ["admin_sim_proker", "user_sim_proker"],

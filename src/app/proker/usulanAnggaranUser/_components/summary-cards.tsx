@@ -84,7 +84,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 <Card sx={{ borderRadius: "12px", border: "1px solid #e0e0e0", boxShadow: "none" }}>
                     <CardContent sx={{ py: 1 }}>
                         <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ mb: 1, display: "block" }}>
-                            Unduh Template Formats Usulan Anggaran:
+                            Unduh Template Formats Usulan Sarana dan Prasarana:
                         </Typography>
                         <Stack direction="row" spacing={0.75} flexWrap="nowrap" sx={{ overflowX: "auto", pb: 0.5 }}>
                             <Button

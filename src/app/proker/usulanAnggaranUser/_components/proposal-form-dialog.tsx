@@ -121,7 +121,7 @@ export const ProposalFormDialog: React.FC<ProposalFormDialogProps> = ({
         >
             <form onSubmit={handleSubmit}>
                 <DialogTitle sx={{ fontWeight: 800 }}>
-                    {selectedProposal ? "Edit Usulan Anggaran Unit" : "Tambah Usulan Anggaran Unit"}
+                    {selectedProposal ? "Edit Sarana dan Prasarana" : "Tambah Sarana dan Prasarana"}
                 </DialogTitle>
                 <Divider />
                 <DialogContent>
@@ -162,7 +162,7 @@ export const ProposalFormDialog: React.FC<ProposalFormDialogProps> = ({
 
                         <Divider />
                         <Typography variant="subtitle2" fontWeight={700} color="primary.main">
-                            Rincian Usulan Anggaran Per Kategori:
+                            Rincian Usulan Sarana dan Prasarana Per Kategori:
                         </Typography>
 
                         {/* 1. Usulan Perbaikan */}

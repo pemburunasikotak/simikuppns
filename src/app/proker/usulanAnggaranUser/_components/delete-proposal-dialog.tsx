@@ -34,12 +34,12 @@ export const DeleteProposalDialog: React.FC<DeleteProposalDialogProps> = ({
             PaperProps={{ sx: { borderRadius: "16px", p: 1 } }}
         >
             <DialogTitle sx={{ fontWeight: 800, color: "error.main" }}>
-                Hapus Usulan Anggaran
+                Hapus Usulan Sarana dan Prasarana
             </DialogTitle>
             <Divider />
             <DialogContent>
                 <Typography>
-                    Apakah Anda yakin ingin menghapus Usulan Anggaran tahun{" "}
+                    Apakah Anda yakin ingin menghapus Usulan Sarana dan Prasarana tahun{" "}
                     <strong>{selectedProposal?.year}</strong> untuk unit ini? Tindakan ini tidak dapat
                     dibatalkan.
                 </Typography>

@@ -47,5 +47,9 @@ export const getDashboardSummary = async (params: { year: number; type?: string 
 };
 export const getDashboardIKUDetail = async (id: string, params: { year: number }): Promise<import('./type').TDashboardIKUDetailResponse> => {
   const res = await api.get(`/api/dashboard/iku/${id}`, { params });
-  return res.data;
+  const responseData = res.data;
+  if (responseData.data && !responseData.result) {
+    responseData.result = responseData.data;
+  }
+  return responseData;
 };

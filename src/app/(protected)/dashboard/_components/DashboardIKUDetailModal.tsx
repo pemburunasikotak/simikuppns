@@ -31,8 +31,6 @@ const DashboardIKUDetailModal: React.FC<Props> = ({ open, onClose, loading, erro
 
   const result = data?.result
 
-  console.log('result', result)
-
   // Set default active tab when data is loaded
   React.useEffect(() => {
     if (formulas.length > 0 && !activeTab) {
@@ -152,7 +150,6 @@ const DashboardIKUDetailModal: React.FC<Props> = ({ open, onClose, loading, erro
 
   if (!open) return null;
 
-  console.log('CEK DATA', data)
 
   return (
     <>

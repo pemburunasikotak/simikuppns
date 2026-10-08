@@ -1,6 +1,6 @@
 import { FC, ReactElement, useState } from "react";
 import { Page } from "@/app/_components/ui";
-import { Card, Grid, Typography, Box, Link } from "@mui/material";
+import { Card, Grid, Typography, Box, Link, Button } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { useDrawingArea } from "@mui/x-charts/hooks";
@@ -16,6 +16,8 @@ import { TDashboardIKUItem, TDashboardIKUChartDataItem, TDashboardIKUTableDataIt
 import useGetListIKUResult from "./_hooks/use-get-list-iku-result";
 import useGetDashboardIKU from "./_hooks/use-get-dashboard-iku";
 import useGetDashboardSummary from "./_hooks/use-get-dashboard-summary";
+import useGetDashboardIKUDetail from "./_hooks/use-get-dashboard-iku-detail";
+import DashboardIKUDetailModal from "./_components/DashboardIKUDetailModal";
 
 function PieCenterLabel({ achieved, total }: { achieved: number; total: number }) {
   const { width, height, left, top } = useDrawingArea();
@@ -47,6 +49,29 @@ function PieCenterLabel({ achieved, total }: { achieved: number; total: number }
 const Component: FC = (): ReactElement => {
   const { filters, setFilter } = useFilter<TGetIKUResultParams>();
   const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedIkuId, setSelectedIkuId] = useState<string | null>(null);
+  const [selectedIkuTitle, setSelectedIkuTitle] = useState<string>('');
+  console.log('CEK', selectedIkuTitle)
+  const detailQuery = useGetDashboardIKUDetail(
+    selectedIkuId as string,
+    { year },
+    !!selectedIkuId
+  );
+
+  const handleOpenDetail = (id: string, code: string, name: string) => {
+    setSelectedIkuId(id);
+    setSelectedIkuTitle(`${code} - ${name}`);
+    setDetailOpen(true);
+  };
+
+  const handleCloseDetail = () => {
+    setDetailOpen(false);
+    setTimeout(() => {
+      setSelectedIkuId(null);
+      setSelectedIkuTitle('');
+    }, 200);
+  };
   const dashboardIKUQuery = useGetDashboardIKU({ year });
   const dashboardSummaryQuery = useGetDashboardSummary({ year, type: filters.type as string });
   const ikuResultQuery = useGetListIKUResult({
@@ -322,9 +347,16 @@ const Component: FC = (): ReactElement => {
               return (
                 <Grid key={`utama-chart-${iku.ikuId || index}`} size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
                   <Card style={{ padding: 10, height: "100%" }}>
-                    <Typography variant="h6" sx={{ marginBottom: 2, fontSize: '1.1rem' }}>
-                      {iku.ikuCode} - {iku.ikuName}
-                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                      <Typography variant="h6" sx={{ fontSize: '1.1rem' }}>
+                        {iku.ikuCode} - {iku.ikuName}
+                      </Typography>
+                      {iku.ikuCode === "IKU1.1" && (
+                        <Button size="small" variant="outlined" onClick={() => handleOpenDetail(iku.ikuId, iku.ikuCode, iku.ikuName)}>
+                          Detail
+                        </Button>
+                      )}
+                    </Box>
                     <BarChart
                       loading={dashboardIKUQuery.isLoading}
                       xAxis={[{ data: periods, scaleType: "band" }]}
@@ -343,9 +375,14 @@ const Component: FC = (): ReactElement => {
               return (
                 <Grid key={`utama-table-${iku.ikuId || index}`} size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
                   <Card style={{ padding: 10, height: "100%" }}>
-                    <Typography variant="h6" sx={{ marginBottom: 2, fontSize: '1.1rem' }}>
-                      {iku.ikuCode} - {iku.ikuName}
-                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                      <Typography variant="h6" sx={{ fontSize: '1.1rem' }}>
+                        {iku.ikuCode} - {iku.ikuName}
+                      </Typography>
+                      <Button size="small" variant="outlined" onClick={() => handleOpenDetail(iku.ikuId, iku.ikuCode, iku.ikuName)}>
+                        Detail
+                      </Button>
+                    </Box>
                     <DataTable
                       loading={dashboardIKUQuery.isLoading}
                       rows={tableData}
@@ -396,9 +433,14 @@ const Component: FC = (): ReactElement => {
               return (
                 <Grid key={`spekta-chart-${iku.ikuId || index}`} size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
                   <Card style={{ padding: 10, height: "100%" }}>
-                    <Typography variant="h6" sx={{ marginBottom: 2, fontSize: '1.1rem' }}>
-                      {iku.ikuCode} - {iku.ikuName}
-                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                      <Typography variant="h6" sx={{ fontSize: '1.1rem' }}>
+                        {iku.ikuCode} - {iku.ikuName}
+                      </Typography>
+                      <Button size="small" variant="outlined" onClick={() => handleOpenDetail(iku.ikuId, iku.ikuCode, iku.ikuName)}>
+                        Detail
+                      </Button>
+                    </Box>
                     <BarChart
                       loading={dashboardIKUQuery.isLoading}
                       xAxis={[{ data: periods, scaleType: "band" }]}
@@ -417,9 +459,14 @@ const Component: FC = (): ReactElement => {
               return (
                 <Grid key={`spekta-table-${iku.ikuId || index}`} size={{ xs: 12, md: 6 }} sx={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
                   <Card style={{ padding: 10, height: "100%" }}>
-                    <Typography variant="h6" sx={{ marginBottom: 2, fontSize: '1.1rem' }}>
-                      {iku.ikuCode} - {iku.ikuName}
-                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                      <Typography variant="h6" sx={{ fontSize: '1.1rem' }}>
+                        {iku.ikuCode} - {iku.ikuName}
+                      </Typography>
+                      <Button size="small" variant="outlined" onClick={() => handleOpenDetail(iku.ikuId, iku.ikuCode, iku.ikuName)}>
+                        Detail
+                      </Button>
+                    </Box>
                     <DataTable
                       loading={dashboardIKUQuery.isLoading}
                       rows={tableData}
@@ -495,6 +542,14 @@ const Component: FC = (): ReactElement => {
           </Grid>
         )}
       </Grid>
+
+      <DashboardIKUDetailModal
+        open={detailOpen}
+        onClose={handleCloseDetail}
+        loading={detailQuery.isLoading}
+        error={detailQuery.isError}
+        data={detailQuery.data}
+      />
     </Page>
   );
 };

@@ -55,3 +55,59 @@ export type TDashboardSummaryResponse = {
   success: boolean;
   data: TDashboardSummaryItem[];
 };
+
+export type TProdiStep = {
+  sequence: number;
+  expression: string;
+  result: number;
+};
+
+export type TProdiComponentValue = {
+  code: string;
+  source: string;
+  value: number | string;
+};
+
+export type TProdiDetail = {
+  prodiId: string;
+  name: string;
+  code: string;
+  level: string;
+  status: string;
+  calculatedValue: number;
+  target?: number;
+  steps?: TProdiStep[];
+  componentValues?: TProdiComponentValue[];
+};
+
+export type TFormulaDetail = {
+  formulaId: string;
+  formulaName: string;
+  prodiLevel: string;
+  result: number;
+  prodis: TProdiDetail[];
+};
+
+export type TDashboardIKUDetailData = {
+  iku: {
+    code: string;
+    name: string;
+    type: string;
+    unit: string;
+  };
+  period: {
+    label: string;
+    year: number;
+    calculatedAt: string;
+    evaluatedAt: string;
+    formulaVersion: string;
+  };
+  summary: {
+    calculatedValue: number;
+    status: string;
+    target: number;
+  };
+  formulas: TFormulaDetail[];
+};
+
+export type TDashboardIKUDetailResponse = TResponse<TDashboardIKUDetailData>;

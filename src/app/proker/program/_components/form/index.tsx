@@ -194,7 +194,7 @@ const IndicatorItem = ({
             required
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 12 }}>
+        {/* <Grid size={{ xs: 12, sm: 12 }}>
           <FormTextField
             variant="outlined"
             label="Order"
@@ -202,7 +202,7 @@ const IndicatorItem = ({
             control={control}
             name={`indicators.${index}.order`}
           />
-        </Grid>
+        </Grid> */}
 
         {showBudgetAndFiles && (
           <>
@@ -373,7 +373,7 @@ const ProgramForm = ({ loading, handleSubmit, defaultValues }: Props) => {
             placeholder="Masukkan objektif program..."
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
+        <Grid size={{ xs: 12, sm: 3 }}>
           <FormTextField
             variant="filled"
             label="Tahun"
@@ -383,7 +383,7 @@ const ProgramForm = ({ loading, handleSubmit, defaultValues }: Props) => {
             placeholder="Ex: 2025"
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
+        {/* <Grid size={{ xs: 12, sm: 6 }}>
           <Controller
             control={form.control}
             name="budget"
@@ -417,7 +417,7 @@ const ProgramForm = ({ loading, handleSubmit, defaultValues }: Props) => {
               </FormControl>
             )}
           />
-        </Grid>
+        </Grid> */}
         {/* <Grid size={{ xs: 12, sm: 6 }}>
           <FormTextField
             variant="filled"
@@ -479,7 +479,7 @@ const ProgramForm = ({ loading, handleSubmit, defaultValues }: Props) => {
             placeholder="Masukkan ID PIC"
           />
         </Grid> */}
-        <Grid size={{ xs: 12 }}>
+        <Grid size={{ xs: 12, sm: 9 }}>
           <FormDropdownField
             label="IKU ID"
             control={form.control}
@@ -503,7 +503,7 @@ const ProgramForm = ({ loading, handleSubmit, defaultValues }: Props) => {
                     masterUnitTypeId: "",
                     category: "",
                     budget: 0,
-                    order: fields.length + 1,
+                    // order: fields.length + 1,
                     targetQ1: 0,
                     targetQ2: 0,
                     targetQ3: 0,

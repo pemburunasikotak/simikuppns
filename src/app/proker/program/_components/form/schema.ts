@@ -12,7 +12,7 @@ export const ProgramSchema = z.object({
   // status: z.string().optional(),
   // startDate: z.string().optional(),
   // endDate: z.string().optional(),
-  budget: z.coerce.number().min(0, "Anggaran tidak valid").optional(),
+  // budget: z.coerce.number().min(0, "Anggaran tidak valid").optional(),
   // picId: z.string().optional(),
   ikuId: z.string().optional(),
   indicators: z.array(
@@ -27,7 +27,7 @@ export const ProgramSchema = z.object({
       targetQ4: z.coerce.number().optional(),
       budget: z.coerce.number().optional(),
       picIds: z.array(z.string()).optional(),
-      order: z.coerce.number().optional(),
+      // order: z.coerce.number().optional(),
       propsal: z.any().optional(),
       rab: z.any().optional(),
     })

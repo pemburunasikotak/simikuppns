@@ -35,7 +35,7 @@ const EditProgramPage = () => {
         // status: data.status || "DRAFT",
         // startDate: data.startDate ? data.startDate.split("T")[0] : "",
         // endDate: data.endDate ? data.endDate.split("T")[0] : "",
-        budget: data.budget || 0,
+        // budget: data.budget || 0,
         // picId: data.picId || "",
       });
     }

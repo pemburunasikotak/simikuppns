@@ -223,6 +223,7 @@ const IndicatorTab: FC = (): ReactElement => {
           setSelectedIndicator(null);
         }}
         programId={id as string}
+        programTitle={program?.title}
         selectedIndicator={selectedIndicator}
       />
       <ModalAddIndicator

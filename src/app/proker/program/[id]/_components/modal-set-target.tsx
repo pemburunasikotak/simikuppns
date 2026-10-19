@@ -11,6 +11,7 @@ import {
   FormLabel,
   InputAdornment,
   Typography,
+  Box,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,6 +23,7 @@ import FormUploadField from "@/app/_components/ui/form-upload-field";
 import BaseInputText from "@/app/_components/ui/base-input-text";
 import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
 import useSetProgramIndicatorTarget from "../../_hooks/use-set-program-indicator-target";
+import useGetProgram from "../../_hooks/use-get-program";
 import useGetUnitUsers from "@/app/proker/unit/_hooks/use-get-unit-users";
 import { uploadProkerDocument } from "@/api/proker/program/api";
 
@@ -30,6 +32,7 @@ type ModalSetTargetProps = {
   onClose: () => void;
   programId: string;
   selectedIndicator: TDefaultProgramIndicator | null;
+  programTitle?: string;
 };
 
 const schema = z.object({
@@ -46,9 +49,23 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSetTargetProps) => {
+const ModalSetTarget = ({
+  open,
+  onClose,
+  programId,
+  selectedIndicator,
+  programTitle,
+}: ModalSetTargetProps) => {
   const { enqueueSnackbar } = useSnackbar();
   const setTargetMutation = useSetProgramIndicatorTarget(programId);
+  const { data: programData } = useGetProgram(programId);
+
+  const displayProgramTitle =
+    programTitle ||
+    programData?.data?.title ||
+    (selectedIndicator as unknown as { program?: { title?: string } })?.program?.title ||
+    "-";
+  const indicatorName = selectedIndicator?.name || "-";
 
   const [isUploading, setIsUploading] = useState(false);
   const isPending = setTargetMutation.isPending || isUploading;
@@ -214,7 +231,34 @@ const ModalSetTarget = ({ open, onClose, programId, selectedIndicator }: ModalSe
       </DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
-          <Grid container spacing={2.5} sx={{ pt: 1 }}>
+          <Box
+            sx={{
+              p: 2,
+              mb: 2.5,
+              bgcolor: "grey.50",
+              borderRadius: 2,
+              border: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Box sx={{ mb: 1.5 }}>
+              <Typography variant="caption" color="text.secondary" fontWeight={600} display="block">
+                Judul Program
+              </Typography>
+              <Typography variant="subtitle1" fontWeight={700} color="text.primary">
+                {displayProgramTitle}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" color="text.secondary" fontWeight={600} display="block">
+                Nama Indikator
+              </Typography>
+              <Typography variant="body2" fontWeight={600} color="text.secondary">
+                {indicatorName}
+              </Typography>
+            </Box>
+          </Box>
+          <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, md: 6 }}>
               <FormTextField
                 control={control}

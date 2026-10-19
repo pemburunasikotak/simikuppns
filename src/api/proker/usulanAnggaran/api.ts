@@ -15,12 +15,8 @@ export const getUnitBudgetProposals = async (
 export const getMyUnitBudgetProposals = async (
   params?: Record<string, unknown>
 ): Promise<TUnitBudgetProposalResponse> => {
-  const queryParams: Record<string, unknown> = {};
-  if (params?.year) {
-    queryParams.year = params.year;
-  }
   const { data } = await prokerAxiosInstance.get("/api/v1/unit-budget-proposals/my-units", {
-    params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+    params,
   });
 
   let rawList: unknown[] = [];
@@ -62,7 +58,7 @@ export const getMyUnitBudgetProposals = async (
     message: data?.message ?? "Success",
     data: {
       items,
-      pagination: {
+      pagination: data?.data?.pagination || data?.pagination || {
         page: 1,
         limit: items.length || 10,
         totalItems: items.length,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import {
   AppBar,
@@ -168,7 +168,7 @@ const SidebarItem = ({ item, collapsed }: SidebarItemProps) => {
   const itemContent = (
     <ListItemButton
       component={Link}
-      to={item.path}
+      to={{ pathname: item.path, search: "" }}
       sx={{
         pl: collapsed ? 1 : 2,
         pr: collapsed ? 1 : 2,
@@ -244,6 +244,16 @@ const ProkerLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
+
+  const prevPathname = useRef(location.pathname);
+  useEffect(() => {
+    if (prevPathname.current !== location.pathname) {
+      prevPathname.current = location.pathname;
+      if (location.search) {
+        navigate(location.pathname, { replace: true });
+      }
+    }
+  }, [location.pathname, location.search, navigate]);
 
   const user = ProkerSessionUser.get()?.user;
   const { signout: signoutProker } = useProkerSession();

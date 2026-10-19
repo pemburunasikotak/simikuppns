@@ -35,6 +35,8 @@ import useGetMyUnits from "@/app/proker/unit/_hooks/use-get-my-units";
 import { ProkerSessionUser } from "@/libs/localstorage/proker-session";
 
 
+import { useFilter } from "@/app/_hooks/use-filter";
+
 const ProgramPage: FC = (): ReactElement => {
   const navigate = useNavigate();
   const modal = useModal();
@@ -42,10 +44,19 @@ const ProgramPage: FC = (): ReactElement => {
   const finalisasiMutation = useFinalisasiIndicators();
   const { enqueueSnackbar } = useSnackbar();
 
-  const [filter, setFilter] = useState<Record<string, unknown>>({ per_page: 10 });
+  const { filters: filter, setFilter } = useFilter<{
+    page?: number;
+    per_page?: number;
+    search?: string;
+    search_value?: string;
+  }>();
+
+  const isSearching = Boolean(filter.search || filter.search_value);
+
   const { data, isLoading } = useGetPrograms({
-    page: filter.page ? Number(filter.page) : 1,
-    limit: filter.per_page ? Number(filter.per_page) : 10
+    page: isSearching ? 1 : (filter.page ? Number(filter.page) : 1),
+    limit: filter.per_page ? Number(filter.per_page) : 10,
+    search: filter.search || filter.search_value || undefined,
   });
 
   const [openExportModal, setOpenExportModal] = useState(false);
@@ -298,9 +309,15 @@ const ProgramPage: FC = (): ReactElement => {
         paginationInfo={createPaginationInfo({
           per_page: filter.per_page ? Number(filter.per_page) : 10,
           total: data?.data?.pagination?.totalItems || 0,
-          page: data?.data?.pagination?.page || 1,
+          page: isSearching ? 1 : (data?.data?.pagination?.page || 1),
         })}
-        handleChange={setFilter}
+        handleChange={(pagination) => {
+          setFilter({
+            ...pagination,
+            search: undefined,
+            search_value: undefined,
+          });
+        }}
       />
 
       {/* ── Dialog Export Excel ── */}

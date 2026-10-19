@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Typography, Button, Stack } from "@mui/material";
 import { AddOutlined } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
@@ -6,7 +6,7 @@ import { useSnackbar } from "notistack";
 import DataTable from "@/app/_components/ui/data-table";
 import { createPaginationInfo } from "@/utils/data-table";
 import { Page } from "@/app/_components/ui";
-import Filter from "@/app/_components/ui/filter";
+// import Filter from "@/app/_components/ui/filter";
 import { useFilter } from "@/app/_hooks/use-filter";
 import DocumentPreviewModal from "@/app/_components/ui/document-preview-modal";
 
@@ -37,13 +37,14 @@ export default function UsulanAnggaranUserPage() {
         per_page?: number;
     }>();
 
+    const isSearching = Boolean(filters.search || filters.search_value);
+
     const queryParams = {
-        ...filters,
-        search: filters.search_value || filters.search,
-        unitId: filters.unitId,
-        year: filters.year ? Number(filters.year) : undefined,
-        page: filters.page ? Number(filters.page) : 1,
+        page: isSearching ? 1 : (filters.page ? Number(filters.page) : 1),
         limit: filters.per_page ? Number(filters.per_page) : 10,
+        search: filters.search || filters.search_value || undefined,
+        unitId: filters.unitId || undefined,
+        year: filters.year ? Number(filters.year) : undefined,
     };
 
     const user = ProkerSessionUser.get()?.user;
@@ -306,6 +307,26 @@ export default function UsulanAnggaranUserPage() {
         rowId: `${item.unitId}-${item.year}`,
     }));
 
+    const filteredRows = useMemo(() => {
+        const searchVal = (filters.search || filters.search_value || "").trim().toLowerCase();
+        if (!searchVal) return rows;
+        return rows.filter((r) => {
+            const unitName = getUnitName(r.unitId, r.unit?.name).toLowerCase();
+            const yearStr = String(r.year || "");
+            return unitName.includes(searchVal) || yearStr.includes(searchVal);
+        });
+    }, [rows, filters.search, filters.search_value, myUnits, allUnits]);
+
+    const totalProposalItems = useMemo(() => {
+        if (isSearching) {
+            if (filteredRows.length < rows.length) {
+                return filteredRows.length;
+            }
+            return pagination.totalItems || filteredRows.length;
+        }
+        return pagination.totalItems || 0;
+    }, [isSearching, filteredRows.length, rows.length, pagination.totalItems]);
+
     const columns = getProposalColumns({
         getUnitName,
         onPreviewDoc: setPreviewDoc,
@@ -324,15 +345,15 @@ export default function UsulanAnggaranUserPage() {
                     path: "/proker/usulanAnggaranUser",
                 },
             ]}
-            topPage={
-                <Filter
-                    variants={["search"]}
-                    labelSearch={"Cari Unit atau Usulan..."}
-                    defaultValue={{
-                        search_value: filters.search || filters.search_value,
-                    }}
-                />
-            }
+        // topPage={
+        //     <Filter
+        //         variants={["search"]}
+        //         labelSearch={"Cari Unit atau Usulan..."}
+        //         defaultValue={{
+        //             search_value: filters.search || filters.search_value,
+        //         }}
+        //     />
+        // }
         >
             <Stack spacing={3}>
                 {/* ── Summary Stats Section ── */}
@@ -361,15 +382,21 @@ export default function UsulanAnggaranUserPage() {
                 {/* ── Data Table ── */}
                 <DataTable
                     loading={query.isLoading}
-                    rows={rows}
+                    rows={filteredRows}
                     getRowId={(row) => row.rowId}
                     columns={columns}
                     paginationInfo={createPaginationInfo({
                         per_page: pagination.limit || 10,
-                        total: pagination.totalItems || 0,
-                        page: pagination.page || 1,
+                        total: totalProposalItems,
+                        page: isSearching ? 1 : (pagination.page || 1),
                     })}
-                    handleChange={setFilter}
+                    handleChange={(pagination) => {
+                        setFilter({
+                            ...pagination,
+                            search: undefined,
+                            search_value: undefined,
+                        });
+                    }}
                 />
             </Stack>
 

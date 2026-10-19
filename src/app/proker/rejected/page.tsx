@@ -47,10 +47,12 @@ export default function RejectedPage() {
     search?: string;
   }>();
 
+  const isSearching = Boolean(filter.search || filter.search_value);
+
   const queryParams = {
-    ...filter,
-    page: filter.page ? Number(filter.page) : 1,
+    page: isSearching ? 1 : (filter.page ? Number(filter.page) : 1),
     limit: filter.per_page ? Number(filter.per_page) : 10,
+    search: filter.search || filter.search_value || undefined,
   };
 
   const query = useGetRejectedIndicators(queryParams);
@@ -323,9 +325,15 @@ export default function RejectedPage() {
         paginationInfo={createPaginationInfo({
           per_page: limit,
           total: totalItems,
-          page: currentPage,
+          page: isSearching ? 1 : currentPage,
         })}
-        handleChange={setFilter}
+        handleChange={(pagination) => {
+          setFilter({
+            ...pagination,
+            search: undefined,
+            search_value: undefined,
+          });
+        }}
         getRowId={(row) => row.id}
       />
     </Page>

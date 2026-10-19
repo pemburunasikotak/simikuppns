@@ -1,4 +1,4 @@
-import { FC, ReactElement, useState } from "react";
+import { FC, ReactElement, useMemo } from "react";
 import { GridColDef } from "@mui/x-data-grid";
 import { useNavigate } from "react-router";
 
@@ -10,17 +10,49 @@ import Filter from "@/app/_components/ui/filter";
 import DataTable from "@/app/_components/ui/data-table";
 import { createPaginationInfo } from "@/utils/data-table";
 import ActionButtonTable from "@/app/_components/ui/action-button-table";
+import { useFilter } from "@/app/_hooks/use-filter";
 
 const ManajemenProgramPage: FC = (): ReactElement => {
   const navigate = useNavigate();
-  const [filter, setFilter] = useState<Record<string, unknown>>({ per_page: 10 });
+  const { filters: filter, setFilter } = useFilter<{
+    page?: number;
+    per_page?: number;
+    search?: string;
+    search_value?: string;
+  }>();
+
+  const isSearching = Boolean(filter.search || filter.search_value);
+
   const { data, isLoading } = useGetListIkuProker({
-    page: filter.page ? Number(filter.page) : 1,
+    page: isSearching ? 1 : (filter.page ? Number(filter.page) : 1),
     limit: filter.per_page ? Number(filter.per_page) : 10,
     search: filter.search || filter.search_value || undefined,
   });
 
-  const items = data?.data?.items || [];
+  const rawItems = data?.data?.items || [];
+
+  const filteredRows = useMemo(() => {
+    const searchVal = (filter.search || filter.search_value || "").trim().toLowerCase();
+    if (!searchVal) return rawItems;
+    return rawItems.filter(
+      (item) =>
+        item.code?.toLowerCase().includes(searchVal) ||
+        item.name?.toLowerCase().includes(searchVal) ||
+        item.description?.toLowerCase().includes(searchVal) ||
+        item.type?.toLowerCase().includes(searchVal)
+    );
+  }, [rawItems, filter.search, filter.search_value]);
+
+  const totalItems = useMemo(() => {
+    if (isSearching) {
+      const rawCount = rawItems.length;
+      if (filteredRows.length < rawCount) {
+        return filteredRows.length;
+      }
+      return data?.data?.pagination?.totalItems || filteredRows.length;
+    }
+    return data?.data?.pagination?.totalItems || 0;
+  }, [isSearching, rawItems.length, filteredRows.length, data?.data?.pagination?.totalItems]);
 
   const columns: GridColDef<TProkerIku>[] = [
     { field: "code", headerName: "Kode IKU", minWidth: 150, flex: 0.5 },
@@ -67,32 +99,26 @@ const ManajemenProgramPage: FC = (): ReactElement => {
           defaultValue={{
             search_value: filter.search || filter.search_value,
           }}
-        // actions={[
-        //   <Button
-        //     key="add"
-        //     variant="contained"
-        //     startIcon={<AddOutlined />}
-        //     onClick={() => {
-        //       navigate("/proker/manajemenProgram/tambah");
-        //     }}
-        //   >
-        //     Tambah Program
-        //   </Button>,
-        // ]}
         />
       }
     >
       <DataTable
         loading={isLoading}
-        rows={items}
+        rows={filteredRows}
         columns={columns}
         checkboxSelection={false}
         paginationInfo={createPaginationInfo({
           per_page: filter.per_page ? Number(filter.per_page) : 10,
-          total: data?.data?.pagination?.totalItems || 0,
-          page: data?.data?.pagination?.page || 1,
+          total: totalItems,
+          page: isSearching ? 1 : (data?.data?.pagination?.page || 1),
         })}
-        handleChange={setFilter}
+        handleChange={(pagination) => {
+          setFilter({
+            ...pagination,
+            search: undefined,
+            search_value: undefined,
+          });
+        }}
       />
     </Page>
   );

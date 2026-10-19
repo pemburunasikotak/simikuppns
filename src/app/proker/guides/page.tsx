@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { GridColDef } from "@mui/x-data-grid";
 import { Page } from "@/app/_components/ui";
 import DataTable from "@/app/_components/ui/data-table";
@@ -108,8 +108,9 @@ export default function ProkerGuidesPage() {
   const { enqueueSnackbar } = useSnackbar();
   const { filters, setFilter } = useFilter<TGetProkerGuidesParams>();
 
-  const search = (filters.search_value as string) || "";
-  const page = filters.page ? Number(filters.page) : 1;
+  const isSearching = Boolean(filters.search || filters.search_value);
+  const search = (filters.search || filters.search_value || "") as string;
+  const page = isSearching ? 1 : (filters.page ? Number(filters.page) : 1);
   const limit = filters.limit ? Number(filters.limit) : 10;
 
   // Role check
@@ -121,18 +122,43 @@ export default function ProkerGuidesPage() {
   const query = useGetListProkerGuide({
     page,
     limit,
-    search_value: search,
+    search: search || undefined,
   });
 
-  const guidesList: TProkerGuideItem[] =
+  const rawGuidesList: TProkerGuideItem[] =
     query.data?.data?.items ?? query.data?.data?.data ?? [];
+
+  const guidesList = useMemo(() => {
+    const searchVal = search.trim().toLowerCase();
+    if (!searchVal) return rawGuidesList;
+    return rawGuidesList.filter(
+      (guide) =>
+        guide.title?.toLowerCase().includes(searchVal) ||
+        guide.description?.toLowerCase().includes(searchVal) ||
+        guide.fileName?.toLowerCase().includes(searchVal) ||
+        guide.originalName?.toLowerCase().includes(searchVal)
+    );
+  }, [rawGuidesList, search]);
+
+  const serverTotal =
+    query.data?.data?.pagination?.totalItems ??
+    query.data?.data?.pagination?.total ??
+    0;
+
+  const totalItems = useMemo(() => {
+    if (isSearching) {
+      if (guidesList.length < rawGuidesList.length) {
+        return guidesList.length;
+      }
+      return serverTotal || guidesList.length;
+    }
+    return serverTotal;
+  }, [isSearching, guidesList.length, rawGuidesList.length, serverTotal]);
+
   const paginationData = {
-    page: query.data?.data?.pagination?.page ?? page,
+    page: isSearching ? 1 : (query.data?.data?.pagination?.page ?? page),
     limit: query.data?.data?.pagination?.limit ?? limit,
-    total:
-      query.data?.data?.pagination?.totalItems ??
-      query.data?.data?.pagination?.total ??
-      0,
+    total: totalItems,
   };
 
   // Mutations
@@ -267,10 +293,10 @@ export default function ProkerGuidesPage() {
       flex: 1.5,
       minWidth: 180,
       headerAlign: "center",
-      align: "center",
+      // align: "center",
       renderCell: (params) => (
         <Box sx={{ display: "flex", alignItems: "center", height: "100%", width: "100%" }}>
-          <Typography variant="body2" fontWeight={600} color="text.primary" align="center">
+          <Typography variant="body2" fontWeight={600} color="text.primary">
             {params.row.title}
           </Typography>
         </Box>
@@ -473,7 +499,7 @@ export default function ProkerGuidesPage() {
             variants={["search"]}
             labelSearch="Cari panduan..."
             defaultValue={{
-              search_value: search,
+              search_value: filters.search || filters.search_value,
             }}
           />
         </Box>
@@ -506,6 +532,8 @@ export default function ProkerGuidesPage() {
             setFilter({
               page: page ?? paginationData.page,
               limit: per_page ?? paginationData.limit,
+              search: undefined,
+              search_value: undefined,
             });
           }}
         />

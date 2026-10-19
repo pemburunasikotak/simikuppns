@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
 import {
   Typography,
@@ -27,17 +27,25 @@ import { useExportProkerByUnit } from "./_hooks/use-export-unit";
 import { TProkerUnit } from "@/api/proker/unit/type";
 import { Page } from "@/app/_components/ui";
 import Filter from "@/app/_components/ui/filter";
+import { useFilter } from "@/app/_hooks/use-filter";
 
 export default function UnitPage() {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
-  const [filter, setFilter] = useState<Record<string, unknown>>({ per_page: 10 });
+  const { filters: filter, setFilter } = useFilter<{
+    page?: number;
+    per_page?: number;
+    search?: string;
+    search_value?: string;
+  }>();
+
+  const isSearching = Boolean(filter.search || filter.search_value);
 
   const queryParams = {
-    ...filter,
-    page: filter.page ? Number(filter.page) : 1,
+    page: isSearching ? 1 : (filter.page ? Number(filter.page) : 1),
     limit: filter.per_page ? Number(filter.per_page) : 10,
+    search: filter.search || filter.search_value || undefined,
   };
 
   const query = useGetProkerUnits(queryParams);
@@ -196,7 +204,27 @@ export default function UnitPage() {
     },
   ];
 
-  const filteredRows = query.data?.items || [];
+  const filteredRows = useMemo(() => {
+    const items = query.data?.items || [];
+    const searchVal = (filter.search || filter.search_value || "").trim().toLowerCase();
+    if (!searchVal) return items;
+    return items.filter(
+      (item) =>
+        item.name?.toLowerCase().includes(searchVal) ||
+        item.description?.toLowerCase().includes(searchVal)
+    );
+  }, [query.data?.items, filter.search, filter.search_value]);
+
+  const totalItems = useMemo(() => {
+    if (isSearching) {
+      const rawCount = query.data?.items?.length || 0;
+      if (filteredRows.length < rawCount) {
+        return filteredRows.length;
+      }
+      return query.data?.pagination?.totalItems || filteredRows.length;
+    }
+    return query.data?.pagination?.totalItems || 0;
+  }, [isSearching, query.data?.items, query.data?.pagination?.totalItems, filteredRows.length]);
 
   return (
     <Page
@@ -251,10 +279,16 @@ export default function UnitPage() {
         checkboxSelection={false}
         paginationInfo={createPaginationInfo({
           per_page: filter.per_page ? Number(filter.per_page) : 10,
-          total: query.data?.pagination?.totalItems || 0,
-          page: query.data?.pagination?.page || 1,
+          total: totalItems,
+          page: isSearching ? 1 : (query.data?.pagination?.page || 1),
         })}
-        handleChange={setFilter}
+        handleChange={(pagination) => {
+          setFilter({
+            ...pagination,
+            search: undefined,
+            search_value: undefined,
+          });
+        }}
       />
       <Dialog open={openModal} onClose={() => setOpenModal(false)} maxWidth="sm" fullWidth>
         <form onSubmit={handleSubmit}>

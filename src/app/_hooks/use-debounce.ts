@@ -1,4 +1,4 @@
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useEffect } from "react";
 
 interface DebounceParam {
   cb: () => void;
@@ -13,7 +13,15 @@ export const useDebounce = () => {
     setTimeoutRef.current && clearTimeout(setTimeoutRef.current);
     setTimeoutRef.current = setTimeout(() => {
       cb();
-    }, delay ?? 1000);
+    }, delay ?? 2000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (setTimeoutRef.current) {
+        clearTimeout(setTimeoutRef.current);
+      }
+    };
   }, []);
 
   return debounce;

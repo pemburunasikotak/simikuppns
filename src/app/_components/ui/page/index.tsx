@@ -12,9 +12,10 @@ interface Props {
     path: string | null;
   }[];
   loading?: boolean;
+  noPaper?: boolean;
 }
 
-const Page = ({ children, topPage, title, description, breadcrumbs, loading }: Props) => {
+const Page = ({ children, topPage, title, description, breadcrumbs, loading, noPaper = false }: Props) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "16px", paddingBottom: "36px" }}>
       {breadcrumbs?.length ? (
@@ -38,20 +39,9 @@ const Page = ({ children, topPage, title, description, breadcrumbs, loading }: P
           )}
         </Breadcrumbs>
       ) : null}
-      <Paper elevation={0}>
-        {topPage ? (
-          <>
-            <Box
-              sx={{
-                p: "16px",
-              }}
-            >
-              {topPage}
-            </Box>
-            <Divider />
-          </>
-        ) : null}
-        <Box sx={{ p: "16px" }}>
+      {noPaper ? (
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {topPage && <Box>{topPage}</Box>}
           {(title || description) && (
             <Box>
               {title && (
@@ -77,7 +67,6 @@ const Page = ({ children, topPage, title, description, breadcrumbs, loading }: P
               )}
             </Box>
           )}
-
           {loading ? (
             <Box
               sx={{
@@ -90,10 +79,67 @@ const Page = ({ children, topPage, title, description, breadcrumbs, loading }: P
               <Skeleton height={80} />
             </Box>
           ) : (
-            <Box sx={{ marginTop: "16px" }}>{children}</Box>
+            <Box>{children}</Box>
           )}
         </Box>
-      </Paper>
+      ) : (
+        <Paper elevation={0}>
+          {topPage ? (
+            <>
+              <Box
+                sx={{
+                  p: "16px",
+                }}
+              >
+                {topPage}
+              </Box>
+              <Divider />
+            </>
+          ) : null}
+          <Box sx={{ p: "16px" }}>
+            {(title || description) && (
+              <Box>
+                {title && (
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      color: "rgba(57, 61, 78, 1)",
+                    }}
+                  >
+                    {title}
+                  </Typography>
+                )}
+                {description && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      mt: 0.5,
+                    }}
+                  >
+                    {description}
+                  </Typography>
+                )}
+              </Box>
+            )}
+
+            {loading ? (
+              <Box
+                sx={{
+                  ".MuiSkeleton-root": {
+                    transform: "scale(1, 0.80)",
+                  },
+                }}
+              >
+                <Skeleton height={80} />
+                <Skeleton height={80} />
+              </Box>
+            ) : (
+              <Box sx={{ marginTop: "16px" }}>{children}</Box>
+            )}
+          </Box>
+        </Paper>
+      )}
     </Box>
   );
 };

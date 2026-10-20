@@ -150,7 +150,9 @@ const IndicatorTab: FC = (): ReactElement => {
             });
           }
 
-          if (params.row.status === "ASSIGNED_TO_UNIT") {
+          const { status } = params.row;
+
+          if (["ASSIGNED_TO_UNIT", "APPROVED", "SUBMITTED"].includes(status || "")) {
             actionItems.push({
               key: "assign",
               type: "assign" as const,

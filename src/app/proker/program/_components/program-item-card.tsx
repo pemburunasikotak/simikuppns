@@ -12,6 +12,7 @@ import {
   ListItemIcon,
   ListItemText,
   Tooltip,
+  Skeleton,
 } from "@mui/material";
 import {
   KeyboardArrowDown,
@@ -84,21 +85,70 @@ const getStatusColor = (status?: string) => {
   }
 };
 
-const getPicDisplay = (ind: TDefaultProgramIndicator) => {
-  if (typeof ind.unit === "object" && ind.unit?.name) return ind.unit.name;
-  if (typeof ind.unit === "string" && ind.unit) return ind.unit;
+/**
+ * Ambil daftar nama PIC dari sebuah indikator.
+ * Mendukung beberapa bentuk data:
+ * - pics: [{ name }]
+ * - pics: [{ user: { name } }]
+ * - pics: [{ userName }] / [{ fullName }]
+ * - pics: ["Nama"]
+ * Catatan: respons API list indikator per-program hanya berisi { id, indicatorId, userId, createdAt }
+ * tanpa nama. Agar nama tampil, backend perlu meng-include relasi user di `pics`.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getPicNames = (ind: any): string[] => {
+  const rawPics = Array.isArray(ind?.pics) ? ind.pics : ind?.pics ? [ind.pics] : [];
+
+  const names = rawPics
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .flatMap((p: any) => {
+      if (typeof p === "string") return [p];
+      const n = p?.name ?? p?.user?.name ?? p?.userName ?? p?.fullName;
+      return Array.isArray(n) ? n : [n];
+    })
+    .filter(Boolean) as string[];
+
+  if (names.length > 0) return names;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const anyInd = ind as any;
-  if (anyInd.unitName) return anyInd.unitName;
-  if (anyInd.picName) return anyInd.picName;
-  if (anyInd.pics && anyInd.pics.length > 0) {
-    const names = anyInd.pics
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((p: any) => p.user?.name || p.name || p.userName || p.userId)
-      .filter(Boolean);
-    if (names.length > 0) return names.join(", ");
+  const picName = (ind as any)?.picName;
+  if (picName) return [picName];
+
+  return [];
+};
+
+const renderPicChips = (ind: TDefaultProgramIndicator): ReactElement => {
+  const names = getPicNames(ind);
+
+  if (names.length === 0) {
+    return (
+      <Typography sx={{ fontSize: "13px", fontWeight: 600, color: "#94A3B8" }}>
+        -
+      </Typography>
+    );
   }
-  return "-";
+
+  return (
+    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, alignItems: "center" }}>
+      {names.map((name, i) => (
+        <Chip
+          key={i}
+          label={name}
+          size="small"
+          variant="outlined"
+          sx={{
+            fontSize: "11px",
+            fontWeight: 600,
+            height: "24px",
+            borderRadius: "6px",
+            bgcolor: "#F8FAFC",
+            borderColor: "#E2E8F0",
+            color: "#334155",
+          }}
+        />
+      ))}
+    </Box>
+  );
 };
 
 export const ProgramItemCard: FC<ProgramItemCardProps> = ({
@@ -114,19 +164,36 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
 }): ReactElement => {
   const navigate = useNavigate();
 
-  // Lazy fetch fallback if indicators array is not embedded
-  const { data: fetchedIndicatorsData } = useGetListProgramIndicator(program.id || "", {
-    enabled: isExpanded && (!program.indicators || program.indicators.length === 0),
-  });
+  // Selalu fetch indikator dari API saat card di-expand
+  const { data: fetchedIndicatorsData, isLoading: isLoadingIndicators } = useGetListProgramIndicator(
+    program.id || "",
+    { enabled: isExpanded },
+  );
 
   const indicators: TDefaultProgramIndicator[] = useMemo(() => {
-    if (program.indicators && program.indicators.length > 0) return program.indicators;
-    if (fetchedIndicatorsData?.data) {
-      if (Array.isArray(fetchedIndicatorsData.data)) return fetchedIndicatorsData.data;
+    const embedded: TDefaultProgramIndicator[] = program.indicators || [];
+    let fetched: TDefaultProgramIndicator[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const d: any = fetchedIndicatorsData?.data;
+    if (Array.isArray(d)) fetched = d;
+    else if (Array.isArray(d?.items)) fetched = d.items;
+    if (fetched.length === 0) return embedded;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const embeddedPicsMap = new Map<string, any>(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (Array.isArray((fetchedIndicatorsData.data as any).items)) return (fetchedIndicatorsData.data as any).items;
-    }
-    return program.indicators || [];
+      embedded.map((e: any) => [e.id, e.pics]),
+    );
+
+    return fetched.map((ind) => {
+      if (getPicNames(ind).length === 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const embeddedPics = embeddedPicsMap.get((ind as any).id);
+        if (Array.isArray(embeddedPics) && getPicNames({ pics: embeddedPics }).length > 0) {
+          return { ...ind, pics: embeddedPics };
+        }
+      }
+      return ind;
+    });
   }, [program.indicators, fetchedIndicatorsData]);
 
   // Program menu state
@@ -154,7 +221,6 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
     setSelectedInd(null);
   };
 
-  // Compute IKU badge
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const anyProgram = program as any;
   const ikuBadge =
@@ -393,7 +459,14 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
           </Box>
 
           {/* Indicators List */}
-          {indicators.length === 0 ? (
+          {isLoadingIndicators ? (
+            // Skeleton loading saat fetch indikator dari API
+            <Stack spacing={1.5}>
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} variant="rounded" height={68} sx={{ borderRadius: "10px" }} />
+              ))}
+            </Stack>
+          ) : indicators.length === 0 ? (
             <Box
               sx={{
                 bgcolor: "#ffffff",
@@ -417,13 +490,12 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
                     bgcolor: "#ffffff",
                     borderRadius: "10px",
                     border: "1px solid #E2E8F0",
-                    px: { xs: 2, sm: 2.5 },
-                    py: 1.8,
+                    px: { xs: 1.5, sm: 2.5 },
+                    py: 1.5,
                     display: "flex",
-                    flexDirection: { xs: "column", md: "row" },
-                    alignItems: { xs: "flex-start", md: "center" },
+                    flexDirection: { xs: "column", md: "column" },
                     justifyContent: "space-between",
-                    gap: { xs: 1.5, md: 2 },
+                    gap: 1.5,
                     cursor: "pointer",
                     transition: "all 0.15s ease",
                     "&:hover": {
@@ -450,95 +522,102 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
                   </Box>
 
                   {/* Right: Metadata Columns & Action */}
+                  {/* Right: Metadata Columns & Action */}
                   <Stack
                     direction="row"
-                    spacing={{ xs: 2, sm: 3, md: 4 }}
                     alignItems="center"
-                    sx={{ flexShrink: 0, width: { xs: "100%", md: "auto" }, justifyContent: { xs: "space-between", md: "flex-end" } }}
+                    justifyContent="space-between"
+                    sx={{ width: "100%" }}
                   >
-                    {/* Column 1: KATEGORI */}
-                    <Box sx={{ textAlign: "center", minWidth: 70 }}>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          fontSize: "10px",
-                          fontWeight: 700,
-                          color: "#94A3B8",
-                          letterSpacing: 0.5,
-                          display: "block",
-                          mb: 0.5,
-                        }}
-                      >
-                        KATEGORI
-                      </Typography>
-                      <Chip
-                        label={ind.category || "TUSI"}
-                        size="small"
-                        sx={{
-                          bgcolor: "#EEF2FF",
-                          color: "#2563EB",
-                          fontWeight: 700,
-                          fontSize: "11px",
-                          height: "24px",
-                          borderRadius: "6px",
-                        }}
-                      />
-                    </Box>
+                    {/* Kolom metadata (kiri) */}
+                    <Stack
+                      direction="row"
+                      spacing={{ xs: 1.5, sm: 2.5 }}
+                      alignItems="center"
+                      sx={{ flexWrap: "wrap", rowGap: 1 }}
+                    >
+                      {/* Column 1: KATEGORI */}
+                      <Box sx={{ textAlign: "center", minWidth: 70 }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontSize: "10px",
+                            fontWeight: 700,
+                            color: "#94A3B8",
+                            letterSpacing: 0.5,
+                            display: "block",
+                            mb: 0.5,
+                          }}
+                        >
+                          KATEGORI
+                        </Typography>
+                        <Chip
+                          label={ind.category || "TUSI"}
+                          size="small"
+                          sx={{
+                            bgcolor: "#EEF2FF",
+                            color: "#2563EB",
+                            fontWeight: 700,
+                            fontSize: "11px",
+                            height: "24px",
+                            borderRadius: "6px",
+                          }}
+                        />
+                      </Box>
 
-                    {/* Column 2: STATUS */}
-                    <Box sx={{ textAlign: "center", minWidth: 120 }}>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          fontSize: "10px",
-                          fontWeight: 700,
-                          color: "#94A3B8",
-                          letterSpacing: 0.5,
-                          display: "block",
-                          mb: 0.5,
-                        }}
-                      >
-                        STATUS
-                      </Typography>
-                      <Chip
-                        label={(ind.status || "ASSIGNED_TO_UNIT").replace(/_/g, " ")}
-                        size="small"
-                        sx={{
-                          bgcolor: getStatusBg(ind.status),
-                          color: getStatusColor(ind.status),
-                          fontWeight: 700,
-                          fontSize: "11px",
-                          height: "24px",
-                          borderRadius: "6px",
-                        }}
-                      />
-                    </Box>
+                      {/* Column 2: STATUS */}
+                      <Box sx={{ textAlign: "center", minWidth: 120 }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontSize: "10px",
+                            fontWeight: 700,
+                            color: "#94A3B8",
+                            letterSpacing: 0.5,
+                            display: "block",
+                            mb: 0.5,
+                          }}
+                        >
+                          STATUS
+                        </Typography>
+                        <Chip
+                          label={(ind.status || "ASSIGNED_TO_UNIT").replace(/_/g, " ")}
+                          size="small"
+                          sx={{
+                            bgcolor: getStatusBg(ind.status),
+                            color: getStatusColor(ind.status),
+                            fontWeight: 700,
+                            fontSize: "11px",
+                            height: "24px",
+                            borderRadius: "6px",
+                          }}
+                        />
+                      </Box>
 
-                    {/* Column 3: PIC */}
-                    <Box sx={{ textAlign: "left", minWidth: 110 }}>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          fontSize: "10px",
-                          fontWeight: 700,
-                          color: "#94A3B8",
-                          letterSpacing: 0.5,
-                          display: "block",
-                          mb: 0.5,
-                        }}
-                      >
-                        PIC
-                      </Typography>
-                      <Typography sx={{ fontSize: "13px", fontWeight: 600, color: "#334155" }}>
-                        {getPicDisplay(ind)}
-                      </Typography>
-                    </Box>
+                      {/* Column 3: PIC */}
+                      <Box sx={{ textAlign: "left", minWidth: 110 }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontSize: "10px",
+                            fontWeight: 700,
+                            color: "#94A3B8",
+                            letterSpacing: 0.5,
+                            display: "block",
+                            mb: 0.5,
+                          }}
+                        >
+                          PIC
+                        </Typography>
+                        {renderPicChips(ind)}
+                      </Box>
+                    </Stack>
 
-                    {/* Column 4: Action Menu */}
+                    {/* Column 4: Action Menu (pojok kanan mentok) */}
                     <IconButton
                       size="small"
                       onClick={(e) => handleOpenIndMenu(e, ind)}
-                      sx={{ color: "#94A3B8", p: 0.5 }}
+                      sx={{ color: "#94A3B8", p: 0.5, flexShrink: 0, ml: 1 }}
                     >
                       <MoreVert fontSize="small" />
                     </IconButton>

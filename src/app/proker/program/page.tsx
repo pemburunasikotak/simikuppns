@@ -16,19 +16,20 @@ import {
   Pagination,
   Select,
   FormControl,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
   Skeleton,
   Tooltip,
   Chip,
   Paper,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import {
   AddOutlined,
   CheckCircleOutlined,
   DeleteOutlined,
   SearchOutlined,
+  TableRowsOutlined,
+  ViewListOutlined,
 } from "@mui/icons-material";
 import { GridColDef } from "@mui/x-data-grid";
 import { useNavigate } from "react-router";
@@ -63,8 +64,23 @@ const ProgramPage: FC = (): ReactElement => {
   const { enqueueSnackbar } = useSnackbar();
   const debounce = useDebounce();
 
-  // View mode: 'tabel' (versi lama) or 'list' (versi baru), default is 'tabel'
-  const [viewMode, setViewMode] = useState<"tabel" | "list">("tabel");
+  // View mode: 'tabel' (format data grid) atau 'list' (format kartu accordion)
+  const [viewMode, setViewMode] = useState<"tabel" | "list">(() => {
+    try {
+      return (localStorage.getItem("proker_program_view_mode") as "tabel" | "list") || "tabel";
+    } catch {
+      return "tabel";
+    }
+  });
+
+  const handleSetViewMode = (newMode: "tabel" | "list") => {
+    setViewMode(newMode);
+    try {
+      localStorage.setItem("proker_program_view_mode", newMode);
+    } catch (error) {
+      console.warn("Gagal menyimpan view mode ke localStorage", error);
+    }
+  };
 
   const { filters: filter, setFilter } = useFilter<{
     page?: number;
@@ -104,17 +120,8 @@ const ProgramPage: FC = (): ReactElement => {
     });
   };
 
-  // Expanded items state for 'list' view
+  // Expanded items state for 'list' view (semua item bisa ditutup / dibuka bebas)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    if (rawItems.length > 0 && expandedIds.size === 0) {
-      const firstId = rawItems[0].id || rawItems[0].code;
-      if (firstId) {
-        setExpandedIds(new Set([firstId]));
-      }
-    }
-  }, [rawItems, expandedIds.size]);
 
   const handleToggleExpand = (id: string) => {
     setExpandedIds((prev) => {
@@ -128,17 +135,8 @@ const ProgramPage: FC = (): ReactElement => {
     });
   };
 
-  // Client-side search refinement for 'list' view
-  const items = useMemo(() => {
-    const q = (filter.search || filter.search_value || "").toLowerCase().trim();
-    if (!q) return rawItems;
-    return rawItems.filter((prog) => {
-      const matchTitle = prog.title?.toLowerCase().includes(q);
-      const matchCode = prog.code?.toLowerCase().includes(q);
-      const matchInd = prog.indicators?.some((ind) => ind.name?.toLowerCase().includes(q));
-      return matchTitle || matchCode || matchInd;
-    });
-  }, [rawItems, filter.search, filter.search_value]);
+  // Both table and list views use the exact same data from the API
+  const items = rawItems;
 
   // Modals for execution
   const [selectedProgram, setSelectedProgram] = useState<TProkerProgram | null>(null);
@@ -300,6 +298,46 @@ const ProgramPage: FC = (): ReactElement => {
         },
       },
       {
+        field: "unit",
+        headerName: "Unit",
+        minWidth: 200,
+        flex: 1,
+        renderCell: (params) => {
+          const indicators = params.row.indicators || [];
+
+          // Ambil nama unit langsung dari tiap indikator, buang kosong & duplikat
+          const units: string[] = Array.from(
+            new Set(
+              indicators
+                .map((ind: TDefaultProgramIndicator) =>
+                  typeof ind?.unit === "object" ? ind?.unit?.name : ind?.unit,
+                )
+                .filter(Boolean),
+            ),
+          ) as string[];
+
+          if (units.length === 0) return "-";
+
+          return (
+            <Tooltip title={units.join(", ")}>
+              <Stack
+                direction="row"
+                spacing={1}
+                alignItems="center"
+                sx={{ height: "100%", overflow: "hidden" }}
+              >
+                {units.slice(0, 2).map((unitName) => (
+                  <Chip key={unitName} label={unitName} size="small" variant="outlined" />
+                ))}
+                {units.length > 2 && (
+                  <Chip label={`+${units.length - 2}`} size="small" variant="outlined" />
+                )}
+              </Stack>
+            </Tooltip>
+          );
+        },
+      },
+      {
         field: "actions",
         headerName: "Aksi",
         width: 150,
@@ -316,30 +354,30 @@ const ProgramPage: FC = (): ReactElement => {
             },
             ...(isAdmin
               ? [
-                  {
-                    key: "edit",
-                    type: "edit" as const,
-                    onClick: () => {
-                      navigate(`/proker/program/${params.row.id}/edit`);
-                    },
+                {
+                  key: "edit",
+                  type: "edit" as const,
+                  onClick: () => {
+                    navigate(`/proker/program/${params.row.id}/edit`);
                   },
-                  {
-                    key: "delete",
-                    type: "delete" as const,
-                    onClick: () => {
-                      modal.confirm({
-                        title: "Hapus Program",
-                        description: "Apakah anda yakin ingin menghapus program ini?",
-                        icon: <DeleteOutlined sx={{ height: 40, width: 40 }} />,
-                        onOk: () => {
-                          if (params.row.id) {
-                            deleteProgram.mutate({ id: params.row.id as string });
-                          }
-                        },
-                      });
-                    },
+                },
+                {
+                  key: "delete",
+                  type: "delete" as const,
+                  onClick: () => {
+                    modal.confirm({
+                      title: "Hapus Program",
+                      description: "Apakah anda yakin ingin menghapus program ini?",
+                      icon: <DeleteOutlined sx={{ height: 40, width: 40 }} />,
+                      onOk: () => {
+                        if (params.row.id) {
+                          deleteProgram.mutate({ id: params.row.id as string });
+                        }
+                      },
+                    });
                   },
-                ]
+                },
+              ]
               : []),
           ];
           return <ActionButtonTable items={actionItems} />;
@@ -424,35 +462,51 @@ const ProgramPage: FC = (): ReactElement => {
           alignItems={{ xs: "stretch", sm: "center" }}
           sx={{ flexShrink: 0 }}
         >
-          {/* Radio Button Toggle: Tabel (lama) vs List (baru) */}
-          <FormControl component="fieldset">
-            <RadioGroup
-              row
+          {/* ToggleButtonGroup: Tabel vs List */}
+          <Tooltip title={viewMode === "tabel" ? "Tampilan Tabel" : "Tampilan List"} arrow>
+            <ToggleButtonGroup
               value={viewMode}
-              onChange={(e) => setViewMode(e.target.value as "tabel" | "list")}
+              exclusive
+              onChange={(_e, val) => { if (val) handleSetViewMode(val as "tabel" | "list"); }}
+              size="small"
+              aria-label="view mode"
               sx={{
-                bgcolor: "#ffffff",
-                px: 1.5,
-                borderRadius: "10px",
-                border: "1px solid #E2E8F0",
                 height: 44,
-                display: "flex",
-                alignItems: "center",
-                flexWrap: "nowrap",
+                bgcolor: "#ffffff",
+                border: "1px solid #E2E8F0",
+                borderRadius: "10px",
+                overflow: "hidden",
+                "& .MuiToggleButton-root": {
+                  border: "none",
+                  borderRadius: 0,
+                  px: 1.8,
+                  color: "#94A3B8",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  gap: 0.7,
+                  textTransform: "none",
+                  transition: "all 0.2s ease",
+                  "&.Mui-selected": {
+                    bgcolor: "#0D6836",
+                    color: "#ffffff",
+                    "&:hover": { bgcolor: "#0A532B" },
+                  },
+                  "&:hover": { bgcolor: "#F1F5F9" },
+                  "&:first-of-type": { borderRadius: "9px 0 0 9px" },
+                  "&:last-of-type": { borderRadius: "0 9px 9px 0" },
+                },
               }}
             >
-              <FormControlLabel
-                value="tabel"
-                control={<Radio size="small" color="primary" />}
-                label={<Typography sx={{ fontSize: "14px", fontWeight: 600 }}>Tabel</Typography>}
-              />
-              <FormControlLabel
-                value="list"
-                control={<Radio size="small" color="primary" />}
-                label={<Typography sx={{ fontSize: "14px", fontWeight: 600 }}>List</Typography>}
-              />
-            </RadioGroup>
-          </FormControl>
+              <ToggleButton value="tabel" aria-label="tabel">
+                <TableRowsOutlined sx={{ fontSize: 18 }} />
+                <span>Tabel</span>
+              </ToggleButton>
+              <ToggleButton value="list" aria-label="list">
+                <ViewListOutlined sx={{ fontSize: 18 }} />
+                <span>List</span>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Tooltip>
 
           {/* Unduh Excel Button */}
           <Button
@@ -544,19 +598,17 @@ const ProgramPage: FC = (): ReactElement => {
         >
           <DataTable
             loading={isLoading}
-            rows={rawItems}
+            rows={items}
             columns={tableColumns}
             checkboxSelection={false}
             paginationInfo={createPaginationInfo({
-              per_page: filter.per_page ? Number(filter.per_page) : 10,
-              total: data?.data?.pagination?.totalItems || 0,
-              page: isSearching ? 1 : (data?.data?.pagination?.page || 1),
+              per_page: perPage,
+              total: totalItems,
+              page: currentPage,
             })}
             handleChange={(pagination) => {
               setFilter({
                 ...pagination,
-                search: undefined,
-                search_value: undefined,
               });
             }}
           />

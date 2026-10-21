@@ -30,6 +30,9 @@ import { useNavigate } from "react-router";
 import { TProkerProgram } from "@/api/proker/program/type";
 import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
 import useGetListProgramIndicator from "../[id]/_hooks/use-get-list-program-indicator";
+import useDeleteProgramIndicator from "../[id]/_hooks/use-delete-program-indicator";
+import useModal from "@/app/_components/ui/modal";
+import { useSnackbar } from "notistack";
 
 interface ProgramItemCardProps {
   program: TProkerProgram;
@@ -39,6 +42,7 @@ interface ProgramItemCardProps {
   onAddIndicator: (program: TProkerProgram) => void;
   onSetTarget: (program: TProkerProgram, indicator: TDefaultProgramIndicator) => void;
   onEditIndicator: (program: TProkerProgram, indicator: TDefaultProgramIndicator) => void;
+  onDeleteIndicator?: (program: TProkerProgram, indicator: TDefaultProgramIndicator) => void;
   onEditProgram: (program: TProkerProgram) => void;
   onDeleteProgram: (program: TProkerProgram) => void;
 }
@@ -159,10 +163,45 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
   onAddIndicator,
   onSetTarget,
   onEditIndicator,
+  onDeleteIndicator,
   onEditProgram,
   onDeleteProgram,
 }): ReactElement => {
   const navigate = useNavigate();
+  const modal = useModal();
+  const { enqueueSnackbar } = useSnackbar();
+  const deleteIndicatorMutation = useDeleteProgramIndicator();
+
+  const handleDeleteIndicatorInternal = (indicator: TDefaultProgramIndicator) => {
+    if (onDeleteIndicator) {
+      onDeleteIndicator(program, indicator);
+      return;
+    }
+
+    modal.confirm({
+      title: "Hapus Indikator",
+      description: `Apakah anda yakin ingin menghapus indikator "${indicator.name}"?`,
+      icon: <DeleteOutlined sx={{ height: 40, width: 40 }} />,
+      onOk: () => {
+        if (program.id && indicator.id) {
+          deleteIndicatorMutation.mutate(
+            { programId: program.id, id: indicator.id },
+            {
+              onSuccess: () => {
+                enqueueSnackbar("Berhasil menghapus indikator", { variant: "success" });
+              },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onError: (error: any) => {
+                enqueueSnackbar(error?.response?.data?.message || "Gagal menghapus indikator", {
+                  variant: "error",
+                });
+              },
+            }
+          );
+        }
+      },
+    });
+  };
 
   // Selalu fetch indikator dari API saat card di-expand
   const { data: fetchedIndicatorsData, isLoading: isLoadingIndicators } = useGetListProgramIndicator(
@@ -697,17 +736,37 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
             <ListItemText primary="Input Realisasi" />
           </MenuItem>
         )}
+        {isAdmin && (
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCloseIndMenu();
+              if (selectedInd) onEditIndicator(program, selectedInd);
+            }}
+          >
+            <ListItemIcon>
+              <EditOutlined fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="Edit Indikator" />
+          </MenuItem>
+        )}
         <MenuItem
           onClick={(e) => {
             e.stopPropagation();
             handleCloseIndMenu();
-            if (selectedInd) onEditIndicator(program, selectedInd);
+            if (selectedInd) {
+              if (onDeleteIndicator) {
+                onDeleteIndicator(program, selectedInd);
+              } else {
+                handleDeleteIndicatorInternal(selectedInd);
+              }
+            }
           }}
         >
           <ListItemIcon>
-            <EditOutlined fontSize="small" />
+            <DeleteOutlined fontSize="small" color="error" />
           </ListItemIcon>
-          <ListItemText primary="Edit Indikator" />
+          <ListItemText primary="Hapus Indikator" sx={{ color: "error.main" }} />
         </MenuItem>
       </Menu>
     </Box>

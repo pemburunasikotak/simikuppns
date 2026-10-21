@@ -27,6 +27,20 @@ export const deleteProgram = async (id: string): Promise<unknown> => {
   return;
 };
 
+export const deleteProgramIndicator = async (programId: string, id: string): Promise<unknown> => {
+  await prokerAxiosInstance.delete(`/api/v1/programs/${programId}/indicators/${id}`);
+  return;
+};
+
+export const updateProgramIndicator = async (
+  programId: string,
+  id: string,
+  payload: import("../manajemenProgram/type").TDefaultProgramIndicatorPayload | Record<string, unknown>
+): Promise<unknown> => {
+  const { data } = await prokerAxiosInstance.put(`/api/v1/programs/${programId}/indicators/${id}`, payload);
+  return data;
+};
+
 export const createProgramActivity = async (id: string, payload: TProgramActivityPayload): Promise<{ isSuccess: boolean; data: TProkerAktivitas }> => {
   const { data } = await prokerAxiosInstance.post(`/api/v1/programs/${id}/activities`, payload);
   return data;

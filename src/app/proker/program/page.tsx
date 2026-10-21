@@ -46,6 +46,7 @@ import { createPaginationInfo } from "@/utils/data-table";
 import ActionButtonTable from "@/app/_components/ui/action-button-table";
 import useModal from "@/app/_components/ui/modal";
 import useDeleteProgram from "./_hooks/use-delete-program";
+import useDeleteProgramIndicator from "./_hooks/use-delete-program-indicator";
 import useFinalisasiIndicators from "./_hooks/use-finalisasi-indicators";
 import useGetMyUnits from "@/app/proker/unit/_hooks/use-get-my-units";
 import { ProkerSessionUser } from "@/libs/localstorage/proker-session";
@@ -60,6 +61,7 @@ const ProgramPage: FC = (): ReactElement => {
   const navigate = useNavigate();
   const modal = useModal();
   const deleteProgram = useDeleteProgram();
+  const deleteIndicator = useDeleteProgramIndicator();
   const finalisasiMutation = useFinalisasiIndicators();
   const { enqueueSnackbar } = useSnackbar();
   const debounce = useDebounce();
@@ -163,6 +165,32 @@ const ProgramPage: FC = (): ReactElement => {
     setSelectedIndicator(ind);
     setIndicatorModalMode("edit");
     setIndicatorModalOpen(true);
+  };
+
+  const handleDeleteIndicator = (prog: TProkerProgram, ind: TDefaultProgramIndicator) => {
+    modal.confirm({
+      title: "Hapus Indikator",
+      description: `Apakah anda yakin ingin menghapus indikator "${ind.name}"?`,
+      icon: <DeleteOutlined sx={{ height: 40, width: 40 }} />,
+      onOk: () => {
+        if (prog.id && ind.id) {
+          deleteIndicator.mutate(
+            { programId: prog.id, id: ind.id },
+            {
+              onSuccess: () => {
+                enqueueSnackbar("Berhasil menghapus indikator", { variant: "success" });
+              },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onError: (error: any) => {
+                enqueueSnackbar(error?.response?.data?.message || "Gagal menghapus indikator", {
+                  variant: "error",
+                });
+              },
+            }
+          );
+        }
+      },
+    });
   };
 
   const handleEditProgram = (prog: TProkerProgram) => {
@@ -657,6 +685,7 @@ const ProgramPage: FC = (): ReactElement => {
                     onAddIndicator={handleOpenAddIndicator}
                     onSetTarget={handleOpenSetTarget}
                     onEditIndicator={handleOpenEditIndicator}
+                    onDeleteIndicator={handleDeleteIndicator}
                     onEditProgram={handleEditProgram}
                     onDeleteProgram={handleDeleteProgram}
                   />

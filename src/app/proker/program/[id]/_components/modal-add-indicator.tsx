@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -52,30 +52,29 @@ const getStatusLabel = (status?: string) => {
   return status || "-";
 };
 
-const schema = z.object({
-  name: z.string().min(1, "Nama Indikator wajib diisi"),
-  category: z.string().min(1, "Kategori wajib dipilih"),
-  masterUnitTypeId: z.string().min(1, "Satuan wajib dipilih"),
-  unitId: z.string().min(1, "UNIT wajib dipilih"),
-  picIds: z.array(z.string()).min(1, "PIC wajib dipilih"),
-  order: z.coerce.number().min(1, "Urutan minimal 1"),
-  targetQ1: z.coerce.number().optional(),
-  targetQ2: z.coerce.number().optional(),
-  targetQ3: z.coerce.number().optional(),
-  targetQ4: z.coerce.number().optional(),
-  budget: z.string().optional(),
-  propsal: z.any().optional(),
-  rab: z.any().optional(),
-  // usulanBahanHabisPakai: z.any().optional(),
-  // usulanPeralatan: z.any().optional(),
-  // usulanMebel: z.any().optional(),
-  // usulanPerawatanPerbaikan: z.any().optional(),
-  // usulanLainnya: z.any().optional(),
-  proposalDocumentId: z.string().optional(),
-  rabDocumentId: z.string().optional(),
-});
+const createSchema = (mode: "add" | "edit" | "detail") =>
+  z.object({
+    name: z.string().min(1, "Nama Indikator wajib diisi"),
+    category: z.string().min(1, "Kategori wajib dipilih"),
+    masterUnitTypeId: z.string().min(1, "Satuan wajib dipilih"),
+    unitId: z.string().min(1, "UNIT wajib dipilih"),
+    picIds:
+      mode === "edit"
+        ? z.array(z.string()).optional()
+        : z.array(z.string()).min(1, "PIC wajib dipilih"),
+    order: z.coerce.number().min(1, "Urutan minimal 1"),
+    targetQ1: z.coerce.number().optional(),
+    targetQ2: z.coerce.number().optional(),
+    targetQ3: z.coerce.number().optional(),
+    targetQ4: z.coerce.number().optional(),
+    budget: z.string().optional(),
+    propsal: z.any().optional(),
+    rab: z.any().optional(),
+    proposalDocumentId: z.string().optional(),
+    rabDocumentId: z.string().optional(),
+  });
 
-type FormData = z.infer<typeof schema>;
+type FormData = z.infer<ReturnType<typeof createSchema>>;
 
 const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }: ModalAddIndicatorProps) => {
   const { enqueueSnackbar } = useSnackbar();
@@ -96,8 +95,10 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
     label: item?.unit?.name || item?.name || "",
   })) || [];
 
+  const formSchema = useMemo(() => createSchema(mode), [mode]);
+
   const { control, handleSubmit, reset, watch } = useForm<FormData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       category: "",
@@ -123,7 +124,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   });
 
   const selectedCategory = watch("category");
-  const showBudgetAndFiles = selectedCategory === "RUTIN" || selectedCategory === "PENGEMBANGAN";
+  const showBudgetAndFiles = Boolean(selectedCategory);
 
   const selectedUnitId = watch("unitId");
   const { data: usersData } = useGetUnitUsers(selectedUnitId, { limit: 50 });
@@ -135,44 +136,65 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   useEffect(() => {
     if (open) {
       if ((mode === "edit" || mode === "detail") && selectedIndicator) {
-        let masterUnitTypeId = "";
-        if (typeof selectedIndicator.masterUnitType === 'object' && selectedIndicator.masterUnitType !== null) {
-          masterUnitTypeId = selectedIndicator.masterUnitType.id;
-        } else if (typeof selectedIndicator.masterUnitType === 'string') {
-          masterUnitTypeId = selectedIndicator.masterUnitType;
-        } else if (typeof selectedIndicator.unit === 'object' && selectedIndicator.unit !== null) {
-          masterUnitTypeId = selectedIndicator.unit.id;
-        } else if (typeof selectedIndicator.unit === 'string') {
-          masterUnitTypeId = selectedIndicator.unit;
+        let masterUnitTypeId = selectedIndicator.masterUnitTypeId || "";
+        if (!masterUnitTypeId) {
+          if (typeof selectedIndicator.masterUnitType === 'object' && selectedIndicator.masterUnitType !== null) {
+            masterUnitTypeId = selectedIndicator.masterUnitType.id;
+          } else if (typeof selectedIndicator.masterUnitType === 'string') {
+            masterUnitTypeId = selectedIndicator.masterUnitType;
+          } else if (typeof selectedIndicator.unit === 'object' && selectedIndicator.unit !== null) {
+            masterUnitTypeId = selectedIndicator.unit.id;
+          } else if (typeof selectedIndicator.unit === 'string') {
+            masterUnitTypeId = selectedIndicator.unit;
+          }
         }
 
+        const unitId =
+          selectedIndicator.unitId ||
+          (typeof selectedIndicator.unit === 'object' && selectedIndicator.unit !== null
+            ? selectedIndicator.unit.id
+            : typeof selectedIndicator.unit === 'string'
+              ? selectedIndicator.unit
+              : "");
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const initialPicIds = Array.isArray(selectedIndicator.pics)
-          ? selectedIndicator.pics.map((pic) => pic.userId).filter(Boolean)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ? selectedIndicator.pics.map((pic: any) => (typeof pic === "object" ? pic.userId || pic.id : pic)).filter(Boolean)
           : [];
 
         const selInd = selectedIndicator as unknown as Record<string, unknown>;
 
+        const propDocId =
+          (selInd.proposalDocumentId as string) ||
+          (selInd.proposalDocument as string) ||
+          (selInd.proposalURL as string) ||
+          (selInd.propsal as string) ||
+          "";
+
+        const rabDocId =
+          (selInd.rabDocumentId as string) ||
+          (selInd.rabDocument as string) ||
+          (selInd.rabURL as string) ||
+          (selInd.rab as string) ||
+          "";
+
         reset({
-          name: selectedIndicator.name,
+          name: selectedIndicator.name || "",
           category: selectedIndicator.category || "",
           masterUnitTypeId,
-          unitId: selectedIndicator.unitId || "",
+          unitId,
           picIds: initialPicIds,
-          order: selectedIndicator.order,
-          targetQ1: selectedIndicator.targetQ1 || 0,
-          targetQ2: selectedIndicator.targetQ2 || 0,
-          targetQ3: selectedIndicator.targetQ3 || 0,
-          targetQ4: selectedIndicator.targetQ4 || 0,
-          budget: (selInd.budget as string) || "",
-          propsal: (selInd.propsal as string) || "",
-          proposalDocumentId: (selInd.proposalDocumentId as string) || "",
-          rab: (selInd.rab as string) || "",
-          rabDocumentId: (selInd.rabDocumentId as string) || "",
-          // usulanBahanHabisPakai: (selInd.usulanBahanHabisPakai as string) || "",
-          // usulanPeralatan: (selInd.usulanPeralatan as string) || "",
-          // usulanMebel: (selInd.usulanMebel as string) || "",
-          // usulanPerawatanPerbaikan: (selInd.usulanPerawatanPerbaikan as string) || "",
-          // usulanLainnya: (selInd.usulanLainnya as string) || "",
+          order: selectedIndicator.order || 1,
+          targetQ1: selectedIndicator.targetQ1 ?? 0,
+          targetQ2: selectedIndicator.targetQ2 ?? 0,
+          targetQ3: selectedIndicator.targetQ3 ?? 0,
+          targetQ4: selectedIndicator.targetQ4 ?? 0,
+          budget: selInd.budget !== undefined && selInd.budget !== null ? formatRupiah(String(selInd.budget)) : "",
+          propsal: propDocId,
+          proposalDocumentId: propDocId,
+          rab: rabDocId,
+          rabDocumentId: rabDocId,
         });
       } else {
         reset({
@@ -189,11 +211,6 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
           budget: "",
           propsal: "",
           rab: "",
-          // usulanBahanHabisPakai: "",
-          // usulanPeralatan: "",
-          // usulanMebel: "",
-          // usulanPerawatanPerbaikan: "",
-          // usulanLainnya: "",
           proposalDocumentId: "",
           rabDocumentId: "",
         });
@@ -223,115 +240,80 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
 
   const onSubmit = async (data: FormData) => {
     if (isDetail) return;
-    const isRutinOrPengembangan = data.category === "RUTIN" || data.category === "PENGEMBANGAN";
 
     let proposalVal = data.propsal;
     let rabVal = data.rab;
-    // let usulanBahanHabisPakaiVal = data.usulanBahanHabisPakai;
-    // let usulanPeralatanVal = data.usulanPeralatan;
-    // let usulanMebelVal = data.usulanMebel;
-    // let usulanPerawatanPerbaikanVal = data.usulanPerawatanPerbaikan;
-    // let usulanLainnyaVal = data.usulanLainnya;
 
-    if (isRutinOrPengembangan) {
-      if (data.propsal instanceof File) {
-        setIsUploading(true);
-        try {
-          proposalVal = await uploadProkerDocument(data.propsal, "PROPOSAL");
-        } catch {
-          enqueueSnackbar("Gagal mengunggah berkas Proposal/TOR", { variant: "error" });
-          setIsUploading(false);
-          return;
-        }
+    if (data.propsal instanceof File) {
+      setIsUploading(true);
+      try {
+        proposalVal = await uploadProkerDocument(data.propsal, "PROPOSAL");
+      } catch {
+        enqueueSnackbar("Gagal mengunggah berkas Proposal/TOR", { variant: "error" });
+        setIsUploading(false);
+        return;
       }
-      if (data.rab instanceof File) {
-        setIsUploading(true);
-        try {
-          rabVal = await uploadProkerDocument(data.rab, "RAB");
-        } catch {
-          enqueueSnackbar("Gagal mengunggah berkas RAB", { variant: "error" });
-          setIsUploading(false);
-          return;
-        }
+    }
+    if (data.rab instanceof File) {
+      setIsUploading(true);
+      try {
+        rabVal = await uploadProkerDocument(data.rab, "RAB");
+      } catch {
+        enqueueSnackbar("Gagal mengunggah berkas RAB", { variant: "error" });
+        setIsUploading(false);
+        return;
       }
-      // if (data.usulanBahanHabisPakai instanceof File) {
-      //   setIsUploading(true);
-      //   try {
-      //     usulanBahanHabisPakaiVal = await uploadProkerDocument(data.usulanBahanHabisPakai, "OTHER");
-      //   } catch {
-      //     enqueueSnackbar("Gagal mengunggah berkas Usulan Bahan Habis Pakai", { variant: "error" });
-      //     setIsUploading(false);
-      //     return;
-      //   }
-      // }
-      // if (data.usulanPeralatan instanceof File) {
-      //   setIsUploading(true);
-      //   try {
-      //     usulanPeralatanVal = await uploadProkerDocument(data.usulanPeralatan, "OTHER");
-      //   } catch {
-      //     enqueueSnackbar("Gagal mengunggah berkas Usulan Peralatan", { variant: "error" });
-      //     setIsUploading(false);
-      //     return;
-      //   }
-      // }
-      // if (data.usulanMebel instanceof File) {
-      //   setIsUploading(true);
-      //   try {
-      //     usulanMebelVal = await uploadProkerDocument(data.usulanMebel, "OTHER");
-      //   } catch {
-      //     enqueueSnackbar("Gagal mengunggah berkas Usulan Mebel", { variant: "error" });
-      //     setIsUploading(false);
-      //     return;
-      //   }
-      // }
-      // if (data.usulanPerawatanPerbaikan instanceof File) {
-      //   setIsUploading(true);
-      //   try {
-      //     usulanPerawatanPerbaikanVal = await uploadProkerDocument(data.usulanPerawatanPerbaikan, "OTHER");
-      //   } catch {
-      //     enqueueSnackbar("Gagal mengunggah berkas Usulan Perawatan & Perbaikan", { variant: "error" });
-      //     setIsUploading(false);
-      //     return;
-      //   }
-      // }
-      // if (data.usulanLainnya instanceof File) {
-      //   setIsUploading(true);
-      //   try {
-      //     usulanLainnyaVal = await uploadProkerDocument(data.usulanLainnya, "OTHER");
-      //   } catch {
-      //     enqueueSnackbar("Gagal mengunggah berkas Usulan Pelatihan", { variant: "error" });
-      //     setIsUploading(false);
-      //     return;
-      //   }
-      // }
     }
     setIsUploading(false);
 
+    const budgetNum = data.budget
+      ? typeof data.budget === "number"
+        ? data.budget
+        : Number(String(data.budget).replace(/[^0-9]/g, "")) || 0
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      : (typeof (selectedIndicator as any)?.budget === "number" ? (selectedIndicator as any).budget : 0);
+
+    const selInd = selectedIndicator as unknown as Record<string, unknown> | null;
+
+    const finalProposalDocId =
+      typeof proposalVal === "string" && proposalVal
+        ? proposalVal
+        : data.proposalDocumentId || (selInd?.proposalDocumentId as string) || undefined;
+
+    const finalRabDocId =
+      typeof rabVal === "string" && rabVal
+        ? rabVal
+        : data.rabDocumentId || (selInd?.rabDocumentId as string) || undefined;
+
+    const resolvedUnitId =
+      data.unitId ||
+      selectedIndicator?.unitId ||
+      (typeof selectedIndicator?.unit === 'object' && selectedIndicator.unit !== null ? selectedIndicator.unit.id : "") ||
+      "";
+
+    const resolvedMasterUnitTypeId =
+      data.masterUnitTypeId ||
+      selectedIndicator?.masterUnitTypeId ||
+      (typeof selectedIndicator?.masterUnitType === 'object' && selectedIndicator.masterUnitType !== null
+        ? selectedIndicator.masterUnitType.id
+        : "") ||
+      "";
+
     const fullPayload: import("@/api/proker/manajemenProgram/type").TDefaultProgramIndicatorPayload & Record<string, unknown> = {
+      unitId: resolvedUnitId,
       name: data.name,
+      masterUnitTypeId: resolvedMasterUnitTypeId,
       category: data.category,
-      unit: data.masterUnitTypeId,
-      masterUnitTypeId: data.masterUnitTypeId,
-      order: Number(data.order || 1),
-      unitId: mode === "edit" && selectedIndicator ? data.unitId || selectedIndicator.unitId || "" : data.unitId,
-      targetQ1: data.targetQ1 !== undefined && data.targetQ1 !== null ? Number(data.targetQ1) : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ1 || 0) : 0),
-      targetQ2: data.targetQ2 !== undefined && data.targetQ2 !== null ? Number(data.targetQ2) : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ2 || 0) : 0),
-      targetQ3: data.targetQ3 !== undefined && data.targetQ3 !== null ? Number(data.targetQ3) : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ3 || 0) : 0),
-      targetQ4: data.targetQ4 !== undefined && data.targetQ4 !== null ? Number(data.targetQ4) : (mode === "edit" && selectedIndicator ? Number(selectedIndicator.targetQ4 || 0) : 0),
-      status: mode === "edit" && selectedIndicator ? selectedIndicator.status || "DRAFT" : "DRAFT",
-      budget: isRutinOrPengembangan && data.budget ? Number(data.budget.replace(/[^0-9]/g, "")) : 0,
+      isDefaultProgramIndicator: Boolean(selInd?.isDefaultProgramIndicator ?? false),
+      targetQ1: Number(data.targetQ1 ?? selectedIndicator?.targetQ1 ?? 0),
+      targetQ2: Number(data.targetQ2 ?? selectedIndicator?.targetQ2 ?? 0),
+      targetQ3: Number(data.targetQ3 ?? selectedIndicator?.targetQ3 ?? 0),
+      targetQ4: Number(data.targetQ4 ?? selectedIndicator?.targetQ4 ?? 0),
+      budget: budgetNum,
       picIds: data.picIds || [],
-      ...(isRutinOrPengembangan ? {
-        propsal: proposalVal,
-        rab: rabVal,
-        rabDocumentId: rabVal,
-        proposalDocumentId: proposalVal,
-        // usulanBahanHabisPakai: usulanBahanHabisPakaiVal,
-        // usulanPeralatan: usulanPeralatanVal,
-        // usulanMebel: usulanMebelVal,
-        // usulanPerawatanPerbaikan: usulanPerawatanPerbaikanVal,
-        // usulanLainnya: usulanLainnyaVal,
-      } : {}),
+      order: Number(data.order || selectedIndicator?.order || 1),
+      ...(finalProposalDocId ? { proposalDocumentId: finalProposalDocId } : {}),
+      ...(finalRabDocId ? { rabDocumentId: finalRabDocId } : {}),
     };
 
     if (mode === "add") {
@@ -342,8 +324,11 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
             enqueueSnackbar("Berhasil menambahkan indikator", { variant: "success" });
             handleClose();
           },
-          onError: () => {
-            enqueueSnackbar("Gagal menambahkan indikator", { variant: "error" });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onError: (error: any) => {
+            enqueueSnackbar(error?.response?.data?.message || "Gagal menambahkan indikator", {
+              variant: "error",
+            });
           },
         }
       );
@@ -356,8 +341,11 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
             enqueueSnackbar("Berhasil mengubah indikator", { variant: "success" });
             handleClose();
           },
-          onError: () => {
-            enqueueSnackbar("Gagal mengubah indikator", { variant: "error" });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onError: (error: any) => {
+            enqueueSnackbar(error?.response?.data?.message || "Gagal mengubah indikator", {
+              variant: "error",
+            });
           },
         }
       );
@@ -439,7 +427,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
                 name="picIds"
                 label="PIC"
                 options={picOptions}
-                required
+                required={mode !== "edit"}
                 disabled={isDetail}
               />
             </Grid>

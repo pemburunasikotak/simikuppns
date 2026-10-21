@@ -20,7 +20,7 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: true,
       },
-      includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
+      includeAssets: ["images/logo.png"],
       manifest: {
         name: "My Awesome App",
         short_name: "MyApp",

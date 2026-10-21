@@ -58,6 +58,15 @@ const IndicatorTab: FC = (): ReactElement => {
   const columns: GridColDef<TDefaultProgramIndicator>[] = useMemo(
     () => [
       { field: "name", headerName: "Nama Indikator", minWidth: 250, flex: 1 },
+      {
+        field: "unit", headerName: "Unit", minWidth: 250, flex: 1,
+        renderCell: (params) => {
+          return (
+            (typeof params.row.unit === "object"
+              ? params.row.unit?.name
+              : params.row.unit) || "-")
+        }
+      },
       { field: "category", headerName: "Kategori", width: 140, renderCell: (params) => params.value || "-" },
       {
         field: "unit_measurement",

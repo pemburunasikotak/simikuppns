@@ -537,7 +537,7 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
                       sx={{ flexWrap: "wrap", rowGap: 1 }}
                     >
                       {/* Column 1: KATEGORI */}
-                      <Box sx={{ textAlign: "center", minWidth: 70 }}>
+                      <Box sx={{ minWidth: 70 }}>
                         <Typography
                           variant="caption"
                           sx={{
@@ -566,7 +566,7 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
                       </Box>
 
                       {/* Column 2: STATUS */}
-                      <Box sx={{ textAlign: "center", minWidth: 120 }}>
+                      <Box sx={{ minWidth: 120 }}>
                         <Typography
                           variant="caption"
                           sx={{
@@ -586,6 +586,37 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
                           sx={{
                             bgcolor: getStatusBg(ind.status),
                             color: getStatusColor(ind.status),
+                            fontWeight: 700,
+                            fontSize: "11px",
+                            height: "24px",
+                            borderRadius: "6px",
+                          }}
+                        />
+                      </Box>
+                      <Box sx={{ minWidth: 120 }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontSize: "10px",
+                            fontWeight: 700,
+                            color: "#94A3B8",
+                            letterSpacing: 0.5,
+                            display: "block",
+                            mb: 0.5,
+                          }}
+                        >
+                          Unit
+                        </Typography>
+                        <Chip
+                          label={
+                            (typeof ind.unit === "object"
+                              ? ind.unit?.name
+                              : ind.unit) || "-"
+                          }
+                          size="small"
+                          sx={{
+                            bgcolor: "#EEF2FF",
+                            color: "#2563EB",
                             fontWeight: 700,
                             fontSize: "11px",
                             height: "24px",

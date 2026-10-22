@@ -18,8 +18,9 @@ import { useGetProkerMasterUnits } from "@/app/proker/master-unit/_hooks/use-get
 import { ProkerSessionUser } from "@/libs/localstorage/proker-session";
 import useGetListIKU from "@/app/proker/unit/[id]/_hooks/use-get-list-iku";
 
-const formatRupiah = (value: string) => {
-  const numberString = value.replace(/[^,\d]/g, "").toString();
+const formatRupiah = (value: string | number | null | undefined) => {
+  if (value === undefined || value === null || value === "") return "";
+  const numberString = value.toString().replace(/[^,\d]/g, "");
   const split = numberString.split(",");
   const sisa = split[0].length % 3;
   let rupiah = split[0].substr(0, sisa);
@@ -133,13 +134,13 @@ const IndicatorItem = ({
                     <BaseInputText
                       id={`budget-${index}`}
                       variant="outlined"
-                      value={field.value}
+                      value={formatRupiah(field.value)}
                       placeholder="Contoh: 10.000.000"
                       error={fieldState.invalid}
                       helperText={fieldState.error?.message}
                       onChange={(e) => {
-                        const formatted = formatRupiah(e.target.value);
-                        field.onChange(formatted);
+                        const rawValue = e.target.value.replace(/\D/g, "");
+                        field.onChange(rawValue ? Number(rawValue) : undefined);
                       }}
                       InputProps={{
                         startAdornment: (

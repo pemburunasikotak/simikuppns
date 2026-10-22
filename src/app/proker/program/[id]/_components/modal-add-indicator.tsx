@@ -11,6 +11,8 @@ import {
   FormLabel,
   InputAdornment,
   Typography,
+  Autocomplete,
+  CircularProgress,
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,8 +28,10 @@ import useCreateProgramIndicator from "../_hooks/use-create-program-indicator";
 import useUpdateProgramIndicator from "../_hooks/use-update-program-indicator";
 import FormDropdownCheckboxField from "@/app/_components/ui/form-dropdown-checkbox-field";
 import { uploadProkerDocument } from "@/api/proker/program/api";
+import { useDebounce } from "@/app/_hooks/use-debounce";
 
 import useGetMyUnits from "@/app/proker/unit/_hooks/use-get-my-units";
+import { TMyUnitItem } from "@/api/proker/unit/api";
 import useGetUnitUsers from "@/app/proker/unit/_hooks/use-get-unit-users";
 
 type ModalAddIndicatorProps = {
@@ -88,12 +92,61 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
   const { data: unitTypesData } = useGetProkerMasterUnits({ limit: 50 });
   const unitOptions = unitTypesData?.items?.map(unit => ({ value: unit.id, label: unit.name })) || [];
 
-  const { data: myUnitsData } = useGetMyUnits({ limit: 50 });
+  const [debouncedUnitSearch, setDebouncedUnitSearch] = useState("");
+  const debounce = useDebounce();
 
-  const myUnitOptions = myUnitsData?.map(item => ({
-    value: item?.unit?.id || item?.id || "",
-    label: item?.unit?.name || item?.name || "",
-  })) || [];
+  const { data: myUnitsData, isLoading: isUnitsLoading } = useGetMyUnits({
+    limit: 100,
+    ...(debouncedUnitSearch.trim() ? { search: debouncedUnitSearch.trim(), search_value: debouncedUnitSearch.trim() } : {}),
+  });
+
+  const myUnitOptions = useMemo(() => {
+    const rawItems = Array.isArray(myUnitsData)
+      ? myUnitsData
+      : (myUnitsData as unknown as { items?: TMyUnitItem[] })?.items || [];
+
+    const options = rawItems
+      .map((item) => ({
+        value: item?.unit?.id || item?.id || "",
+        label: item?.unit?.name || item?.name || "",
+      }))
+      .filter((opt) => opt.value && opt.label);
+
+    if (selectedIndicator) {
+      const indUnitId =
+        selectedIndicator.unitId ||
+        (typeof selectedIndicator.unit === "object" && selectedIndicator.unit !== null
+          ? selectedIndicator.unit.id
+          : typeof selectedIndicator.unit === "string"
+            ? selectedIndicator.unit
+            : "");
+      const indUnitName =
+        (typeof selectedIndicator.unit === "object" && selectedIndicator.unit !== null
+          ? selectedIndicator.unit.name
+          : "") || indUnitId;
+
+      if (indUnitId && !options.some((o) => o.value === indUnitId)) {
+        options.unshift({ value: indUnitId, label: indUnitName || indUnitId });
+      }
+    }
+
+    return options;
+  }, [myUnitsData, selectedIndicator]);
+
+  const handleUnitInputChange = (
+    _event: React.SyntheticEvent,
+    value: string,
+    reason: string
+  ) => {
+    if (reason === "input") {
+      debounce({
+        cb: () => setDebouncedUnitSearch(value),
+        delay: 400,
+      });
+    } else if (reason === "clear") {
+      setDebouncedUnitSearch("");
+    }
+  };
 
   const formSchema = useMemo(() => createSchema(mode), [mode]);
 
@@ -135,6 +188,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
 
   useEffect(() => {
     if (open) {
+      setDebouncedUnitSearch("");
       if ((mode === "edit" || mode === "detail") && selectedIndicator) {
         let masterUnitTypeId = selectedIndicator.masterUnitTypeId || "";
         if (!masterUnitTypeId) {
@@ -220,6 +274,7 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
 
   const handleClose = () => {
     reset();
+    setDebouncedUnitSearch("");
     onClose();
   };
 
@@ -401,13 +456,61 @@ const ModalAddIndicator = ({ open, onClose, programId, mode, selectedIndicator }
             </Grid>
 
             <Grid size={{ xs: 12, md: 6 }}>
-              <FormDropdownField
+              <Controller
                 control={control}
                 name="unitId"
-                label="UNIT"
-                options={myUnitOptions}
-                required
-                disabled={isDetail}
+                render={({ field, fieldState }) => {
+                  const selectedOption =
+                    myUnitOptions.find((opt) => opt.value === field.value) || null;
+
+                  return (
+                    <FormControl
+                      variant="outlined"
+                      fullWidth
+                      error={fieldState.invalid}
+                      disabled={isDetail}
+                      sx={{ backgroundColor: "white" }}
+                    >
+                      <FormLabel required error={fieldState.invalid}>
+                        UNIT
+                      </FormLabel>
+                      <Autocomplete
+                        options={myUnitOptions}
+                        value={selectedOption}
+                        disabled={isDetail}
+                        loading={isUnitsLoading}
+                        isOptionEqualToValue={(option, val) => option.value === val?.value}
+                        getOptionLabel={(option) =>
+                          typeof option === "string" ? option : option.label || ""
+                        }
+                        onChange={(_, newValue) => {
+                          field.onChange(newValue ? newValue.value : "");
+                        }}
+                        onInputChange={handleUnitInputChange}
+                        noOptionsText="Unit tidak ditemukan"
+                        renderInput={(params) => (
+                          <BaseInputText
+                            {...params}
+                            placeholder={isDetail ? "" : "Cari & Pilih Unit..."}
+                            error={fieldState.invalid}
+                            helperText={fieldState.error?.message}
+                            InputProps={{
+                              ...params.InputProps,
+                              endAdornment: (
+                                <>
+                                  {isUnitsLoading ? (
+                                    <CircularProgress color="inherit" size={20} />
+                                  ) : null}
+                                  {params.InputProps.endAdornment}
+                                </>
+                              ),
+                            }}
+                          />
+                        )}
+                      />
+                    </FormControl>
+                  );
+                }}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>

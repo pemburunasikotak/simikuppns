@@ -290,8 +290,8 @@ const ProgramForm = ({ loading, handleSubmit, defaultValues }: Props) => {
   const userRoleKeys = user?.roles?.map((r: { key: string }) => r.key) || [];
   const isAdmin = userRoleKeys.includes("admin_sim_proker");
 
-  const { data: unitsData } = useGetProkerUnits();
-  const { data: myUnitsData } = useGetMyUnits({ limit: 50 });
+  const { data: unitsData } = useGetProkerUnits({ limit: 100 });
+  const { data: myUnitsData } = useGetMyUnits({ limit: 100 });
 
   const allUnitOptions = unitsData?.items.map((u) => ({ value: u.id, label: u.name })) || [];
   const myUnitOptions = myUnitsData?.map((item) => ({

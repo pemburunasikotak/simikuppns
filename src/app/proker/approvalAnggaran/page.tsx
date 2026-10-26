@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Typography,
   Button,
@@ -14,6 +14,7 @@ import {
   IconButton,
   Box,
   Grid,
+  Autocomplete,
 } from "@mui/material";
 import {
   CheckCircleOutlined,
@@ -26,6 +27,8 @@ import DataTable from "@/app/_components/ui/data-table";
 import { createPaginationInfo } from "@/utils/data-table";
 import { Page, DocumentCell } from "@/app/_components/ui";
 import Filter from "@/app/_components/ui/filter";
+import { useFilter } from "@/app/_hooks/use-filter";
+import { useGetProkerUnits } from "@/app/proker/unit/_hooks/use-get-units";
 import { useGetApprovedIndicators } from "./_hooks/use-get-approved-indicators";
 import {
   useApproveAnggaranIndicator,
@@ -56,7 +59,17 @@ const formatRupiah = (amount?: string | number) => {
 export default function ApprovalAnggaranPage() {
   const { enqueueSnackbar } = useSnackbar();
 
-  const [filter, setFilter] = useState<Record<string, unknown>>({ per_page: 10 });
+  const { filters: filter, setFilter } = useFilter<{
+    page?: number;
+    per_page?: number;
+    search_value?: string;
+    search?: string;
+    UnitId?: string;
+    unitId?: string;
+  }>();
+
+  const selectedUnitId = (filter.UnitId || filter.unitId) as string | undefined;
+
   const [note, setNote] = useState("");
   const [dialogState, setDialogState] = useState<ActionDialogState>({
     open: false,
@@ -68,11 +81,13 @@ export default function ApprovalAnggaranPage() {
 
   const queryParams = {
     page: isSearching ? 1 : (filter.page ? Number(filter.page) : 1),
-    limit: filter.per_page ? Number(filter.per_page) : 10,
+    limit: filter.per_page ? Number(filter.per_page) : 50,
     search: filter.search || filter.search_value || undefined,
+    ...(selectedUnitId ? { UnitId: selectedUnitId, unitId: selectedUnitId } : {}),
   };
 
   const query = useGetApprovedIndicators(queryParams);
+  const { data: unitsData, isLoading: isLoadingUnits } = useGetProkerUnits({ limit: 100 });
   const approveMutation = useApproveAnggaranIndicator();
   const rejectMutation = useRejectAnggaranIndicator();
   const revisionMutation = useRevisionAnggaranIndicator();
@@ -418,10 +433,48 @@ export default function ApprovalAnggaranPage() {
     },
   ];
 
-  const filteredRows = query.data?.data?.items || [];
-  const totalItems = query.data?.data?.pagination?.totalItems || 0;
+  const rawRows = query.data?.data?.items || [];
+
+  const unitOptions = useMemo(() => {
+    const map = new Map<string, { id: string; name: string }>();
+    (unitsData?.items || []).forEach((u) => {
+      if (u?.id) map.set(u.id, { id: u.id, name: u.name });
+    });
+    rawRows.forEach((row) => {
+      if (row.unit?.id && !map.has(row.unit.id)) {
+        map.set(row.unit.id, { id: row.unit.id, name: row.unit.name || row.unit.code || row.unit.id });
+      }
+      if (row.unitId && !map.has(row.unitId)) {
+        map.set(row.unitId, { id: row.unitId, name: row.unit?.name || row.unitId });
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [unitsData, rawRows]);
+
+  const selectedUnit = useMemo(() => {
+    if (!selectedUnitId) return null;
+    return (
+      unitOptions.find((u) => u.id === selectedUnitId) || {
+        id: selectedUnitId,
+        name: selectedUnitId,
+      }
+    );
+  }, [selectedUnitId, unitOptions]);
+
+  const filteredRows = useMemo(() => {
+    if (!selectedUnitId) return rawRows;
+    return rawRows.filter(
+      (item) => item.unitId === selectedUnitId || item.unit?.id === selectedUnitId
+    );
+  }, [rawRows, selectedUnitId]);
+
+  const totalItems = selectedUnitId
+    ? (filteredRows.length !== rawRows.length
+        ? filteredRows.length
+        : query.data?.data?.pagination?.totalItems || filteredRows.length)
+    : query.data?.data?.pagination?.totalItems || 0;
   const currentPage = query.data?.data?.pagination?.page || 1;
-  const limit = query.data?.data?.pagination?.limit || 10;
+  const limit = query.data?.data?.pagination?.limit || (filter.per_page ? Number(filter.per_page) : 50);
 
   const dialogConfig = {
     approval: {
@@ -463,6 +516,47 @@ export default function ApprovalAnggaranPage() {
           defaultValue={{
             search_value: filter.search || filter.search_value,
           }}
+          actions={[
+            <Autocomplete
+              key="filter-unit"
+              options={unitOptions}
+              loading={isLoadingUnits}
+              getOptionLabel={(option) => (typeof option === "string" ? option : option.name || "")}
+              isOptionEqualToValue={(option, val) => option.id === val.id}
+              value={selectedUnit}
+              onChange={(_, newValue) => {
+                setFilter({
+                  UnitId: newValue?.id || undefined,
+                  unitId: undefined,
+                  page: 1,
+                });
+              }}
+              sx={{
+                width: { xs: "100%", sm: 280, md: 320 },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "10px",
+                  backgroundColor: "rgba(244, 242, 244, 1)",
+                  minHeight: "56px",
+                  boxSizing: "border-box",
+                  "& fieldset": {
+                    borderColor: "transparent",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "transparent",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "primary.main",
+                  },
+                },
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Filter Unit..."
+                />
+              )}
+            />,
+          ]}
         />
       }
     >
@@ -473,16 +567,12 @@ export default function ApprovalAnggaranPage() {
         checkboxSelection={false}
         getRowHeight={() => "auto"}
         paginationInfo={createPaginationInfo({
-          per_page: limit,
+          per_page: filter.per_page ? Number(filter.per_page) : limit,
           total: totalItems,
           page: isSearching ? 1 : currentPage,
         })}
         handleChange={(pagination) => {
-          setFilter({
-            ...pagination,
-            search: undefined,
-            search_value: undefined,
-          });
+          setFilter(pagination);
         }}
       />
 

@@ -22,6 +22,7 @@ import {
   Paper,
   ToggleButton,
   ToggleButtonGroup,
+  Autocomplete,
 } from "@mui/material";
 import {
   AddOutlined,
@@ -49,6 +50,7 @@ import useDeleteProgram from "./_hooks/use-delete-program";
 import useDeleteProgramIndicator from "./_hooks/use-delete-program-indicator";
 import useFinalisasiIndicators from "./_hooks/use-finalisasi-indicators";
 import useGetMyUnits from "@/app/proker/unit/_hooks/use-get-my-units";
+import { useGetProkerUnits } from "@/app/proker/unit/_hooks/use-get-units";
 import { ProkerSessionUser } from "@/libs/localstorage/proker-session";
 import { useFilter } from "@/app/_hooks/use-filter";
 import { useDebounce } from "@/app/_hooks/use-debounce";
@@ -89,7 +91,11 @@ const ProgramPage: FC = (): ReactElement => {
     per_page?: number;
     search?: string;
     search_value?: string;
+    UnitId?: string;
+    unitId?: string;
   }>();
+
+  const selectedUnitId = (filter.UnitId || filter.unitId) as string | undefined;
 
   const [searchTerm, setSearchTerm] = useState(filter.search || filter.search_value || "");
 
@@ -101,11 +107,65 @@ const ProgramPage: FC = (): ReactElement => {
     page: currentPage,
     limit: perPage,
     search: filter.search || filter.search_value || undefined,
+    ...(selectedUnitId ? { UnitId: selectedUnitId, unitId: selectedUnitId } : {}),
   });
 
+  const { data: unitsData, isLoading: isLoadingUnits } = useGetProkerUnits({ limit: 100 });
+
   const rawItems = data?.data?.items || [];
-  const totalItems = data?.data?.pagination?.totalItems || rawItems.length;
-  const totalPages = data?.data?.pagination?.totalPages || Math.ceil(totalItems / perPage) || 1;
+
+  const unitOptions = useMemo(() => {
+    const map = new Map<string, { id: string; name: string }>();
+    (unitsData?.items || []).forEach((u) => {
+      if (u?.id) map.set(u.id, { id: u.id, name: u.name });
+    });
+    rawItems.forEach((prog) => {
+      prog.indicators?.forEach((ind) => {
+        const u = typeof ind.unit === "object" && ind.unit !== null ? ind.unit : null;
+        if (u?.id && !map.has(u.id)) {
+          map.set(u.id, { id: u.id, name: u.name || u.id });
+        }
+        if (ind.unitId && !map.has(ind.unitId)) {
+          map.set(ind.unitId, {
+            id: ind.unitId,
+            name: u?.name || ind.unitId,
+          });
+        }
+      });
+    });
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [unitsData, rawItems]);
+
+  const selectedUnit = useMemo(() => {
+    if (!selectedUnitId) return null;
+    return (
+      unitOptions.find((u) => u.id === selectedUnitId) || {
+        id: selectedUnitId,
+        name: selectedUnitId,
+      }
+    );
+  }, [selectedUnitId, unitOptions]);
+
+  const filteredItems = useMemo(() => {
+    if (!selectedUnitId) return rawItems;
+    return rawItems.filter((prog) => {
+      if (prog.unitId === selectedUnitId) return true;
+      return prog.indicators?.some((ind) => {
+        if (ind.unitId === selectedUnitId) return true;
+        if (typeof ind.unit === "object" && ind.unit !== null && ind.unit.id === selectedUnitId) return true;
+        if (typeof ind.unit === "string" && ind.unit === selectedUnitId) return true;
+        return false;
+      });
+    });
+  }, [rawItems, selectedUnitId]);
+
+  const items = filteredItems;
+  const effectiveTotalItems = selectedUnitId
+    ? (filteredItems.length !== rawItems.length
+      ? filteredItems.length
+      : data?.data?.pagination?.totalItems || filteredItems.length)
+    : data?.data?.pagination?.totalItems || rawItems.length;
+  const effectiveTotalPages = data?.data?.pagination?.totalPages || Math.ceil(effectiveTotalItems / perPage) || 1;
 
   // Search input change handler with debounce
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -136,9 +196,6 @@ const ProgramPage: FC = (): ReactElement => {
       return next;
     });
   };
-
-  // Both table and list views use the exact same data from the API
-  const items = rawItems;
 
   // Modals for execution
   const [selectedProgram, setSelectedProgram] = useState<TProkerProgram | null>(null);
@@ -224,7 +281,7 @@ const ProgramPage: FC = (): ReactElement => {
   const userRoleKeys = user?.roles?.map((r: { key: string }) => r.key) || [];
   const isAdmin = userRoleKeys.includes("admin_sim_proker");
 
-  const [selectedUnitId, setSelectedUnitId] = useState<string>("");
+  const [exportUnitId, setExportUnitId] = useState<string>("");
   const { data: myUnitsData } = useGetMyUnits({ limit: 50 });
   const myUnitOptions = useMemo(() => {
     return (
@@ -236,10 +293,10 @@ const ProgramPage: FC = (): ReactElement => {
   }, [myUnitsData]);
 
   useEffect(() => {
-    if (myUnitOptions.length > 0 && !selectedUnitId) {
-      setSelectedUnitId(myUnitOptions[0].value);
+    if (myUnitOptions.length > 0 && !exportUnitId) {
+      setExportUnitId(myUnitOptions[0].value);
     }
-  }, [myUnitOptions, selectedUnitId]);
+  }, [myUnitOptions, exportUnitId]);
 
   const handleDownloadExcel = async () => {
     if (!selectedYear) {
@@ -252,7 +309,7 @@ const ProgramPage: FC = (): ReactElement => {
     }
     try {
       setIsExporting(true);
-      const blob = await exportProkerExcel(selectedYear, selectedType, !isAdmin ? selectedUnitId : undefined);
+      const blob = await exportProkerExcel(selectedYear, selectedType, !isAdmin ? exportUnitId : undefined);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -429,18 +486,13 @@ const ProgramPage: FC = (): ReactElement => {
         },
       ]}
     >
-      {/* ── Top Bar / Search & Action Bar ── */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", lg: "row" },
-          alignItems: { xs: "stretch", lg: "center" },
-          justifyContent: "space-between",
-          gap: 2,
-          mb: 3,
-        }}
+      {/* ── Top Bar: Search & Unit Filter ── */}
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1.5}
+        alignItems={{ xs: "stretch", sm: "center" }}
+        sx={{ mb: 2 }}
       >
-        {/* Search Input */}
         <TextField
           value={searchTerm}
           onChange={handleSearchChange}
@@ -483,59 +535,123 @@ const ProgramPage: FC = (): ReactElement => {
           }}
         />
 
-        {/* View Mode Toggle (Tabel / List) & Action Buttons */}
+        <Autocomplete
+          key="filter-unit"
+          options={unitOptions}
+          loading={isLoadingUnits}
+          getOptionLabel={(option) => (typeof option === "string" ? option : option.name || "")}
+          isOptionEqualToValue={(option, val) => option.id === val.id}
+          value={selectedUnit}
+          onChange={(_, newValue) => {
+            setFilter({
+              UnitId: newValue?.id || undefined,
+              unitId: undefined,
+              page: 1,
+            });
+          }}
+          size="small"
+          sx={{
+            width: { xs: "100%", sm: 260, md: 300 },
+            flexShrink: 0,
+            "& .MuiOutlinedInput-root": {
+              bgcolor: "#ffffff",
+              borderRadius: "10px",
+              minHeight: 44,
+              height: 44,
+              boxSizing: "border-box",
+              paddingTop: "0 !important",
+              paddingBottom: "0 !important",
+              "& fieldset": {
+                borderColor: "#E2E8F0",
+              },
+              "&:hover fieldset": {
+                borderColor: "#CBD5E1",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#0D6836",
+              },
+            },
+            "& .MuiOutlinedInput-input": {
+              fontSize: "14px",
+              color: "#1E293B",
+              "&::placeholder": {
+                color: "#94A3B8",
+                opacity: 1,
+              },
+            },
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              placeholder="Filter Unit..."
+            />
+          )}
+        />
+      </Stack>
+
+      {/* ── Top Bar: View Mode Toggle & Action Buttons ── */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          alignItems: { xs: "stretch", sm: "center" },
+          justifyContent: "flex-end",
+          gap: 1.5,
+          mb: 3,
+        }}
+      >
+        {/* ToggleButtonGroup: Tabel vs List */}
+        <Tooltip title={viewMode === "tabel" ? "Tampilan Tabel" : "Tampilan List"} arrow>
+          <ToggleButtonGroup
+            value={viewMode}
+            exclusive
+            onChange={(_e, val) => { if (val) handleSetViewMode(val as "tabel" | "list"); }}
+            size="small"
+            aria-label="view mode"
+            sx={{
+              height: 44,
+              bgcolor: "#ffffff",
+              border: "1px solid #E2E8F0",
+              borderRadius: "10px",
+              overflow: "hidden",
+              "& .MuiToggleButton-root": {
+                border: "none",
+                borderRadius: 0,
+                px: 1.8,
+                color: "#94A3B8",
+                fontSize: "13px",
+                fontWeight: 600,
+                gap: 0.7,
+                textTransform: "none",
+                transition: "all 0.2s ease",
+                "&.Mui-selected": {
+                  bgcolor: "#0D6836",
+                  color: "#ffffff",
+                  "&:hover": { bgcolor: "#0A532B" },
+                },
+                "&:hover": { bgcolor: "#F1F5F9" },
+                "&:first-of-type": { borderRadius: "9px 0 0 9px" },
+                "&:last-of-type": { borderRadius: "0 9px 9px 0" },
+              },
+            }}
+          >
+            <ToggleButton value="tabel" aria-label="tabel">
+              <TableRowsOutlined sx={{ fontSize: 18 }} />
+              <span>Tabel</span>
+            </ToggleButton>
+            <ToggleButton value="list" aria-label="list">
+              <ViewListOutlined sx={{ fontSize: 18 }} />
+              <span>List</span>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Tooltip>
+
+        {/* Action Buttons */}
         <Stack
           direction={{ xs: "column", sm: "row" }}
           spacing={1.5}
           alignItems={{ xs: "stretch", sm: "center" }}
-          sx={{ flexShrink: 0 }}
         >
-          {/* ToggleButtonGroup: Tabel vs List */}
-          <Tooltip title={viewMode === "tabel" ? "Tampilan Tabel" : "Tampilan List"} arrow>
-            <ToggleButtonGroup
-              value={viewMode}
-              exclusive
-              onChange={(_e, val) => { if (val) handleSetViewMode(val as "tabel" | "list"); }}
-              size="small"
-              aria-label="view mode"
-              sx={{
-                height: 44,
-                bgcolor: "#ffffff",
-                border: "1px solid #E2E8F0",
-                borderRadius: "10px",
-                overflow: "hidden",
-                "& .MuiToggleButton-root": {
-                  border: "none",
-                  borderRadius: 0,
-                  px: 1.8,
-                  color: "#94A3B8",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  gap: 0.7,
-                  textTransform: "none",
-                  transition: "all 0.2s ease",
-                  "&.Mui-selected": {
-                    bgcolor: "#0D6836",
-                    color: "#ffffff",
-                    "&:hover": { bgcolor: "#0A532B" },
-                  },
-                  "&:hover": { bgcolor: "#F1F5F9" },
-                  "&:first-of-type": { borderRadius: "9px 0 0 9px" },
-                  "&:last-of-type": { borderRadius: "0 9px 9px 0" },
-                },
-              }}
-            >
-              <ToggleButton value="tabel" aria-label="tabel">
-                <TableRowsOutlined sx={{ fontSize: 18 }} />
-                <span>Tabel</span>
-              </ToggleButton>
-              <ToggleButton value="list" aria-label="list">
-                <ViewListOutlined sx={{ fontSize: 18 }} />
-                <span>List</span>
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Tooltip>
-
           {/* Unduh Excel Button */}
           <Button
             variant="outlined"
@@ -631,7 +747,7 @@ const ProgramPage: FC = (): ReactElement => {
             checkboxSelection={false}
             paginationInfo={createPaginationInfo({
               per_page: perPage,
-              total: totalItems,
+              total: effectiveTotalItems,
               page: currentPage,
             })}
             handleChange={(pagination) => {
@@ -707,7 +823,7 @@ const ProgramPage: FC = (): ReactElement => {
               >
                 <Typography variant="body2" color="#64748B">
                   Menampilkan {items.length > 0 ? (currentPage - 1) * perPage + 1 : 0} -{" "}
-                  {Math.min(currentPage * perPage, totalItems)} dari {totalItems} program
+                  {Math.min(currentPage * perPage, effectiveTotalItems)} dari {effectiveTotalItems} program
                 </Typography>
 
                 <Stack direction="row" spacing={2} alignItems="center">
@@ -743,7 +859,7 @@ const ProgramPage: FC = (): ReactElement => {
                   </Stack>
 
                   <Pagination
-                    count={totalPages}
+                    count={effectiveTotalPages}
                     page={currentPage}
                     onChange={(_, page) => {
                       setFilter({ page });
@@ -781,8 +897,8 @@ const ProgramPage: FC = (): ReactElement => {
               <TextField
                 select
                 label="Unit"
-                value={selectedUnitId}
-                onChange={(e) => setSelectedUnitId(e.target.value)}
+                value={exportUnitId}
+                onChange={(e) => setExportUnitId(e.target.value)}
                 fullWidth
               >
                 {myUnitOptions.map((opt) => (

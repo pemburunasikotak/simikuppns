@@ -26,6 +26,16 @@ export type TDefaultProgramIndicator = {
   targetQ2?: number;
   targetQ3?: number;
   targetQ4?: number;
+  budget?: number | string;
+  proposalURL?: string;
+  proposalDocument?: unknown;
+  propsal?: unknown;
+  proposal?: unknown;
+  proposalDocumentId?: string;
+  rabURL?: string;
+  rabDocument?: unknown;
+  rab?: unknown;
+  rabDocumentId?: string;
   status?: string;
   order: number;
   pics?: {

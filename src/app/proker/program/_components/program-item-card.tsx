@@ -12,6 +12,7 @@ import {
   ListItemIcon,
   ListItemText,
   Tooltip,
+  Divider,
 } from "@mui/material";
 import {
   KeyboardArrowDown,
@@ -31,6 +32,8 @@ import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
 import useDeleteProgramIndicator from "../[id]/_hooks/use-delete-program-indicator";
 import useModal from "@/app/_components/ui/modal";
 import { useSnackbar } from "notistack";
+import { DocumentCell } from "@/app/_components/ui";
+import { formatRupiah } from "@/utils/commons";
 
 interface ProgramItemCardProps {
   program: TProkerProgram;
@@ -491,7 +494,31 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
             </Box>
           ) : (
             <Stack spacing={1.5}>
-              {indicators.map((ind) => (
+              {indicators.map((ind) => {
+                const proposalDoc =
+                  ind.proposalURL ||
+                  ind.proposalDocument ||
+                  ind.proposal ||
+                  ind.propsal ||
+                  ind.proposalDocumentId;
+                const rabDoc =
+                  ind.rabURL ||
+                  ind.rabDocument ||
+                  ind.rab ||
+                  ind.rabDocumentId;
+
+                const hasProposalDoc = Boolean(
+                  proposalDoc &&
+                  (typeof proposalDoc !== "string" || proposalDoc.trim() !== "") &&
+                  (typeof proposalDoc !== "object" || Object.keys(proposalDoc).length > 0)
+                );
+                const hasRabDoc = Boolean(
+                  rabDoc &&
+                  (typeof rabDoc !== "string" || rabDoc.trim() !== "") &&
+                  (typeof rabDoc !== "object" || Object.keys(rabDoc).length > 0)
+                );
+
+                return (
                 <Box
                   key={ind.id}
                   onClick={() => handleIndicatorClick(ind)}
@@ -514,157 +541,375 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
                     },
                   }}
                 >
-                  {/* Left: Indicator Name */}
-                  <Box sx={{ flex: 1, minWidth: 0, pr: 2 }}>
-                    <Tooltip title="Klik untuk eksekusi indikator ini">
-                      <Typography
-                        sx={{
-                          fontWeight: 600,
-                          fontSize: "14px",
-                          color: "#1E293B",
-                          lineHeight: 1.4,
-                        }}
-                      >
-                        {ind.name}
-                      </Typography>
-                    </Tooltip>
-                  </Box>
-
-                  {/* Right: Metadata Columns & Action */}
-                  {/* Right: Metadata Columns & Action */}
+                  {/* Row 1: Indicator Name (kiri) & Action Menu (kanan) */}
                   <Stack
                     direction="row"
-                    alignItems="center"
+                    alignItems="flex-start"
                     justifyContent="space-between"
+                    spacing={1}
                     sx={{ width: "100%" }}
                   >
-                    {/* Kolom metadata (kiri) */}
-                    <Stack
-                      direction="row"
-                      spacing={{ xs: 1.5, sm: 2.5 }}
-                      alignItems="center"
-                      sx={{ flexWrap: "wrap", rowGap: 1 }}
-                    >
-                      {/* Column 1: KATEGORI */}
-                      <Box sx={{ minWidth: 70 }}>
+                    <Box sx={{ flex: 1, minWidth: 0, pr: 1 }}>
+                      <Tooltip title="Klik untuk eksekusi indikator ini">
                         <Typography
-                          variant="caption"
                           sx={{
-                            fontSize: "10px",
-                            fontWeight: 700,
-                            color: "#94A3B8",
-                            letterSpacing: 0.5,
-                            display: "block",
-                            mb: 0.5,
+                            fontWeight: 600,
+                            fontSize: "14px",
+                            color: "#1E293B",
+                            lineHeight: 1.4,
                           }}
                         >
-                          KATEGORI
+                          {ind.name}
                         </Typography>
-                        <Chip
-                          label={ind.category || "TUSI"}
-                          size="small"
-                          sx={{
-                            bgcolor: "#EEF2FF",
-                            color: "#2563EB",
-                            fontWeight: 700,
-                            fontSize: "11px",
-                            height: "24px",
-                            borderRadius: "6px",
-                          }}
-                        />
-                      </Box>
+                      </Tooltip>
+                    </Box>
 
-                      {/* Column 2: STATUS */}
-                      <Box sx={{ minWidth: 120 }}>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            fontSize: "10px",
-                            fontWeight: 700,
-                            color: "#94A3B8",
-                            letterSpacing: 0.5,
-                            display: "block",
-                            mb: 0.5,
-                          }}
-                        >
-                          STATUS
-                        </Typography>
-                        <Chip
-                          label={(ind.status || "ASSIGNED_TO_UNIT").replace(/_/g, " ")}
-                          size="small"
-                          sx={{
-                            bgcolor: getStatusBg(ind.status),
-                            color: getStatusColor(ind.status),
-                            fontWeight: 700,
-                            fontSize: "11px",
-                            height: "24px",
-                            borderRadius: "6px",
-                          }}
-                        />
-                      </Box>
-                      <Box sx={{ minWidth: 120 }}>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            fontSize: "10px",
-                            fontWeight: 700,
-                            color: "#94A3B8",
-                            letterSpacing: 0.5,
-                            display: "block",
-                            mb: 0.5,
-                          }}
-                        >
-                          Unit
-                        </Typography>
-                        <Chip
-                          label={
-                            (typeof ind.unit === "object"
-                              ? ind.unit?.name
-                              : ind.unit) || "-"
-                          }
-                          size="small"
-                          sx={{
-                            bgcolor: "#EEF2FF",
-                            color: "#2563EB",
-                            fontWeight: 700,
-                            fontSize: "11px",
-                            height: "24px",
-                            borderRadius: "6px",
-                          }}
-                        />
-                      </Box>
-
-                      {/* Column 3: PIC */}
-                      <Box sx={{ textAlign: "left", minWidth: 110 }}>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            fontSize: "10px",
-                            fontWeight: 700,
-                            color: "#94A3B8",
-                            letterSpacing: 0.5,
-                            display: "block",
-                            mb: 0.5,
-                          }}
-                        >
-                          PIC
-                        </Typography>
-
-                        {renderPicChips(ind)}
-                      </Box>
-                    </Stack>
-
-                    {/* Column 4: Action Menu (pojok kanan mentok) */}
+                    {/* Action Menu (pojok kanan atas) */}
                     <IconButton
                       size="small"
                       onClick={(e) => handleOpenIndMenu(e, ind)}
-                      sx={{ color: "#94A3B8", p: 0.5, flexShrink: 0, ml: 1 }}
+                      sx={{ color: "#94A3B8", p: 0.5, flexShrink: 0 }}
                     >
                       <MoreVert fontSize="small" />
                     </IconButton>
                   </Stack>
+
+                  {/* Row 2: Metadata (Kategori, Status, Unit, PIC) */}
+                  <Stack
+                    direction="row"
+                    spacing={{ xs: 1.5, sm: 2.5 }}
+                    alignItems="center"
+                    sx={{ flexWrap: "wrap", rowGap: 1 }}
+                  >
+                    {/* Column 1: KATEGORI */}
+                    <Box sx={{ minWidth: 70 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          color: "#94A3B8",
+                          letterSpacing: 0.5,
+                          display: "block",
+                          mb: 0.5,
+                        }}
+                      >
+                        KATEGORI
+                      </Typography>
+                      <Chip
+                        label={ind.category || "TUSI"}
+                        size="small"
+                        sx={{
+                          bgcolor: "#EEF2FF",
+                          color: "#2563EB",
+                          fontWeight: 700,
+                          fontSize: "11px",
+                          height: "24px",
+                          borderRadius: "6px",
+                        }}
+                      />
+                    </Box>
+
+                    {/* Column 2: STATUS */}
+                    <Box sx={{ minWidth: 120 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          color: "#94A3B8",
+                          letterSpacing: 0.5,
+                          display: "block",
+                          mb: 0.5,
+                        }}
+                      >
+                        STATUS
+                      </Typography>
+                      <Chip
+                        label={(ind.status || "ASSIGNED_TO_UNIT").replace(/_/g, " ")}
+                        size="small"
+                        sx={{
+                          bgcolor: getStatusBg(ind.status),
+                          color: getStatusColor(ind.status),
+                          fontWeight: 700,
+                          fontSize: "11px",
+                          height: "24px",
+                          borderRadius: "6px",
+                        }}
+                      />
+                    </Box>
+
+                    {/* Column 3: Unit */}
+                    <Box sx={{ minWidth: 120 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          color: "#94A3B8",
+                          letterSpacing: 0.5,
+                          display: "block",
+                          mb: 0.5,
+                        }}
+                      >
+                        UNIT
+                      </Typography>
+                      <Chip
+                        label={
+                          (typeof ind.unit === "object"
+                            ? ind.unit?.name
+                            : ind.unit) || "-"
+                        }
+                        size="small"
+                        sx={{
+                          bgcolor: "#EEF2FF",
+                          color: "#2563EB",
+                          fontWeight: 700,
+                          fontSize: "11px",
+                          height: "24px",
+                          borderRadius: "6px",
+                        }}
+                      />
+                    </Box>
+
+                    {/* Column 4: PIC */}
+                    <Box sx={{ textAlign: "left", minWidth: 110 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          color: "#94A3B8",
+                          letterSpacing: 0.5,
+                          display: "block",
+                          mb: 0.5,
+                        }}
+                      >
+                        PIC
+                      </Typography>
+
+                      {renderPicChips(ind)}
+                    </Box>
+                  </Stack>
+
+                  {/* Row 3: Baris Target Q1 - Q4, Budget, TOR & RAB (Satu Baris Rapi) */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                      gap: { xs: 1.5, sm: 2 },
+                      bgcolor: "#F8FAFC",
+                      borderRadius: "8px",
+                      border: "1px solid #E2E8F0",
+                      px: 1.5,
+                      py: 0.75,
+                      mt: 0.5,
+                    }}
+                  >
+                    {/* Target Q1 - Q4 */}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                      <Typography
+                        sx={{
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          color: "#64748B",
+                          letterSpacing: 0.5,
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        TARGET:
+                      </Typography>
+                      <Stack direction="row" spacing={0.5} alignItems="center">
+                        <Chip
+                          label={`Q1: ${ind.targetQ1 ?? 0}`}
+                          size="small"
+                          variant="outlined"
+                          sx={{
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            height: "24px",
+                            borderRadius: "6px",
+                            borderColor: "#CBD5E1",
+                            color: "#334155",
+                            bgcolor: "#ffffff",
+                          }}
+                        />
+                        <Chip
+                          label={`Q2: ${ind.targetQ2 ?? 0}`}
+                          size="small"
+                          variant="outlined"
+                          sx={{
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            height: "24px",
+                            borderRadius: "6px",
+                            borderColor: "#CBD5E1",
+                            color: "#334155",
+                            bgcolor: "#ffffff",
+                          }}
+                        />
+                        <Chip
+                          label={`Q3: ${ind.targetQ3 ?? 0}`}
+                          size="small"
+                          variant="outlined"
+                          sx={{
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            height: "24px",
+                            borderRadius: "6px",
+                            borderColor: "#CBD5E1",
+                            color: "#334155",
+                            bgcolor: "#ffffff",
+                          }}
+                        />
+                        <Chip
+                          label={`Q4: ${ind.targetQ4 ?? 0}`}
+                          size="small"
+                          variant="outlined"
+                          sx={{
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            height: "24px",
+                            borderRadius: "6px",
+                            borderColor: "#CBD5E1",
+                            color: "#334155",
+                            bgcolor: "#ffffff",
+                          }}
+                        />
+                      </Stack>
+                    </Box>
+
+                    <Divider
+                      orientation="vertical"
+                      flexItem
+                      sx={{ height: 18, alignSelf: "center", borderColor: "#CBD5E1", display: { xs: "none", sm: "block" } }}
+                    />
+
+                    {/* Budget */}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                      <Typography
+                        sx={{
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          color: "#64748B",
+                          letterSpacing: 0.5,
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        BUDGET:
+                      </Typography>
+                      {ind.budget ? (
+                        <Chip
+                          label={formatRupiah(ind.budget)}
+                          size="small"
+                          sx={{
+                            bgcolor: "#F0FDF4",
+                            color: "#16A34A",
+                            fontWeight: 700,
+                            fontSize: "11px",
+                            height: "24px",
+                            borderRadius: "6px",
+                            border: "1px solid #BBF7D0",
+                          }}
+                        />
+                      ) : (
+                        <Typography sx={{ fontSize: "12px", fontWeight: 600, color: "#94A3B8" }}>
+                          -
+                        </Typography>
+                      )}
+                    </Box>
+
+                    <Divider
+                      orientation="vertical"
+                      flexItem
+                      sx={{ height: 18, alignSelf: "center", borderColor: "#CBD5E1", display: { xs: "none", sm: "block" } }}
+                    />
+
+                    {/* Dokumen: TOR & RAB */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.75,
+                        "& .MuiStack-root": { py: 0 },
+                        "& .MuiStack-root > .MuiBox-root": {
+                          height: "24px",
+                          py: 0,
+                          px: 1,
+                          display: "flex",
+                          alignItems: "center",
+                          boxSizing: "border-box",
+                        },
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Typography
+                        sx={{
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          color: "#64748B",
+                          letterSpacing: 0.5,
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        DOKUMEN:
+                      </Typography>
+
+                      {/* TOR */}
+                      {hasProposalDoc ? (
+                        <DocumentCell
+                          documents={[{ label: "TOR", doc: proposalDoc }]}
+                          title={`TOR: ${ind.name}`}
+                        />
+                      ) : (
+                        <Tooltip title="Belum ada dokumen TOR">
+                          <Chip
+                            label="TOR: -"
+                            size="small"
+                            variant="outlined"
+                            sx={{
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              height: "24px",
+                              borderRadius: "6px",
+                              borderColor: "#E2E8F0",
+                              color: "#94A3B8",
+                              bgcolor: "#ffffff",
+                            }}
+                          />
+                        </Tooltip>
+                      )}
+
+                      {/* RAB */}
+                      {hasRabDoc ? (
+                        <DocumentCell
+                          documents={[{ label: "RAB", doc: rabDoc }]}
+                          title={`RAB: ${ind.name}`}
+                        />
+                      ) : (
+                        <Tooltip title="Belum ada dokumen RAB">
+                          <Chip
+                            label="RAB: -"
+                            size="small"
+                            variant="outlined"
+                            sx={{
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              height: "24px",
+                              borderRadius: "6px",
+                              borderColor: "#E2E8F0",
+                              color: "#94A3B8",
+                              bgcolor: "#ffffff",
+                            }}
+                          />
+                        </Tooltip>
+                      )}
+                    </Box>
+                  </Box>
                 </Box>
-              ))}
+                );
+              })}
             </Stack>
           )}
         </Box>

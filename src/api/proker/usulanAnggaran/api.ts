@@ -53,15 +53,24 @@ export const getMyUnitBudgetProposals = async (
     return item as TUnitBudgetProposal;
   });
 
+  let filteredItems = items;
+  const unitIdParam = (params?.unitId || params?.UnitId) as string | undefined;
+  if (unitIdParam) {
+    filteredItems = filteredItems.filter((item) => item.unitId === unitIdParam);
+  }
+  if (params?.year) {
+    filteredItems = filteredItems.filter((item) => Number(item.year) === Number(params.year));
+  }
+
   return {
     isSuccess: data?.isSuccess ?? true,
     message: data?.message ?? "Success",
     data: {
-      items,
+      items: filteredItems,
       pagination: data?.data?.pagination || data?.pagination || {
         page: 1,
-        limit: items.length || 10,
-        totalItems: items.length,
+        limit: filteredItems.length || 10,
+        totalItems: filteredItems.length,
         totalPages: 1,
       },
     },

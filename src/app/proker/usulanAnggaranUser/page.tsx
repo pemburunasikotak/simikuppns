@@ -1,12 +1,12 @@
 import { useState, useMemo } from "react";
-import { Typography, Button, Stack } from "@mui/material";
+import { Typography, Button, Stack, Autocomplete, TextField } from "@mui/material";
 import { AddOutlined } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
 
 import DataTable from "@/app/_components/ui/data-table";
 import { createPaginationInfo } from "@/utils/data-table";
 import { Page } from "@/app/_components/ui";
-// import Filter from "@/app/_components/ui/filter";
+import Filter from "@/app/_components/ui/filter";
 import { useFilter } from "@/app/_hooks/use-filter";
 import DocumentPreviewModal from "@/app/_components/ui/document-preview-modal";
 
@@ -32,26 +32,35 @@ export default function UsulanAnggaranUserPage() {
         search?: string;
         search_value?: string;
         unitId?: string;
+        UnitId?: string;
         year?: string | number;
         page?: number;
         per_page?: number;
     }>();
 
+    const selectedUnitId = (filters.unitId || filters.UnitId) as string | undefined;
+    const selectedYear = filters.year ? Number(filters.year) : undefined;
     const isSearching = Boolean(filters.search || filters.search_value);
+    const isFiltered = Boolean(isSearching || selectedUnitId || selectedYear);
 
     const queryParams = {
-        page: isSearching ? 1 : (filters.page ? Number(filters.page) : 1),
+        page: isFiltered ? 1 : (filters.page ? Number(filters.page) : 1),
         limit: filters.per_page ? Number(filters.per_page) : 10,
         search: filters.search || filters.search_value || undefined,
-        unitId: filters.unitId || undefined,
-        year: filters.year ? Number(filters.year) : undefined,
+        unitId: selectedUnitId || undefined,
+        UnitId: selectedUnitId || undefined,
+        year: selectedYear || undefined,
     };
 
     const user = ProkerSessionUser.get()?.user;
     const userRoleKeys = user?.roles?.map((r: { key: string }) => r.key) || [];
     const isAdmin = userRoleKeys.includes("admin_sim_proker");
 
-    const query = useGetUnitBudgetProposals(queryParams, { isMyUnitsOnly: !isAdmin });
+    const query = useGetUnitBudgetProposals(queryParams, {
+        isMyUnitsOnly: !isAdmin,
+        year: selectedYear,
+        unitId: selectedUnitId,
+    });
     const saveMutation = useSaveUnitBudgetProposal();
     const deleteMutation = useDeleteUnitBudgetProposal();
 
@@ -80,6 +89,24 @@ export default function UsulanAnggaranUserPage() {
         if (foundAll?.name) return foundAll.name;
         return unitId;
     };
+
+    const unitOptions = useMemo(() => {
+        const map = new Map<string, { id: string; name: string }>();
+        availableUnits.forEach((u) => {
+            if (u?.id) map.set(u.id, { id: u.id, name: u.name || u.id });
+        });
+        return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+    }, [availableUnits]);
+
+    const selectedUnit = useMemo(() => {
+        if (!selectedUnitId) return null;
+        return (
+            unitOptions.find((u) => u.id === selectedUnitId) || {
+                id: selectedUnitId,
+                name: getUnitName(selectedUnitId),
+            }
+        );
+    }, [selectedUnitId, unitOptions]);
 
     const [openModal, setOpenModal] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
@@ -300,7 +327,17 @@ export default function UsulanAnggaranUserPage() {
         totalPages: 0,
     };
 
-    const grandTotal = items.reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
+    const currentYear = new Date().getFullYear();
+    const yearOptions = useMemo(() => {
+        const yearsSet = new Set<number>();
+        for (let y = currentYear + 2; y >= currentYear - 3; y--) {
+            yearsSet.add(y);
+        }
+        items.forEach((item) => {
+            if (item.year) yearsSet.add(Number(item.year));
+        });
+        return Array.from(yearsSet).sort((a, b) => b - a);
+    }, [items, currentYear]);
 
     const rows: TRow[] = items.map((item) => ({
         ...item,
@@ -308,24 +345,37 @@ export default function UsulanAnggaranUserPage() {
     }));
 
     const filteredRows = useMemo(() => {
+        let result = rows;
+        if (selectedUnitId) {
+            result = result.filter((r) => r.unitId === selectedUnitId);
+        }
+        if (selectedYear) {
+            result = result.filter((r) => Number(r.year) === Number(selectedYear));
+        }
         const searchVal = (filters.search || filters.search_value || "").trim().toLowerCase();
-        if (!searchVal) return rows;
-        return rows.filter((r) => {
-            const unitName = getUnitName(r.unitId, r.unit?.name).toLowerCase();
-            const yearStr = String(r.year || "");
-            return unitName.includes(searchVal) || yearStr.includes(searchVal);
-        });
-    }, [rows, filters.search, filters.search_value, myUnits, allUnits]);
+        if (searchVal) {
+            result = result.filter((r) => {
+                const unitName = getUnitName(r.unitId, r.unit?.name).toLowerCase();
+                const yearStr = String(r.year || "");
+                return unitName.includes(searchVal) || yearStr.includes(searchVal);
+            });
+        }
+        return result;
+    }, [rows, selectedUnitId, selectedYear, filters.search, filters.search_value, myUnits, allUnits]);
+
+    const grandTotal = useMemo(() => {
+        return filteredRows.reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
+    }, [filteredRows]);
 
     const totalProposalItems = useMemo(() => {
-        if (isSearching) {
+        if (isFiltered) {
             if (filteredRows.length < rows.length) {
                 return filteredRows.length;
             }
             return pagination.totalItems || filteredRows.length;
         }
         return pagination.totalItems || 0;
-    }, [isSearching, filteredRows.length, rows.length, pagination.totalItems]);
+    }, [isFiltered, filteredRows.length, rows.length, pagination.totalItems]);
 
     const columns = getProposalColumns({
         getUnitName,
@@ -345,15 +395,92 @@ export default function UsulanAnggaranUserPage() {
                     path: "/proker/usulanAnggaranUser",
                 },
             ]}
-        // topPage={
-        //     <Filter
-        //         variants={["search"]}
-        //         labelSearch={"Cari Unit atau Usulan..."}
-        //         defaultValue={{
-        //             search_value: filters.search || filters.search_value,
-        //         }}
-        //     />
-        // }
+            topPage={
+                <Filter
+                    variants={["search"]}
+                    labelSearch={"Cari Unit atau Usulan..."}
+                    defaultValue={{
+                        search_value: filters.search || filters.search_value,
+                    }}
+                    actions={[
+                        <Autocomplete
+                            key="filter-unit"
+                            options={unitOptions}
+                            getOptionLabel={(option) => (typeof option === "string" ? option : option.name || "")}
+                            isOptionEqualToValue={(option, val) => option.id === val.id}
+                            value={selectedUnit}
+                            onChange={(_, newValue) => {
+                                setFilter({
+                                    unitId: newValue?.id || undefined,
+                                    UnitId: newValue?.id || undefined,
+                                    page: 1,
+                                });
+                            }}
+                            sx={{
+                                width: { xs: "100%", sm: 260, md: 300 },
+                                "& .MuiOutlinedInput-root": {
+                                    borderRadius: "10px",
+                                    backgroundColor: "rgba(244, 242, 244, 1)",
+                                    minHeight: "56px",
+                                    boxSizing: "border-box",
+                                    "& fieldset": {
+                                        borderColor: "transparent",
+                                    },
+                                    "&:hover fieldset": {
+                                        borderColor: "transparent",
+                                    },
+                                    "&.Mui-focused fieldset": {
+                                        borderColor: "primary.main",
+                                    },
+                                },
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    placeholder="Filter Unit..."
+                                />
+                            )}
+                        />,
+                        <Autocomplete
+                            key="filter-year"
+                            options={yearOptions}
+                            getOptionLabel={(option) => (typeof option === "number" ? String(option) : option)}
+                            isOptionEqualToValue={(option, val) => Number(option) === Number(val)}
+                            value={selectedYear || null}
+                            onChange={(_, newValue) => {
+                                setFilter({
+                                    year: newValue ? Number(newValue) : undefined,
+                                    page: 1,
+                                });
+                            }}
+                            sx={{
+                                width: { xs: "100%", sm: 160, md: 180 },
+                                "& .MuiOutlinedInput-root": {
+                                    borderRadius: "10px",
+                                    backgroundColor: "rgba(244, 242, 244, 1)",
+                                    minHeight: "56px",
+                                    boxSizing: "border-box",
+                                    "& fieldset": {
+                                        borderColor: "transparent",
+                                    },
+                                    "&:hover fieldset": {
+                                        borderColor: "transparent",
+                                    },
+                                    "&.Mui-focused fieldset": {
+                                        borderColor: "primary.main",
+                                    },
+                                },
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    placeholder="Filter Tahun..."
+                                />
+                            )}
+                        />,
+                    ]}
+                />
+            }
         >
             <Stack spacing={3}>
                 {/* ── Summary Stats Section ── */}
@@ -388,7 +515,7 @@ export default function UsulanAnggaranUserPage() {
                     paginationInfo={createPaginationInfo({
                         per_page: pagination.limit || 10,
                         total: totalProposalItems,
-                        page: isSearching ? 1 : (pagination.page || 1),
+                        page: isFiltered ? 1 : (pagination.page || 1),
                     })}
                     handleChange={(pagination) => {
                         setFilter({

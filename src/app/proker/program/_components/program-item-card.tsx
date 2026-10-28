@@ -12,7 +12,6 @@ import {
   ListItemIcon,
   ListItemText,
   Tooltip,
-  Skeleton,
 } from "@mui/material";
 import {
   KeyboardArrowDown,
@@ -29,7 +28,6 @@ import { useNavigate } from "react-router";
 
 import { TProkerProgram } from "@/api/proker/program/type";
 import { TDefaultProgramIndicator } from "@/api/proker/manajemenProgram/type";
-import useGetListProgramIndicator from "../[id]/_hooks/use-get-list-program-indicator";
 import useDeleteProgramIndicator from "../[id]/_hooks/use-delete-program-indicator";
 import useModal from "@/app/_components/ui/modal";
 import { useSnackbar } from "notistack";
@@ -101,7 +99,13 @@ const getStatusColor = (status?: string) => {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getPicNames = (ind: any): string[] => {
-  const rawPics = Array.isArray(ind?.pics) ? ind.pics : ind?.pics ? [ind.pics] : [];
+  const rawPics = Array.isArray(ind?.pics)
+    ? ind.pics
+    : ind?.pics
+      ? [ind.pics]
+      : ind?.pic
+        ? [ind.pic]
+        : [];
 
   const names = rawPics
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -115,7 +119,7 @@ const getPicNames = (ind: any): string[] => {
   if (names.length > 0) return names;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const picName = (ind as any)?.picName;
+  const picName = (ind as any)?.picName ?? (ind as any)?.pic?.name;
   if (picName) return [picName];
 
   return [];
@@ -203,37 +207,10 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
     });
   };
 
-  // Selalu fetch indikator dari API saat card di-expand
-  const { data: fetchedIndicatorsData, isLoading: isLoadingIndicators } = useGetListProgramIndicator(
-    program.id || "",
-    { enabled: isExpanded },
-  );
-
+  // Indikator langsung diambil dari data program
   const indicators: TDefaultProgramIndicator[] = useMemo(() => {
-    const embedded: TDefaultProgramIndicator[] = program.indicators || [];
-    let fetched: TDefaultProgramIndicator[] = [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const d: any = fetchedIndicatorsData?.data;
-    if (Array.isArray(d)) fetched = d;
-    else if (Array.isArray(d?.items)) fetched = d.items;
-    if (fetched.length === 0) return embedded;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const embeddedPicsMap = new Map<string, any>(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      embedded.map((e: any) => [e.id, e.pics]),
-    );
-
-    return fetched.map((ind) => {
-      if (getPicNames(ind).length === 0) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const embeddedPics = embeddedPicsMap.get((ind as any).id);
-        if (Array.isArray(embeddedPics) && getPicNames({ pics: embeddedPics }).length > 0) {
-          return { ...ind, pics: embeddedPics };
-        }
-      }
-      return ind;
-    });
-  }, [program.indicators, fetchedIndicatorsData]);
+    return program.indicators || [];
+  }, [program.indicators]);
 
   // Program menu state
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
@@ -498,14 +475,7 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
           </Box>
 
           {/* Indicators List */}
-          {isLoadingIndicators ? (
-            // Skeleton loading saat fetch indikator dari API
-            <Stack spacing={1.5}>
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} variant="rounded" height={68} sx={{ borderRadius: "10px" }} />
-              ))}
-            </Stack>
-          ) : indicators.length === 0 ? (
+          {indicators.length === 0 ? (
             <Box
               sx={{
                 bgcolor: "#ffffff",
@@ -679,6 +649,7 @@ export const ProgramItemCard: FC<ProgramItemCardProps> = ({
                         >
                           PIC
                         </Typography>
+
                         {renderPicChips(ind)}
                       </Box>
                     </Stack>
